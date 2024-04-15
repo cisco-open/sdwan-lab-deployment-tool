@@ -1,0 +1,76 @@
+name: Test
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python Setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Lint Checks
+        run: |
+          pip install poetry
+          poetry install
+          poetry run flake8 catalyst_sdwan_lab
+          poetry run isort --check --diff --profile black catalyst_sdwan_lab
+          poetry run black --check catalyst_sdwan_lab
+          poetry run mypy --show-error-codes --show-error-context --pretty --install-types --non-interactive catalyst_sdwan_lab
+          poetry run mypy catalyst_sdwan_lab
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python:
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
+          - '3.12'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python Setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Test
+        run: |
+          pip install poetry
+          poetry install
+          poetry run sdwan-lab -h
+
+  notification:
+    name: Notification
+    if: always() && github.event_name != 'pull_request'
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Job Success
+        run: |
+          if [ ${{ needs.lint.result }} == 'success' ] && [ ${{ needs.test.result }} == 'success' ]; then
+            echo "All jobs succeeded"
+            echo "jobSuccess=success" >> $GITHUB_ENV
+          else
+            echo "Not all jobs succeeded"
+            echo "jobSuccess=fail" >> $GITHUB_ENV
+          fi
+        id: print_status
