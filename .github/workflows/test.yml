@@ -27,7 +27,6 @@ jobs:
           poetry run flake8 catalyst_sdwan_lab
           poetry run isort --check --diff --profile black catalyst_sdwan_lab
           poetry run black --check catalyst_sdwan_lab
-          poetry run mypy --show-error-codes --show-error-context --pretty --install-types --non-interactive catalyst_sdwan_lab
           poetry run mypy catalyst_sdwan_lab
 
   test:
