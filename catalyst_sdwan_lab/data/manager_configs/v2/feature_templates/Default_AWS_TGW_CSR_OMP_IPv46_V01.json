@@ -1,0 +1,292 @@
+{
+  "deviceType": [
+    "vedge-C8000V",
+    "vedge-CSR-1000v"
+  ],
+  "templateType": "cisco_omp",
+  "templateMinVersion": "20.3.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "graceful-restart": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "true",
+      "vipVariableName": "omp_graceful_restart"
+    },
+    "send-path-limit": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 4,
+      "vipVariableName": "omp_send_path_limit"
+    },
+    "ecmp-limit": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 4,
+      "vipVariableName": "omp_ecmp_limit"
+    },
+    "shutdown": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false",
+      "vipVariableName": "omp_shutdown"
+    },
+    "timers": {
+      "advertisement-interval": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 1,
+        "vipVariableName": "omp_advertisement_interval"
+      },
+      "graceful-restart-timer": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 43200,
+        "vipVariableName": "omp_graceful_restart_timer"
+      },
+      "holdtime": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 60,
+        "vipVariableName": "omp_holdtime"
+      },
+      "eor-timer": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 300,
+        "vipVariableName": "omp_eor_timer"
+      }
+    },
+    "overlay-as": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipVariableName": "overlay_as"
+    },
+    "advertise": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "bgp",
+            "vipObjectType": "object"
+          }
+        },
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "connected",
+            "vipObjectType": "object"
+          }
+        },
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "static",
+            "vipObjectType": "object"
+          }
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "ipv6-advertise": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "bgp",
+            "vipObjectType": "object"
+          }
+        },
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "connected",
+            "vipObjectType": "object"
+          }
+        },
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "static",
+            "vipObjectType": "object"
+          }
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "graceful-restart": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "true",
+      "vipVariableName": "omp_graceful_restart"
+    },
+    "send-path-limit": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 4,
+      "vipVariableName": "omp_send_path_limit"
+    },
+    "ecmp-limit": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 4,
+      "vipVariableName": "omp_ecmp_limit"
+    },
+    "shutdown": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false",
+      "vipVariableName": "omp_shutdown"
+    },
+    "timers": {
+      "advertisement-interval": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 1,
+        "vipVariableName": "omp_advertisement_interval"
+      },
+      "graceful-restart-timer": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 43200,
+        "vipVariableName": "omp_graceful_restart_timer"
+      },
+      "holdtime": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 60,
+        "vipVariableName": "omp_holdtime"
+      },
+      "eor-timer": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 300,
+        "vipVariableName": "omp_eor_timer"
+      }
+    },
+    "overlay-as": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipVariableName": "overlay_as"
+    },
+    "advertise": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "bgp",
+            "vipObjectType": "object"
+          }
+        },
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "connected",
+            "vipObjectType": "object"
+          }
+        },
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "static",
+            "vipObjectType": "object"
+          }
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "ipv6-advertise": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "bgp",
+            "vipObjectType": "object"
+          }
+        },
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "connected",
+            "vipObjectType": "object"
+          }
+        },
+        {
+          "priority-order": [
+            "protocol"
+          ],
+          "protocol": {
+            "vipType": "constant",
+            "vipValue": "static",
+            "vipObjectType": "object"
+          }
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 6,
+  "templateId": "94e9e8ea-1935-414f-8ee5-f724fd6fc6f4",
+  "createdOn": 1706357782606,
+  "@rid": 1441,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_AWS_TGW_CSR_OMP_IPv46_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default OMP template for AWS Transit Gateway CSR",
+  "lastUpdatedOn": 1706357782606
+}

@@ -1,0 +1,77 @@
+{
+  "templateType": "bfd-vedge",
+  "templateMinVersion": "20.1.0",
+  "deviceType": [
+    "vedge-1000",
+    "vedge-2000",
+    "vedge-cloud",
+    "vedge-5000",
+    "vedge-ISR1100-6G",
+    "vedge-100-B",
+    "vedge-ISR1100-4G",
+    "vedge-100",
+    "vedge-ISR1100-4GLTE",
+    "vedge-100-WM",
+    "vedge-100-M",
+    "vedge-ISR1100X-6G",
+    "vedge-ISR1100X-4G"
+  ],
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "app-route": {
+      "multiplier": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 6
+      },
+      "poll-interval": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 600000
+      }
+    },
+    "color": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "color"
+      ]
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "app-route": {
+      "multiplier": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 6
+      },
+      "poll-interval": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 600000
+      }
+    },
+    "color": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "color"
+      ]
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "0dd38db7-ee49-47e1-824d-0556bac0d399",
+  "createdOn": 1706313406996,
+  "@rid": 257,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_BFD_Template_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default BFD template settings Version 01",
+  "lastUpdatedOn": 1706313406996
+}

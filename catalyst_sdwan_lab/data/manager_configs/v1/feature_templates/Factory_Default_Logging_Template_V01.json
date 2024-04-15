@@ -1,0 +1,87 @@
+{
+  "templateType": "logging",
+  "templateMinVersion": "20.1.0",
+  "deviceType": [
+    "vedge-1000",
+    "vedge-2000",
+    "vedge-cloud",
+    "vedge-5000",
+    "vedge-ISR1100-6G",
+    "vedge-100-B",
+    "vedge-ISR1100-4G",
+    "vedge-100",
+    "vsmart",
+    "vedge-ISR1100-4GLTE",
+    "vedge-100-WM",
+    "vmanage",
+    "vedge-100-M",
+    "vedge-ISR1100X-6G",
+    "vedge-ISR1100X-4G"
+  ],
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "disk": {
+      "enable": {
+        "vipObjectType": "object",
+        "vipValue": "true",
+        "vipType": "ignore"
+      },
+      "file": {
+        "size": {
+          "vipObjectType": "object",
+          "vipValue": 10,
+          "vipType": "ignore"
+        },
+        "rotate": {
+          "vipObjectType": "object",
+          "vipValue": 10,
+          "vipType": "ignore"
+        }
+      },
+      "priority": {
+        "vipObjectType": "object",
+        "vipValue": "information",
+        "vipType": "ignore"
+      }
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "disk": {
+      "enable": {
+        "vipObjectType": "object",
+        "vipValue": "true",
+        "vipType": "ignore"
+      },
+      "file": {
+        "size": {
+          "vipObjectType": "object",
+          "vipValue": 10,
+          "vipType": "ignore"
+        },
+        "rotate": {
+          "vipObjectType": "object",
+          "vipValue": 10,
+          "vipType": "ignore"
+        }
+      },
+      "priority": {
+        "vipObjectType": "object",
+        "vipValue": "information",
+        "vipType": "ignore"
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 2,
+  "templateId": "29d0a283-14f0-4bac-b897-0ae9f62eedad",
+  "createdOn": 1706313394992,
+  "@rid": 153,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_Logging_Template_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default Logging template settings Version 01",
+  "lastUpdatedOn": 1706313394992
+}

@@ -1,0 +1,74 @@
+#cloud-config
+write_files:
+- path: /etc/default/personality
+  content: "vedge\n"
+- path: /etc/default/inited
+  content: "1\n"
+- path: /usr/share/viptela/symantec-root-ca.crt
+- path: /usr/share/viptela/root-ca.crt
+  content: |
+{% filter indent(width=4, first=True) %}
+{{ root_ca }}
+{% endfilter %}
+
+- path: /etc/confd/init/zcloud.xml
+  content: |
+    <config xmlns="http://tail-f.com/ns/config/1.0">
+      <system xmlns="http://viptela.com/system">
+        <personality>vedge</personality>
+        <device-model>vedge-cloud</device-model>
+        <organization-name>{{ org_name }}</organization-name>
+        <sp-organization-name>{{ org_name }}</sp-organization-name>
+        <vbond>
+          <local></local>
+          <remote>172.16.0.2{{ validator_num }}</remote>
+          <port>12346</port>
+        </vbond>
+        <site-id>100</site-id>
+        <system-ip>100.0.0.2{{ validator_num }}</system-ip>
+        <host-name>Validator{{ validator_num }}</host-name>
+        <domain-id>1</domain-id>
+        <aaa>
+          <user>
+            <name>admin</name>
+            <password>$6$9ac6af765f1cd0c0$jRM/rCPsQ56JlDU/1s9H7zhhksy/FZHv37zDJkzM6h/IU/FsnTcBuLwV3AVI5kCnfX9wYmqP8CsGk.4PrjC22/</password>
+            <group>netadmin</group>
+          </user>
+        </aaa>
+      </system>
+      <vpn xmlns="http://viptela.com/vpn">
+        <vpn-instance>
+          <vpn-id>0</vpn-id>
+          <dns>
+            <dns-addr>172.16.0.254</dns-addr>
+          </dns>
+          <ip>
+            <route>
+              <prefix>172.16.0.0/16</prefix>
+              <next-hop>
+                <address>172.16.0.254</address>
+              </next-hop>
+            </route>
+          </ip>
+          <interface>
+            <if-name>ge0/0</if-name>
+            <ip>
+              <address>172.16.0.2{{ validator_num }}/24</address>
+            </ip>
+            <tunnel-interface>
+              <encapsulation>
+                <encap>ipsec</encap>
+              </encapsulation>
+              <color>
+                <value>default</value>
+              </color>
+              <allow-service>
+                <sshd>true</sshd>
+                <netconf>true</netconf>
+              </allow-service>
+            </tunnel-interface>
+            <shutdown>false</shutdown>
+          </interface>
+        </vpn-instance>
+      </vpn>
+    </config>

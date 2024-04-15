@@ -1,0 +1,22 @@
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+distinguished_name = dn
+req_extensions = v3_ext
+x509_extensions = v3_ca
+
+[ dn ]
+C=US
+O=Cisco Systems Inc
+OU=cml-sdwan-lab-tool
+CN=sign.cml-sdwan-lab-tool.cisco.com
+
+[ v3_ext ]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, keyCertSign, cRLSign
+
+[ v3_ca ]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+basicConstraints = critical, CA:TRUE

@@ -1,0 +1,1148 @@
+[
+  {
+    "listId": "7c467857-c088-4021-a88f-2959e801ee73",
+    "name": "APP_BULK_DATA",
+    "type": "app",
+    "description": "Bulk Data Applications List",
+    "entries": [
+      {
+        "app": "ftp"
+      },
+      {
+        "app": "ftp-data"
+      },
+      {
+        "app": "cisco-jabber-im"
+      },
+      {
+        "app": "netblt"
+      },
+      {
+        "app": "rsync"
+      }
+    ],
+    "lastUpdated": 1706357792498,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "671ff3d7-ec16-4945-a55b-5b5065bd631c",
+    "name": "APP_Scavengers",
+    "type": "app",
+    "description": "Scavengers Applications List",
+    "entries": [
+      {
+        "app": "apple-updates"
+      },
+      {
+        "app": "apple-services"
+      },
+      {
+        "app": "twitter"
+      },
+      {
+        "app": "instagram"
+      },
+      {
+        "app": "youtube"
+      },
+      {
+        "app": "amazon-instant-video"
+      }
+    ],
+    "lastUpdated": 1706357791787,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "801c4e99-3e59-4cea-a27c-31d8823da809",
+    "name": "Google_Apps",
+    "type": "app",
+    "description": "Google Applications List",
+    "entries": [
+      {
+        "app": "android-updates"
+      },
+      {
+        "app": "blogger"
+      },
+      {
+        "app": "chrome_update"
+      },
+      {
+        "app": "gcs"
+      },
+      {
+        "app": "gmail"
+      },
+      {
+        "app": "gmail_basic"
+      },
+      {
+        "app": "gmail_chat"
+      },
+      {
+        "app": "gmail_drive"
+      },
+      {
+        "app": "gmail_mobile"
+      },
+      {
+        "app": "google-services"
+      },
+      {
+        "app": "google-services-audio"
+      },
+      {
+        "app": "google-services-media"
+      },
+      {
+        "app": "google-services-video"
+      },
+      {
+        "app": "google-accounts"
+      },
+      {
+        "app": "google_accounts"
+      },
+      {
+        "app": "google_ads"
+      },
+      {
+        "app": "google_analytics"
+      },
+      {
+        "app": "google_appengine"
+      },
+      {
+        "app": "google_cache"
+      },
+      {
+        "app": "google_calendar"
+      },
+      {
+        "app": "google_code"
+      },
+      {
+        "app": "google_desktop"
+      },
+      {
+        "app": "google_docs"
+      },
+      {
+        "app": "google-docs"
+      },
+      {
+        "app": "google-downloads"
+      },
+      {
+        "app": "google_earth"
+      },
+      {
+        "app": "google-earth"
+      },
+      {
+        "app": "google_groups"
+      },
+      {
+        "app": "google_maps"
+      },
+      {
+        "app": "google_photos"
+      },
+      {
+        "app": "google_picasa"
+      },
+      {
+        "app": "picasa"
+      },
+      {
+        "app": "google-photos"
+      },
+      {
+        "app": "google-play"
+      },
+      {
+        "app": "google_plus"
+      },
+      {
+        "app": "google-plus"
+      },
+      {
+        "app": "google_safebrowsing"
+      },
+      {
+        "app": "google_skymap"
+      },
+      {
+        "app": "google_spaces"
+      },
+      {
+        "app": "google_tags"
+      },
+      {
+        "app": "google_toolbar"
+      },
+      {
+        "app": "google_translate"
+      },
+      {
+        "app": "google_trusted_store"
+      },
+      {
+        "app": "google_weblight"
+      },
+      {
+        "app": "googlebot"
+      },
+      {
+        "app": "gstatic"
+      },
+      {
+        "app": "gtalk"
+      },
+      {
+        "app": "gtalk-chat"
+      },
+      {
+        "app": "gtalk-ft"
+      },
+      {
+        "app": "gtalk-video"
+      },
+      {
+        "app": "gtalk-voip"
+      },
+      {
+        "app": "hangouts"
+      },
+      {
+        "app": "hangouts-audio"
+      },
+      {
+        "app": "hangouts-chat"
+      },
+      {
+        "app": "hangouts-file-transfer"
+      },
+      {
+        "app": "hangouts-media"
+      },
+      {
+        "app": "hangouts-video"
+      },
+      {
+        "app": "youtube"
+      },
+      {
+        "app": "youtube_hd"
+      },
+      {
+        "app": "google-chat"
+      },
+      {
+        "app": "google-meet"
+      },
+      {
+        "app": "google-meet-audio"
+      },
+      {
+        "app": "google-meet-media"
+      },
+      {
+        "app": "google-meet-video"
+      }
+    ],
+    "lastUpdated": 1706357791441,
+    "owner": "system",
+    "readOnly": true,
+    "version": "4.5",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "80fb84a5-d4c7-4772-9f68-c6db95f73680",
+    "name": "Google_Workspace_Apps",
+    "type": "app",
+    "description": "Default Google Workspace Applications",
+    "entries": [
+      {
+        "app": "gmail"
+      },
+      {
+        "app": "gmail_basic"
+      },
+      {
+        "app": "gmail_chat"
+      },
+      {
+        "app": "gmail_drive"
+      },
+      {
+        "app": "gmail_mobile"
+      },
+      {
+        "app": "google_docs"
+      },
+      {
+        "app": "google-docs"
+      },
+      {
+        "app": "google_calendar"
+      },
+      {
+        "app": "google-meet"
+      },
+      {
+        "app": "google-meet-audio"
+      },
+      {
+        "app": "google-meet-video"
+      },
+      {
+        "app": "google-meet-media"
+      },
+      {
+        "app": "google-chat"
+      }
+    ],
+    "lastUpdated": 1706357793774,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.1",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "a678e7b3-8ac3-47fb-af97-591cb8b0f819",
+    "name": "Microsoft_Apps",
+    "type": "app",
+    "description": "Microsoft Applications List",
+    "entries": [
+      {
+        "app": "bing"
+      },
+      {
+        "app": "hockeyapp"
+      },
+      {
+        "app": "live_hotmail"
+      },
+      {
+        "app": "lync"
+      },
+      {
+        "app": "lync_online"
+      },
+      {
+        "app": "ms-services"
+      },
+      {
+        "app": "ms_translator"
+      },
+      {
+        "app": "ms-office-365"
+      },
+      {
+        "app": "share-point"
+      },
+      {
+        "app": "skydrive"
+      },
+      {
+        "app": "skype"
+      },
+      {
+        "app": "windows_azure"
+      },
+      {
+        "app": "windows-azure"
+      },
+      {
+        "app": "windows_update"
+      },
+      {
+        "app": "windows_marketplace"
+      },
+      {
+        "app": "windowslive"
+      },
+      {
+        "app": "windowslivespace"
+      },
+      {
+        "app": "windowsmedia"
+      },
+      {
+        "app": "xbox"
+      },
+      {
+        "app": "xbox_music"
+      },
+      {
+        "app": "xbox_video"
+      },
+      {
+        "app": "xboxlive"
+      },
+      {
+        "app": "xboxlive_marketplace"
+      },
+      {
+        "app": "word_online"
+      },
+      {
+        "app": "powerpoint_online"
+      },
+      {
+        "app": "ms-lync"
+      },
+      {
+        "app": "ms-lync-audio"
+      },
+      {
+        "app": "ms-lync-control"
+      },
+      {
+        "app": "ms-lync-video"
+      },
+      {
+        "app": "ms-update"
+      },
+      {
+        "app": "outlook-web-service"
+      }
+    ],
+    "lastUpdated": 1706357793583,
+    "owner": "system",
+    "readOnly": true,
+    "version": "4.2",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "6d73bcf0-c577-4501-b456-40f1b285a3b5",
+    "name": "REAL_TIME_APPS",
+    "type": "app",
+    "description": "Real Time Applications List",
+    "entries": [
+      {
+        "app": "sip"
+      },
+      {
+        "app": "rtp"
+      },
+      {
+        "app": "skinny"
+      }
+    ],
+    "lastUpdated": 1706357791063,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "139d47b0-dab0-4f9d-a9ce-fc9b1d52a706",
+    "name": "VIDEO_CONF",
+    "type": "app",
+    "description": "Video Conference Applications List",
+    "entries": [
+      {
+        "app": "rtp"
+      }
+    ],
+    "lastUpdated": 1706357794142,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "e02fd644-acc5-45fa-808e-67157423950b",
+    "name": "Voice_Apps",
+    "type": "app",
+    "description": "Default Voice Applications",
+    "entries": [
+      {
+        "app": "adobe-connect"
+      },
+      {
+        "app": "amazon-chime"
+      },
+      {
+        "app": "amazon-chime-media"
+      },
+      {
+        "app": "audio-over-http"
+      },
+      {
+        "app": "circuit"
+      },
+      {
+        "app": "circuit-audio"
+      },
+      {
+        "app": "circuit-media"
+      },
+      {
+        "app": "circuit-video"
+      },
+      {
+        "app": "cisco-collab-audio"
+      },
+      {
+        "app": "cisco-collab-control"
+      },
+      {
+        "app": "cisco-collab-video"
+      },
+      {
+        "app": "cisco-collaboration"
+      },
+      {
+        "app": "cisco-ip-camera"
+      },
+      {
+        "app": "cisco-ip-sla"
+      },
+      {
+        "app": "cisco-jabber-audio"
+      },
+      {
+        "app": "cisco-jabber-control"
+      },
+      {
+        "app": "cisco-jabber-im"
+      },
+      {
+        "app": "cisco-jabber-video"
+      },
+      {
+        "app": "cisco-media-audio"
+      },
+      {
+        "app": "cisco-media-video"
+      },
+      {
+        "app": "cisco-phone"
+      },
+      {
+        "app": "cisco-phone-audio"
+      },
+      {
+        "app": "cisco-phone-control"
+      },
+      {
+        "app": "cisco-phone-media"
+      },
+      {
+        "app": "cisco-phone-video"
+      },
+      {
+        "app": "cisco-smart-probe"
+      },
+      {
+        "app": "cisco-tv"
+      },
+      {
+        "app": "conference-server"
+      },
+      {
+        "app": "conferencing"
+      },
+      {
+        "app": "dingtalk-media"
+      },
+      {
+        "app": "dmp"
+      },
+      {
+        "app": "douyin-media"
+      },
+      {
+        "app": "google-services-audio"
+      },
+      {
+        "app": "google-services-media"
+      },
+      {
+        "app": "google-services-video"
+      },
+      {
+        "app": "gotomeeting"
+      },
+      {
+        "app": "h225"
+      },
+      {
+        "app": "h245"
+      },
+      {
+        "app": "h323"
+      },
+      {
+        "app": "itunes-media"
+      },
+      {
+        "app": "jabber-audio"
+      },
+      {
+        "app": "jabber-video"
+      },
+      {
+        "app": "jive-software"
+      },
+      {
+        "app": "lifesize"
+      },
+      {
+        "app": "mgcp"
+      },
+      {
+        "app": "ms-lync"
+      },
+      {
+        "app": "ms-lync-audio"
+      },
+      {
+        "app": "ms-lync-control"
+      },
+      {
+        "app": "ms-lync-video"
+      },
+      {
+        "app": "ms-teams"
+      },
+      {
+        "app": "ms-teams-app-sharing"
+      },
+      {
+        "app": "ms-teams-audio"
+      },
+      {
+        "app": "ms-teams-media"
+      },
+      {
+        "app": "ms-teams-video"
+      },
+      {
+        "app": "ringcentral"
+      },
+      {
+        "app": "ringcentral-audio"
+      },
+      {
+        "app": "ringcentral-control"
+      },
+      {
+        "app": "ringcentral-media"
+      },
+      {
+        "app": "ringcentral-video"
+      },
+      {
+        "app": "rtcp"
+      },
+      {
+        "app": "rtp"
+      },
+      {
+        "app": "rtp-audio"
+      },
+      {
+        "app": "rtp-video"
+      },
+      {
+        "app": "rtsp"
+      },
+      {
+        "app": "rtsps"
+      },
+      {
+        "app": "sdnskmp"
+      },
+      {
+        "app": "sgcp"
+      },
+      {
+        "app": "sip"
+      },
+      {
+        "app": "sip-tls"
+      },
+      {
+        "app": "skinny"
+      },
+      {
+        "app": "ss7ns"
+      },
+      {
+        "app": "telepresence-audio"
+      },
+      {
+        "app": "telepresence-control"
+      },
+      {
+        "app": "telepresence-media"
+      },
+      {
+        "app": "tpip"
+      },
+      {
+        "app": "video-over-http"
+      },
+      {
+        "app": "voov-meeting"
+      },
+      {
+        "app": "web-rtc"
+      },
+      {
+        "app": "web-rtc-audio"
+      },
+      {
+        "app": "web-rtc-video"
+      },
+      {
+        "app": "webex-app-sharing"
+      },
+      {
+        "app": "webex-audio"
+      },
+      {
+        "app": "webex-control"
+      },
+      {
+        "app": "webex-media"
+      },
+      {
+        "app": "webex-meeting"
+      },
+      {
+        "app": "webex-video"
+      },
+      {
+        "app": "wifi-calling"
+      },
+      {
+        "app": "zoom-meetings"
+      },
+      {
+        "app": "zoom-phone"
+      },
+      {
+        "app": "skype"
+      }
+    ],
+    "lastUpdated": 1706357793135,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.1",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "1b5fc4e2-7880-4cbc-bf52-60c4c16a58b0",
+    "name": "WEB_TOOLS_APP",
+    "type": "app",
+    "description": "Web Tools Applications List",
+    "entries": [
+      {
+        "app": "http"
+      },
+      {
+        "app": "https"
+      },
+      {
+        "app": "sshell"
+      }
+    ],
+    "lastUpdated": 1706357794368,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "7bb639a6-5054-4a22-b57a-2c29d10aaf27",
+    "name": "amazon_aws_apps",
+    "type": "app",
+    "description": "SaaS App List for Amazon AWS",
+    "entries": [
+      {
+        "app": "amazon"
+      },
+      {
+        "app": "amazon-web-services"
+      },
+      {
+        "app": "amazon-instant-video"
+      },
+      {
+        "app": "amazon-cloudfront"
+      },
+      {
+        "app": "amazon-ec2"
+      },
+      {
+        "app": "amazon-s3"
+      }
+    ],
+    "lastUpdated": 1706357793279,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "85180554-73d0-45cf-a545-52ea4ce19dd2",
+    "name": "box_net_apps",
+    "type": "app",
+    "description": "SaaS App List for Box Net",
+    "entries": [
+      {
+        "app": "box"
+      }
+    ],
+    "lastUpdated": 1706357790936,
+    "owner": "system",
+    "readOnly": true,
+    "version": "2.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "28cf35cf-73cc-4dc4-9cab-9739e932c5d5",
+    "name": "concur_apps",
+    "type": "app",
+    "description": "SaaS App List for Concur",
+    "entries": [
+      {
+        "app": "concur"
+      }
+    ],
+    "lastUpdated": 1706357792377,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "2de99dea-ec2a-4145-b919-6a41d51a305e",
+    "name": "dropbox_apps",
+    "type": "app",
+    "description": "SaaS App List for Dropbox",
+    "entries": [
+      {
+        "app": "dropbox"
+      }
+    ],
+    "lastUpdated": 1706357792597,
+    "owner": "system",
+    "readOnly": true,
+    "version": "2.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "f08cb7a7-79e5-4975-9855-1159a5be612f",
+    "name": "gotomeeting_apps",
+    "type": "app",
+    "description": "SaaS App List for Gotomeeting",
+    "entries": [
+      {
+        "app": "citrix"
+      },
+      {
+        "app": "gotomeeting"
+      }
+    ],
+    "lastUpdated": 1706357793866,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "b10d2771-b59a-4cc2-b1a5-aa1b1bac7400",
+    "name": "intuit_apps",
+    "type": "app",
+    "description": "SaaS App List for Intuit",
+    "entries": [
+      {
+        "app": "intuit"
+      }
+    ],
+    "lastUpdated": 1706357792801,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "608043bb-b34c-4611-aaf3-ea1f1b2df905",
+    "name": "office365_apps",
+    "type": "app",
+    "description": "SaaS App List for Office365",
+    "entries": [
+      {
+        "app": "ms-live-accounts"
+      },
+      {
+        "app": "ms-lync"
+      },
+      {
+        "app": "ms-lync-audio"
+      },
+      {
+        "app": "ms-lync-control"
+      },
+      {
+        "app": "ms-lync-video"
+      },
+      {
+        "app": "ms-office-365"
+      },
+      {
+        "app": "ms-office-web-apps"
+      },
+      {
+        "app": "ms-services"
+      },
+      {
+        "app": "ms-teams"
+      },
+      {
+        "app": "ms-teams-audio"
+      },
+      {
+        "app": "ms-teams-media"
+      },
+      {
+        "app": "ms-teams-video"
+      },
+      {
+        "app": "ms-update"
+      },
+      {
+        "app": "outlook-web-service"
+      },
+      {
+        "app": "share-point"
+      },
+      {
+        "app": "skydrive"
+      },
+      {
+        "app": "skype"
+      },
+      {
+        "app": "groove"
+      },
+      {
+        "app": "ms-stream"
+      },
+      {
+        "app": "ms-teams-app-sharing"
+      }
+    ],
+    "lastUpdated": 1706357792699,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.1",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "d84a4e23-e8e8-42e3-a69b-13af7d25a0e6",
+    "name": "oracle_apps",
+    "type": "app",
+    "description": "SaaS App List for Oracle",
+    "entries": [
+      {
+        "app": "oracle"
+      },
+      {
+        "app": "oracle-bi"
+      },
+      {
+        "app": "oracle-ebsuite-unsecured"
+      },
+      {
+        "app": "oracle-sqlnet"
+      },
+      {
+        "app": "oraclenames"
+      },
+      {
+        "app": "oraclenet8cman"
+      }
+    ],
+    "lastUpdated": 1706357793379,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.1",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "ca3ab070-ebb1-412e-a0e3-62480ab63ed3",
+    "name": "salesforce_apps",
+    "type": "app",
+    "description": "SaaS App List for Salesforce",
+    "entries": [
+      {
+        "app": "salesforce"
+      }
+    ],
+    "lastUpdated": 1706357792175,
+    "owner": "system",
+    "readOnly": true,
+    "version": "2.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "15e57d84-7b37-451e-9c5a-e07a8dcbf5f3",
+    "name": "sugar_crm_apps",
+    "type": "app",
+    "description": "SaaS App List for Sugar CRM",
+    "entries": [
+      {
+        "app": "sugarcrm"
+      }
+    ],
+    "lastUpdated": 1706357791303,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "f2bf0d50-b9d3-4c30-8b22-3a796ab9f114",
+    "name": "webex_apps",
+    "type": "app",
+    "description": "SaaS App List for Webex",
+    "entries": [
+      {
+        "app": "cisco-collab-audio"
+      },
+      {
+        "app": "cisco-collab-video"
+      },
+      {
+        "app": "cisco-collaboration"
+      },
+      {
+        "app": "cisco-collab-control"
+      },
+      {
+        "app": "cisco-spark"
+      },
+      {
+        "app": "cisco-spark-audio"
+      },
+      {
+        "app": "cisco-spark-media"
+      },
+      {
+        "app": "cisco-spark-video"
+      },
+      {
+        "app": "webex-app-sharing"
+      },
+      {
+        "app": "webex-audio"
+      },
+      {
+        "app": "webex-control"
+      },
+      {
+        "app": "webex-media"
+      },
+      {
+        "app": "webex-meeting"
+      },
+      {
+        "app": "webex-video"
+      }
+    ],
+    "lastUpdated": 1706357792896,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.1",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "0e4988bb-3438-4c3a-bf02-40fec6a758fe",
+    "name": "zendesk_apps",
+    "type": "app",
+    "description": "SaaS App List for Zendesk",
+    "entries": [
+      {
+        "app": "zendesk"
+      }
+    ],
+    "lastUpdated": 1706357794263,
+    "owner": "system",
+    "readOnly": true,
+    "version": "2.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  },
+  {
+    "listId": "51a4a09b-4db5-4921-9065-2b5b5cc0457e",
+    "name": "zoho_crm_apps",
+    "type": "app",
+    "description": "SaaS App List for Zoho CRM",
+    "entries": [
+      {
+        "app": "zoho-services"
+      }
+    ],
+    "lastUpdated": 1706357792059,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": []
+  }
+]

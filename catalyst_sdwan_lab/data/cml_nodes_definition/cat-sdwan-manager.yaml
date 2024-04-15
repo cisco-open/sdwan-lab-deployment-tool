@@ -1,0 +1,94 @@
+# Copyright 2024 Cisco Systems, Inc. and its affiliates
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+id: cat-sdwan-manager
+configuration:
+  generator:
+    driver: null
+  provisioning:
+    volume_name: cidata
+    media_type: iso
+    files:
+      - name: meta-data
+        content: |-
+          instance-id: Manager
+          local-hostname: Manager
+        editable: false
+      - name: user-data
+        content: |-
+          #cloud-config
+        editable: true
+device:
+  interfaces:
+    has_loopback_zero: false
+    default_count: 3
+    physical:
+      - eth0
+      - eth1
+      - eth2
+      - eth3
+      - eth4
+      - eth5
+      - eth6
+      - eth7
+      - eth8
+    serial_ports: 1
+inherited:
+  image:
+    ram: true
+    cpus: true
+    data_volume: true
+    boot_disk_size: false
+    cpu_limit: true
+  node:
+    ram: true
+    cpus: true
+    data_volume: true
+    boot_disk_size: false
+    cpu_limit: true
+general:
+  description: Cisco Catalyst SD-WAN Manager
+  nature: server
+  read_only: false
+schema_version: 0.0.1
+boot:
+  timeout: 300
+  completed:
+    - ': System Ready'
+sim:
+  linux_native:
+    cpus: 8
+    disk_driver: ide
+    driver: server
+    libvirt_domain_driver: kvm
+    nic_driver: virtio
+    ram: 32768
+    data_volume: 50
+    cpu_limit: 100
+pyats:
+  os: sdwan
+  series: viptela
+  config_extract_command: show running
+  username: admin
+  password: admin
+  use_in_testbed: true
+ui:
+  description: Cisco Catalyst SD-WAN Manager
+  group: Others
+  icon: server
+  label: Catalyst SD-WAN Manager
+  label_prefix: sdwan-manager-
+  visible: true

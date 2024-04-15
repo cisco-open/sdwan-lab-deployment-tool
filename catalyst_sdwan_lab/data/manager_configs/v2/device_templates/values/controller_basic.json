@@ -1,0 +1,150 @@
+{
+  "header": {
+    "generatedOn": 1706359166843,
+    "columns": [
+      {
+        "property": "csv-status",
+        "title": "Status",
+        "toolTip": "Input status",
+        "hideable": false,
+        "dataType": "string",
+        "editable": false,
+        "isDisplay": true,
+        "isLeftPinned": true,
+        "minWidth": 30,
+        "width": 30,
+        "display": "icon",
+        "iconProperty": "csv-status",
+        "icon": [
+          {
+            "key": "complete",
+            "value": "images/template_complete.png"
+          },
+          {
+            "key": "in_complete",
+            "value": "images/template_in_complete.png"
+          }
+        ]
+      },
+      {
+        "property": "csv-deviceId",
+        "title": "Chassis Number",
+        "toolTip": "UUID: csv-deviceId",
+        "hideable": false,
+        "dataType": "string",
+        "editable": false,
+        "isDisplay": true,
+        "isLeftPinned": true,
+        "objectType": "object",
+        "templateType": "None",
+        "values": false,
+        "optional": false,
+        "width": 280
+      },
+      {
+        "property": "csv-deviceIP",
+        "title": "System IP",
+        "toolTip": "Device IP: csv-deviceIP",
+        "hideable": false,
+        "dataType": "string",
+        "editable": false,
+        "isDisplay": true,
+        "isLeftPinned": true,
+        "objectType": "object",
+        "templateType": "None",
+        "values": false,
+        "optional": false,
+        "width": 100
+      },
+      {
+        "property": "csv-host-name",
+        "title": "Hostname",
+        "toolTip": "Host name: csv-host-name",
+        "hideable": false,
+        "dataType": "string",
+        "editable": false,
+        "isDisplay": true,
+        "isLeftPinned": true,
+        "objectType": "object",
+        "templateType": "None",
+        "values": false,
+        "optional": false,
+        "width": 180
+      },
+      {
+        "property": "/0/eth1/interface/ip/address",
+        "title": "IPv4 Address(vpn0_eth1_ip)",
+        "toolTip": "Assign IPv4 address: /0/eth1/interface/ip/address",
+        "hideable": false,
+        "dataType": "ipv4-prefix",
+        "editable": true,
+        "isDisplay": true,
+        "isLeftPinned": false,
+        "objectType": "object",
+        "templateType": "vpn-vsmart-interface",
+        "values": false,
+        "optional": false,
+        "width": 100
+      },
+      {
+        "property": "//system/host-name",
+        "title": "Hostname",
+        "toolTip": "Set the hostname: //system/host-name",
+        "hideable": false,
+        "dataType": "string",
+        "editable": true,
+        "isDisplay": true,
+        "isLeftPinned": false,
+        "objectType": "object",
+        "templateType": "system-vsmart",
+        "values": false,
+        "optional": false,
+        "width": 100
+      },
+      {
+        "property": "//system/system-ip",
+        "title": "System IP",
+        "toolTip": "Set the system IP address: //system/system-ip",
+        "hideable": false,
+        "dataType": "string",
+        "editable": true,
+        "isDisplay": true,
+        "isLeftPinned": false,
+        "objectType": "object",
+        "templateType": "system-vsmart",
+        "values": false,
+        "optional": false,
+        "width": 100
+      },
+      {
+        "property": "//system/site-id",
+        "title": "Site ID",
+        "toolTip": "Set the site ID: //system/site-id",
+        "hideable": false,
+        "dataType": "number",
+        "editable": true,
+        "isDisplay": true,
+        "isLeftPinned": false,
+        "objectType": "object",
+        "templateType": "system-vsmart",
+        "values": false,
+        "optional": false,
+        "width": 100
+      }
+    ],
+    "templateVariableCount": 4,
+    "fields": {}
+  },
+  "data": [
+    {
+      "csv-status": "complete",
+      "csv-deviceId": "2e33317a-2875-4402-bc87-959f7ccc2572",
+      "csv-deviceIP": "100.0.0.101",
+      "csv-host-name": "Controller01",
+      "//system/host-name": "Controller01",
+      "//system/system-ip": "100.0.0.101",
+      "//system/site-id": "100",
+      "/0/eth1/interface/ip/address": "172.16.0.101/24"
+    }
+  ]
+}
