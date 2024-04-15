@@ -16,16 +16,18 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from os.path import abspath, dirname, exists, join
 
-from catalystwan.api.task_status_api import (OperationStatus,
-                                             OperationStatusId, Task)
+from catalystwan.api.task_status_api import OperationStatus, OperationStatusId, Task
 from catalystwan.endpoints.certificate_management_device import TargetDevice
-from catalystwan.endpoints.configuration_device_inventory import \
-    DeviceCreationPayload
-from catalystwan.endpoints.configuration_settings import (Certificate, CloudX,
-                                                          DataStreamIPTypeEnum,
-                                                          Device, ModeEnum,
-                                                          Organization,
-                                                          VManageDataStream)
+from catalystwan.endpoints.configuration_device_inventory import DeviceCreationPayload
+from catalystwan.endpoints.configuration_settings import (
+    Certificate,
+    CloudX,
+    DataStreamIPTypeEnum,
+    Device,
+    ModeEnum,
+    Organization,
+    VManageDataStream,
+)
 from catalystwan.exceptions import ManagerRequestException
 from catalystwan.session import create_manager_session
 from catalystwan.vmanage_auth import UnauthorizedAccessError
@@ -36,65 +38,78 @@ from requests.exceptions import ConnectionError
 
 # Base directory where utils.py is located
 BASE_DIR = dirname(dirname(abspath(__file__)))
-DATA_DIR = join(BASE_DIR, 'data')
-CERTS_DIR = join(DATA_DIR, 'certs')
-CML_BACKUP_LAB_DEFINITION_DIR = join(DATA_DIR, 'cml_lab_definition', 'backup')
-CML_DEPLOY_LAB_DEFINITION_DIR = join(DATA_DIR, 'cml_lab_definition', 'deploy')
-CML_NODES_DEFINITION_DIR = join(DATA_DIR, 'cml_nodes_definition')
-MANAGER_CONFIGS_DIR = join(DATA_DIR, 'manager_configs')
-ORG_NAME = 'cml-sdwan-lab-tool'
+DATA_DIR = join(BASE_DIR, "data")
+CERTS_DIR = join(DATA_DIR, "certs")
+CML_BACKUP_LAB_DEFINITION_DIR = join(DATA_DIR, "cml_lab_definition", "backup")
+CML_DEPLOY_LAB_DEFINITION_DIR = join(DATA_DIR, "cml_lab_definition", "deploy")
+CML_NODES_DEFINITION_DIR = join(DATA_DIR, "cml_nodes_definition")
+MANAGER_CONFIGS_DIR = join(DATA_DIR, "manager_configs")
+ORG_NAME = "cml-sdwan-lab-tool"
 SOFTWARE_IMAGES_DIR = os.getcwd()
-VALIDATOR_FQDN = 'validator.sdwan.local'
+VALIDATOR_FQDN = "validator.sdwan.local"
 
 
 def attach_basic_controller_template(manager_session, log):
     """
     Attach basic template to all SD-WAN controllers that have no template yet
     """
-    track_progress(log, 'Attaching SD-WAN Controller to device template...')
-    device_templates = manager_session.get('dataservice/template/device').json()['data']
+    track_progress(log, "Attaching SD-WAN Controller to device template...")
+    device_templates = manager_session.get("dataservice/template/device").json()["data"]
     # Find the template ID for basic template
-    template_id = next(dev_tmpl['templateId'] for dev_tmpl in device_templates
-                       if dev_tmpl['templateName'] == 'controller_basic')
+    template_id = next(
+        dev_tmpl["templateId"]
+        for dev_tmpl in device_templates
+        if dev_tmpl["templateName"] == "controller_basic"
+    )
 
     # Create dict with new SD-WAN Controllers that have no template attached
     # {uuid}: {last digit of IP}
     device_inventory = manager_session.endpoints.configuration_device_inventory
-    control_components = device_inventory.get_device_details('controllers')
-    new_controllers_uuids = {device.uuid: device.device_ip.split('.')[3] for device in control_components
-                             if device.device_type == 'vsmart' and not device.template}
+    control_components = device_inventory.get_device_details("controllers")
+    new_controllers_uuids = {
+        device.uuid: device.device_ip.split(".")[3]
+        for device in control_components
+        if device.device_type == "vsmart" and not device.template
+    }
 
     if new_controllers_uuids:
         attach_payload = {
-            'deviceTemplateList': [
+            "deviceTemplateList": [
                 {
-                    'templateId': template_id,
-                    'device': [],
-                    'isEdited': False,
-                    'isMasterEdited': False
+                    "templateId": template_id,
+                    "device": [],
+                    "isEdited": False,
+                    "isMasterEdited": False,
                 }
             ]
         }
         for dev_uuid, ip_4th_oct in new_controllers_uuids.items():
             # For every SD-WAN Controller, create a payload to attach template
-            attach_payload['deviceTemplateList'][0]['device'].append({
-                'csv-status': 'complete',
-                'csv-deviceId': dev_uuid,
-                'csv-deviceIP': f'100.0.0.{ip_4th_oct}',
-                'csv-host-name': f'Controller{ip_4th_oct[-2:]}',
-                '/0/eth1/interface/ip/address': f'172.16.0.{ip_4th_oct}/24',
-                '//system/host-name': f'Controller{ip_4th_oct[-2:]}',
-                '//system/system-ip': f'100.0.0.{ip_4th_oct}',
-                '//system/site-id': '100',
-                'csv-templateId': template_id
-            })
+            attach_payload["deviceTemplateList"][0]["device"].append(
+                {
+                    "csv-status": "complete",
+                    "csv-deviceId": dev_uuid,
+                    "csv-deviceIP": f"100.0.0.{ip_4th_oct}",
+                    "csv-host-name": f"Controller{ip_4th_oct[-2:]}",
+                    "/0/eth1/interface/ip/address": f"172.16.0.{ip_4th_oct}/24",
+                    "//system/host-name": f"Controller{ip_4th_oct[-2:]}",
+                    "//system/system-ip": f"100.0.0.{ip_4th_oct}",
+                    "//system/site-id": "100",
+                    "csv-templateId": template_id,
+                }
+            )
 
-        task_id = manager_session.post('dataservice/template/device/config/attachfeature',
-                                       json=attach_payload).json()['id']
+        task_id = manager_session.post(
+            "dataservice/template/device/config/attachfeature", json=attach_payload
+        ).json()["id"]
         success_statuses = [OperationStatus.SUCCESS, OperationStatus.SUCCESS_SCHEDULED]
-        success_statuses_ids = [OperationStatusId.SUCCESS, OperationStatusId.SUCCESS_SCHEDULED]
-        Task(manager_session, task_id).wait_for_completed(success_statuses=success_statuses,
-                                                          success_statuses_ids=success_statuses_ids)
+        success_statuses_ids = [
+            OperationStatusId.SUCCESS,
+            OperationStatusId.SUCCESS_SCHEDULED,
+        ]
+        Task(manager_session, task_id).wait_for_completed(
+            success_statuses=success_statuses, success_statuses_ids=success_statuses_ids
+        )
 
 
 def check_manager_ip_is_free(ip):
@@ -102,31 +117,46 @@ def check_manager_ip_is_free(ip):
     Ping the IP address that will be allocated to SD-WAN Manager
     to verify it's not already used
     """
-    ping_parameter = '-n' if platform.system().lower() == 'windows' else '-c'
+    ping_parameter = "-n" if platform.system().lower() == "windows" else "-c"
 
-    if subprocess.call(['ping', ping_parameter, '1', ip], stdout=subprocess.DEVNULL) == 0:
-        sys.exit(f'IP address {ip} allocated for SD-WAN Manager is already in use. '
-                 f'Please pick a different IP or resolve IP conflict.')
+    if (
+        subprocess.call(["ping", ping_parameter, "1", ip], stdout=subprocess.DEVNULL)
+        == 0
+    ):
+        sys.exit(
+            f"IP address {ip} allocated for SD-WAN Manager is already in use. "
+            f"Please pick a different IP or resolve IP conflict."
+        )
 
 
 def configure_manager_basic_settings(manager_session, ca_chain, log):
     """
     Configure basic settings for SD-WAN Manager
     """
-    track_progress(log, 'Configuring basic settings...')
+    track_progress(log, "Configuring basic settings...")
     manager_config_settings = manager_session.endpoints.configuration_settings
     if manager_config_settings.get_organizations().first().org is None:
         manager_config_settings.edit_organizations(Organization(org=ORG_NAME))
     else:
-        log.info('Org-name is already set')
+        log.info("Org-name is already set")
     manager_config_settings.edit_devices(Device(domain_ip=VALIDATOR_FQDN))
-    manager_config_settings.edit_certificates(Certificate(certificate_signing='enterprise', validityPeriod='1Y',
-                                                          retrieveInterval='60'))
-    manager_session.put('dataservice/settings/configuration/certificate/enterpriserootca',
-                        json={'enterpriseRootCA': ca_chain})
-    manager_config_settings.edit_vmanage_data_stream(VManageDataStream(enable=True, ip_type=DataStreamIPTypeEnum.SYSTEM,
-                                                                       serverHostName=DataStreamIPTypeEnum.SYSTEM,
-                                                                       vpn=0))
+    manager_config_settings.edit_certificates(
+        Certificate(
+            certificate_signing="enterprise", validityPeriod="1Y", retrieveInterval="60"
+        )
+    )
+    manager_session.put(
+        "dataservice/settings/configuration/certificate/enterpriserootca",
+        json={"enterpriseRootCA": ca_chain},
+    )
+    manager_config_settings.edit_vmanage_data_stream(
+        VManageDataStream(
+            enable=True,
+            ip_type=DataStreamIPTypeEnum.SYSTEM,
+            serverHostName=DataStreamIPTypeEnum.SYSTEM,
+            vpn=0,
+        )
+    )
     manager_config_settings.edit_cloudx(CloudX(mode=ModeEnum.ON))
 
 
@@ -147,7 +177,7 @@ def create_cert(ca_cert, ca_key, csr):
     cert.set_issuer(ca_cert.get_subject())
     cert.set_subject(csr.get_subject())
     cert.set_pubkey(csr.get_pubkey())
-    cert.sign(ca_key, 'sha256')
+    cert.sign(ca_key, "sha256")
     return crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
 
 
@@ -156,41 +186,51 @@ def get_cml_sdwan_image_definition(cml, node_definition, software_version):
     Verify if requested SD-WAN software version
     is present in CML for device type
     """
-    requested_image_definition = f'{node_definition}-{software_version}'
-    existing_image_definitions = [image['id']
-                                  for image in cml.definitions.image_definitions_for_node_definition(node_definition)]
+    requested_image_definition = f"{node_definition}-{software_version}"
+    existing_image_definitions = [
+        image["id"]
+        for image in cml.definitions.image_definitions_for_node_definition(
+            node_definition
+        )
+    ]
     if requested_image_definition in existing_image_definitions:
         return requested_image_definition
     else:
-        if node_definition in ['cat-sdwan-controller', 'cat-sdwan-validator']:
+        if node_definition in ["cat-sdwan-controller", "cat-sdwan-validator"]:
             # If there's no requested Controller image, try one version lower
             # For example sometimes Manager is 20.9.3.2 and Controller/Validator is 20.9.3.1
-            new_software_version = software_version.split('.')
+            new_software_version = software_version.split(".")
             if int(new_software_version[-1]) == 1 and len(new_software_version) == 4:
                 # If last digit is one and there are four digits try without this digit
                 new_software_version = new_software_version[:-1]
             else:
-                new_software_version[-1] = f'{(int(new_software_version[-1]) - 1)}'
-            new_software_version = '.'.join(new_software_version)
-            new_requested_image_definition = f'{node_definition}-{new_software_version}'
+                new_software_version[-1] = f"{(int(new_software_version[-1]) - 1)}"
+            new_software_version = ".".join(new_software_version)
+            new_requested_image_definition = f"{node_definition}-{new_software_version}"
             if new_requested_image_definition in existing_image_definitions:
                 return new_requested_image_definition
             else:
-                sys.exit(f'Requested SD-WAN {node_definition.split("-")[2].title()} software image version '
-                         f'{software_version} or {new_software_version} is not found in CML. '
-                         f'Use setup task to upload the correct images.')
+                sys.exit(
+                    f'Requested SD-WAN {node_definition.split("-")[2].title()} software image version '
+                    f"{software_version} or {new_software_version} is not found in CML. "
+                    f"Use setup task to upload the correct images."
+                )
         else:
-            available_software_versions = [image_id.split('-')[3] for image_id in existing_image_definitions]
-            sys.exit(f'Requested SD-WAN {node_definition.split("-")[2].title()} software image version '
-                     f'{software_version} is not found in CML. Use setup task to upload the correct images or '
-                     f'use any available image: {available_software_versions}')
+            available_software_versions = [
+                image_id.split("-")[3] for image_id in existing_image_definitions
+            ]
+            sys.exit(
+                f'Requested SD-WAN {node_definition.split("-")[2].title()} software image version '
+                f"{software_version} is not found in CML. Use setup task to upload the correct images or "
+                f"use any available image: {available_software_versions}"
+            )
 
 
 def get_sdwan_lab_parameters(software_version):
-    major_release = int(software_version.split('.')[0])
-    minor_release = int(software_version.split('.')[1])
+    major_release = int(software_version.split(".")[0])
+    minor_release = int(software_version.split(".")[1])
     if major_release <= 19 or (major_release == 20 and minor_release < 4):
-        sys.exit('Versions lower than 20.4 are not supported by the script.')
+        sys.exit("Versions lower than 20.4 are not supported by the script.")
     elif major_release == 20 and minor_release in [4, 5, 6, 7, 8, 9, 10, 11]:
         # This versions require C8000v (SD-WAN) serial file and device templates
         serial_file_version = 1
@@ -204,20 +244,23 @@ def get_sdwan_lab_parameters(software_version):
 
 
 def load_certificate_details():
-    ca_cert_name = 'signCA.pem'
-    ca_key_name = 'signCA.key'
-    ca_chain_name = 'chainCA.pem'
-    if not exists(join(CERTS_DIR, ca_cert_name)) or not exists(join(CERTS_DIR, ca_key_name)) or not exists(
-            join(CERTS_DIR, ca_chain_name)):
-        sys.exit('Sign CA not found')
+    ca_cert_name = "signCA.pem"
+    ca_key_name = "signCA.key"
+    ca_chain_name = "chainCA.pem"
+    if (
+        not exists(join(CERTS_DIR, ca_cert_name))
+        or not exists(join(CERTS_DIR, ca_key_name))
+        or not exists(join(CERTS_DIR, ca_chain_name))
+    ):
+        sys.exit("Sign CA not found")
     else:
-        file = open(join(CERTS_DIR, ca_cert_name), 'r')
+        file = open(join(CERTS_DIR, ca_cert_name), "r")
         ca_cert = file.read()
         file.close()
-        file = open(join(CERTS_DIR, ca_key_name), 'r')
+        file = open(join(CERTS_DIR, ca_key_name), "r")
         ca_key = file.read()
         file.close()
-        file = open(join(CERTS_DIR, ca_chain_name), 'r')
+        file = open(join(CERTS_DIR, ca_chain_name), "r")
         ca_chain = file.read()
         file.close()
         return [ca_cert, ca_key, ca_chain]
@@ -231,60 +274,84 @@ def onboard_control_components(manager_session, new_control_components, log):
     # Check which control components are already added
     already_added_vpn0_ips = []
     device_inventory = manager_session.endpoints.configuration_device_inventory
-    for device in device_inventory.get_device_details('controllers'):
-        config = manager_session.get(f'dataservice/template/config/attached/{device.uuid}').json()['config']
-        match = re.search(r'vpn 0[\s\S]+?ip\saddress\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', config)
+    for device in device_inventory.get_device_details("controllers"):
+        config = manager_session.get(
+            f"dataservice/template/config/attached/{device.uuid}"
+        ).json()["config"]
+        match = re.search(
+            r"vpn 0[\s\S]+?ip\saddress\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", config
+        )
         if match:
             already_added_vpn0_ips.append(match.group(1))
         else:
             already_added_vpn0_ips.append(device.device_ip)
     i = 0
-    log.info('Adding control components...')
+    log.info("Adding control components...")
     for ip, node_type in new_control_components.items():
-        track_progress(log, f'Adding control components ({i}/{len(new_control_components.keys())})...')
+        track_progress(
+            log,
+            f"Adding control components ({i}/{len(new_control_components.keys())})...",
+        )
         if ip in already_added_vpn0_ips:
-            log.info(f'{node_type.title()} {ip} is already onboarded. Skipping...')
+            log.info(f"{node_type.title()} {ip} is already onboarded. Skipping...")
         else:
-            if node_type.lower() == 'validator':
-                personality = 'vbond'
-            elif node_type.lower() == 'controller':
-                personality = 'vsmart'
+            if node_type.lower() == "validator":
+                personality = "vbond"
+            elif node_type.lower() == "controller":
+                personality = "vsmart"
             else:
-                exit(f'Expected node_type validator or controller, but got {node_type} instead.')
-            device_inventory.create_device(payload=DeviceCreationPayload(device_ip=ip, username='admin',
-                                                                         password='admin', generateCSR=False,
-                                                                         personality=personality))
+                exit(
+                    f"Expected node_type validator or controller, but got {node_type} instead."
+                )
+            device_inventory.create_device(
+                payload=DeviceCreationPayload(
+                    device_ip=ip,
+                    username="admin",
+                    password="admin",
+                    generateCSR=False,
+                    personality=personality,
+                )
+            )
 
-    track_progress(log, 'Generating certificates for control components...')
+    track_progress(log, "Generating certificates for control components...")
     # Prepare the CA for controllers certificate signing
     ca_cert, ca_key, ca_chain = load_certificate_details()
-    control_components = device_inventory.get_device_details('controllers')
+    control_components = device_inventory.get_device_details("controllers")
     with ThreadPoolExecutor() as executor:
         # Generate CSR and sign in the certificates for all control components at the same time
-        sign_certificate_partial = partial(sign_certificate, log=log, manager_session=manager_session,
-                                           ca_cert=ca_cert, ca_key=ca_key)
+        sign_certificate_partial = partial(
+            sign_certificate,
+            log=log,
+            manager_session=manager_session,
+            ca_cert=ca_cert,
+            ca_key=ca_key,
+        )
         executor.map(sign_certificate_partial, control_components)
         executor.shutdown(wait=True)
 
 
-def restore_manager_configuration(manager_ip, manager_user, manager_password, workdir, attach):
+def restore_manager_configuration(
+    manager_ip, manager_user, manager_password, workdir, attach
+):
     """
     Restore configuration using Sastre
     """
-    sastre_task_args = RestoreArgs(
-        workdir=workdir,
-        attach=attach,
-        tag='all'
-    )
+    sastre_task_args = RestoreArgs(workdir=workdir, attach=attach, tag="all")
 
-    with Rest(base_url=f'https://{manager_ip}', username=manager_user, password=manager_password) as api:
+    with Rest(
+        base_url=f"https://{manager_ip}",
+        username=manager_user,
+        password=manager_password,
+    ) as api:
         task = TaskRestore()
         task_output = task.runner(sastre_task_args, api)
 
         if task_output:
-            print('\n\n'.join(str(entry) for entry in task_output))
+            print("\n\n".join(str(entry) for entry in task_output))
 
-        task.log_info(f'Template Restore task completed {task.outcome("successfully", "with caveats: {tally}")}')
+        task.log_info(
+            f'Template Restore task completed {task.outcome("successfully", "with caveats: {tally}")}'
+        )
 
 
 def setup_logging(loglevel):
@@ -292,14 +359,22 @@ def setup_logging(loglevel):
     log = logging.getLogger(__name__)
     log.setLevel(loglevel)
     # When script wait for SD-WAN Manager to come up, filter the connection error logs as they are expected
-    catalystwan_logger = logging.getLogger('catalystwan.session')
-    catalystwan_logger.addFilter(lambda record: 'Max retries exceeded' not in record.getMessage())
-    catalystwan_logger.addFilter(lambda record: 'Failed to establish a new connection: [Errno 61]'
-                                                not in record.getMessage())
-    urllib3_logger = logging.getLogger('urllib3.connectionpool')
-    urllib3_logger.addFilter(lambda record: 'Max retries exceeded' not in record.getMessage())
-    urllib3_logger.addFilter(lambda record: 'Failed to establish a new connection: [Errno 61]'
-                                            not in record.getMessage())
+    catalystwan_logger = logging.getLogger("catalystwan.session")
+    catalystwan_logger.addFilter(
+        lambda record: "Max retries exceeded" not in record.getMessage()
+    )
+    catalystwan_logger.addFilter(
+        lambda record: "Failed to establish a new connection: [Errno 61]"
+        not in record.getMessage()
+    )
+    urllib3_logger = logging.getLogger("urllib3.connectionpool")
+    urllib3_logger.addFilter(
+        lambda record: "Max retries exceeded" not in record.getMessage()
+    )
+    urllib3_logger.addFilter(
+        lambda record: "Failed to establish a new connection: [Errno 61]"
+        not in record.getMessage()
+    )
     return log
 
 
@@ -309,14 +384,20 @@ def sign_certificate(device, log, manager_session, ca_cert, ca_key):
     for SD-WAN control component
     if certificate is not yet installed
     """
-    if device.device_type in ['vmanage', 'vsmart', 'vbond'] and device.serial_number == 'No certificate installed':
+    if (
+        device.device_type in ["vmanage", "vsmart", "vbond"]
+        and device.serial_number == "No certificate installed"
+    ):
         csr = manager_session.endpoints.certificate_management_device.generate_csr(
-            TargetDevice(device_ip=device.device_ip))[0].deviceCSR
+            TargetDevice(device_ip=device.device_ip)
+        )[0].deviceCSR
         cert = create_cert(ca_cert, ca_key, csr)
-        task_id = manager_session.post('dataservice/certificate/install/signedCert', data=cert).json()['id']
+        task_id = manager_session.post(
+            "dataservice/certificate/install/signedCert", data=cert
+        ).json()["id"]
         Task(manager_session, task_id).wait_for_completed()
     else:
-        log.info('Certificate is already signed for ' + device.host_name + '.')
+        log.info("Certificate is already signed for " + device.host_name + ".")
 
 
 def track_progress(log, message):
@@ -326,11 +407,13 @@ def track_progress(log, message):
     """
     if log.level > logging.INFO:
         # User is getting a summary feedback about task status in single line
-        print(f'\r\033[K{message}', end='', flush=True)
+        print(f"\r\033[K{message}", end="", flush=True)
     else:
         # Same message is passed to a log if it doesn't count attempts
         # as this would create too many logs
-        if 'Waiting for SD-WAN Manager API ' not in message and not re.match(r'\([\w\s]?\d/\d\)', message):
+        if "Waiting for SD-WAN Manager API " not in message and not re.match(
+            r"\([\w\s]?\d/\d\)", message
+        ):
             log.info(message)
 
 
@@ -340,25 +423,36 @@ def wait_for_manager_session(manager_ip, manager_user, manager_password, log):
     """
     # Different SD-WAN Manager versions requires different time to boot and bring up application-server with REST API
     # Start trying to log in to SD-WAN Manager until it's succesful or until 60 minutes passes.
-    track_progress(log, 'Waiting for SD-WAN Manager API...')
+    track_progress(log, "Waiting for SD-WAN Manager API...")
     retries = 0
     max_retries = 120
     manager_session = None
     while True:
         try:
-            manager_session = create_manager_session(url=manager_ip, username=manager_user, password=manager_password)
-        except (ConnectionRefusedError, ConnectionError, UnauthorizedAccessError, ManagerRequestException):
+            manager_session = create_manager_session(
+                url=manager_ip, username=manager_user, password=manager_password
+            )
+        except (
+            ConnectionRefusedError,
+            ConnectionError,
+            UnauthorizedAccessError,
+            ManagerRequestException,
+        ):
             retries += 1
             if retries < max_retries:
-                track_progress(log, f'Waiting for SD-WAN Manager API (attempt {retries})...')
+                track_progress(
+                    log, f"Waiting for SD-WAN Manager API (attempt {retries})..."
+                )
                 if retries % 10 == 0:
-                    log.info(f'Waiting for SD-WAN Manager API (attempt {retries}/{max_retries})...')
+                    log.info(
+                        f"Waiting for SD-WAN Manager API (attempt {retries}/{max_retries})..."
+                    )
                 time.sleep(30)
                 continue
             else:
-                sys.exit('Failed to login to SD-WAN Manager after 60 minutes.')
+                sys.exit("Failed to login to SD-WAN Manager after 60 minutes.")
         break
-    log.info('SD-WAN Manager login successful')
+    log.info("SD-WAN Manager login successful")
     return manager_session
 
 
@@ -366,24 +460,34 @@ def wait_for_wan_edge_onboaring(manager_session, wan_edges_to_onboard, log):
     """
     Wait until WAN Edge routers are onboarded
     """
-    log.info('Waiting for WAN Edge onboarding...')
+    log.info("Waiting for WAN Edge onboarding...")
     retries = 0
     max_retries = 120
     wan_edges_onboarded = []
     while not set(wan_edges_to_onboard) == set(wan_edges_onboarded):
         retries += 1
-        track_progress(log, f'Waiting for WAN Edge onboarding '
-                            f'({len(wan_edges_onboarded)}/{len(wan_edges_to_onboard)})...')
+        track_progress(
+            log,
+            f"Waiting for WAN Edge onboarding "
+            f"({len(wan_edges_onboarded)}/{len(wan_edges_to_onboard)})...",
+        )
         if retries < max_retries:
             if retries % 10 == 0:
-                log.info(f'WAN Edges not onboarded, attempt {retries}/{max_retries}, waiting...')
+                log.info(
+                    f"WAN Edges not onboarded, attempt {retries}/{max_retries}, waiting..."
+                )
             time.sleep(30)
-            devices = manager_session.endpoints.configuration_device_inventory.get_device_details('vedges')
+            devices = manager_session.endpoints.configuration_device_inventory.get_device_details(
+                "vedges"
+            )
             for dev_uuid in wan_edges_to_onboard:
                 device = devices.filter(uuid=dev_uuid).single_or_default()
-                if device.cert_install_status == 'Installed' and device.reachability == 'reachable' \
-                        and dev_uuid not in wan_edges_onboarded:
-                    log.info(f'Onboarded WAN Edge with UUID: {dev_uuid}')
+                if (
+                    device.cert_install_status == "Installed"
+                    and device.reachability == "reachable"
+                    and dev_uuid not in wan_edges_onboarded
+                ):
+                    log.info(f"Onboarded WAN Edge with UUID: {dev_uuid}")
                     wan_edges_onboarded.append(dev_uuid)
         else:
             break

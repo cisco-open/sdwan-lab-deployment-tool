@@ -11,7 +11,7 @@ def main(cml, lab_name, force, loglevel):
 
     # Setup logging
     log = setup_logging(loglevel)
-    track_progress(log, 'Preparing delete task...')
+    track_progress(log, "Preparing delete task...")
 
     # Find the lab
     lab = cml.find_labs_by_title(lab_name)
@@ -19,24 +19,28 @@ def main(cml, lab_name, force, loglevel):
         # If there are multiple labs with same name, we don't know which we should back up,
         # so we ask user to make sure the lab names are unique
         if len(lab) > 1:
-            exit(f'There are multiple labs/topologies with name "{lab_name}". Please make sure '
-                 f'lab names are unique and rerun the delete task.')
+            exit(
+                f'There are multiple labs/topologies with name "{lab_name}". Please make sure '
+                f"lab names are unique and rerun the delete task."
+            )
         lab = lab[0]
 
         if not force:
-            confirmation = input('\nThis will remove lab and all its data. '
-                                 'Are you sure you want to proceed? (yes/no): ')
-            if confirmation.lower() != 'yes':
-                exit('You did not confirm yes.')
+            confirmation = input(
+                "\nThis will remove lab and all its data. "
+                "Are you sure you want to proceed? (yes/no): "
+            )
+            if confirmation.lower() != "yes":
+                exit("You did not confirm yes.")
 
-        track_progress(log, 'Deleting the lab...')
-        log.info('Stopping the lab...')
+        track_progress(log, "Deleting the lab...")
+        log.info("Stopping the lab...")
         lab.stop()
-        log.info('Wiping the lab...')
+        log.info("Wiping the lab...")
         lab.wipe()
-        log.info('Removing the lab...')
+        log.info("Removing the lab...")
         lab.remove()
-        track_progress(log, 'Delete task done')
+        track_progress(log, "Delete task done")
 
     else:
-        exit('Could not find a lab with specified name.')
+        exit("Could not find a lab with specified name.")
