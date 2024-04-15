@@ -29,6 +29,7 @@ catalystwan = "^0.31.0"
 isort = "^5.13.2"
 flake8 = "^7.0.0"
 black = "^24.4.0"
+mypy = "^1.9.0"
 
 [build-system]
 requires = ["poetry-core"]
