@@ -4,6 +4,10 @@
 
 - Updated required packages
 
+#### Optimizations:
+
+- added automated testing using flake8, isort, black and mypy
+
 # Catalyst SD-WAN Lab 2.0.5 [Mar 28, 2024]
 
 #### New Features:
