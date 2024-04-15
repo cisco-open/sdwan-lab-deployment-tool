@@ -22,7 +22,8 @@ from requests.exceptions import ConnectionError
 from catalystwan.api.task_status_api import Task, OperationStatus, OperationStatusId
 from catalystwan.endpoints.certificate_management_device import TargetDevice
 from catalystwan.endpoints.configuration_device_inventory import DeviceCreationPayload
-from catalystwan.endpoints.configuration_settings import Certificate, CloudX, DataStreamIPTypeEnum, Device, ModeEnum, Organization, VManageDataStream
+from catalystwan.endpoints.configuration_settings import Certificate, CloudX, DataStreamIPTypeEnum, Device, ModeEnum, \
+    Organization, VManageDataStream
 from catalystwan.exceptions import ManagerRequestException
 from catalystwan.session import create_manager_session
 from catalystwan.vmanage_auth import UnauthorizedAccessError
@@ -71,11 +72,11 @@ def attach_basic_controller_template(manager_session, log):
                 }
             ]
         }
-        for uuid, ip_4th_oct in new_controllers_uuids.items():
+        for dev_uuid, ip_4th_oct in new_controllers_uuids.items():
             # For every SD-WAN Controller, create a payload to attach template
             attach_payload['deviceTemplateList'][0]['device'].append({
                 'csv-status': 'complete',
-                'csv-deviceId': uuid,
+                'csv-deviceId': dev_uuid,
                 'csv-deviceIP': f'100.0.0.{ip_4th_oct}',
                 'csv-host-name': f'Controller{ip_4th_oct[-2:]}',
                 '/0/eth1/interface/ip/address': f'172.16.0.{ip_4th_oct}/24',
@@ -85,10 +86,12 @@ def attach_basic_controller_template(manager_session, log):
                 'csv-templateId': template_id
             })
 
-        task_id = manager_session.post('dataservice/template/device/config/attachfeature', json=attach_payload).json()['id']
+        task_id = manager_session.post('dataservice/template/device/config/attachfeature',
+                                       json=attach_payload).json()['id']
         success_statuses = [OperationStatus.SUCCESS, OperationStatus.SUCCESS_SCHEDULED]
         success_statuses_ids = [OperationStatusId.SUCCESS, OperationStatusId.SUCCESS_SCHEDULED]
-        Task(manager_session, task_id).wait_for_completed(success_statuses=success_statuses, success_statuses_ids=success_statuses_ids)
+        Task(manager_session, task_id).wait_for_completed(success_statuses=success_statuses,
+                                                          success_statuses_ids=success_statuses_ids)
 
 
 def check_manager_ip_is_free(ip):
@@ -114,10 +117,13 @@ def configure_manager_basic_settings(manager_session, ca_chain, log):
     else:
         log.info('Org-name is already set')
     manager_config_settings.edit_devices(Device(domain_ip=VALIDATOR_FQDN))
-    manager_config_settings.edit_certificates(Certificate(certificate_signing='enterprise', validityPeriod='1Y', retrieveInterval="60"))
-    manager_session.put('dataservice/settings/configuration/certificate/enterpriserootca', json={'enterpriseRootCA': ca_chain})
+    manager_config_settings.edit_certificates(Certificate(certificate_signing='enterprise', validityPeriod='1Y',
+                                                          retrieveInterval='60'))
+    manager_session.put('dataservice/settings/configuration/certificate/enterpriserootca',
+                        json={'enterpriseRootCA': ca_chain})
     manager_config_settings.edit_vmanage_data_stream(VManageDataStream(enable=True, ip_type=DataStreamIPTypeEnum.SYSTEM,
-                                                                       serverHostName=DataStreamIPTypeEnum.SYSTEM, vpn=0))
+                                                                       serverHostName=DataStreamIPTypeEnum.SYSTEM,
+                                                                       vpn=0))
     manager_config_settings.edit_cloudx(CloudX(mode=ModeEnum.ON))
 
 
@@ -148,7 +154,8 @@ def get_cml_sdwan_image_definition(cml, node_definition, software_version):
     is present in CML for device type
     """
     requested_image_definition = f'{node_definition}-{software_version}'
-    existing_image_definitions = [image['id'] for image in cml.definitions.image_definitions_for_node_definition(node_definition)]
+    existing_image_definitions = [image['id']
+                                  for image in cml.definitions.image_definitions_for_node_definition(node_definition)]
     if requested_image_definition in existing_image_definitions:
         return requested_image_definition
     else:
@@ -161,7 +168,7 @@ def get_cml_sdwan_image_definition(cml, node_definition, software_version):
                 new_software_version = new_software_version[:-1]
             else:
                 new_software_version[-1] = f'{(int(new_software_version[-1]) - 1)}'
-            new_software_version = ".".join(new_software_version)
+            new_software_version = '.'.join(new_software_version)
             new_requested_image_definition = f'{node_definition}-{new_software_version}'
             if new_requested_image_definition in existing_image_definitions:
                 return new_requested_image_definition
@@ -241,7 +248,9 @@ def onboard_control_components(manager_session, new_control_components, log):
                 personality = 'vsmart'
             else:
                 exit(f'Expected node_type validator or controller, but got {node_type} instead.')
-            device_inventory.create_device(payload=DeviceCreationPayload(device_ip=ip, username='admin', password='admin', generateCSR=False, personality=personality))
+            device_inventory.create_device(payload=DeviceCreationPayload(device_ip=ip, username='admin',
+                                                                         password='admin', generateCSR=False,
+                                                                         personality=personality))
 
     track_progress(log, 'Generating certificates for control components...')
     # Prepare the CA for controllers certificate signing
@@ -282,10 +291,12 @@ def setup_logging(loglevel):
     # When script wait for SD-WAN Manager to come up, filter the connection error logs as they are expected
     catalystwan_logger = logging.getLogger('catalystwan.session')
     catalystwan_logger.addFilter(lambda record: 'Max retries exceeded' not in record.getMessage())
-    catalystwan_logger.addFilter(lambda record: 'Failed to establish a new connection: [Errno 61]' not in record.getMessage())
+    catalystwan_logger.addFilter(lambda record: 'Failed to establish a new connection: [Errno 61]'
+                                                not in record.getMessage())
     urllib3_logger = logging.getLogger('urllib3.connectionpool')
     urllib3_logger.addFilter(lambda record: 'Max retries exceeded' not in record.getMessage())
-    urllib3_logger.addFilter(lambda record: 'Failed to establish a new connection: [Errno 61]' not in record.getMessage())
+    urllib3_logger.addFilter(lambda record: 'Failed to establish a new connection: [Errno 61]'
+                                            not in record.getMessage())
     return log
 
 
@@ -296,7 +307,8 @@ def sign_certificate(device, log, manager_session, ca_cert, ca_key):
     if certificate is not yet installed
     """
     if device.device_type in ['vmanage', 'vsmart', 'vbond'] and device.serial_number == 'No certificate installed':
-        csr = manager_session.endpoints.certificate_management_device.generate_csr(TargetDevice(device_ip=device.device_ip))[0].deviceCSR
+        csr = manager_session.endpoints.certificate_management_device.generate_csr(
+            TargetDevice(device_ip=device.device_ip))[0].deviceCSR
         cert = create_cert(ca_cert, ca_key, csr)
         task_id = manager_session.post('dataservice/certificate/install/signedCert', data=cert).json()['id']
         Task(manager_session, task_id).wait_for_completed()
@@ -364,10 +376,11 @@ def wait_for_wan_edge_onboaring(manager_session, wan_edges_to_onboard, log):
                 log.info(f'WAN Edges not onboarded, attempt {retries}/{max_retries}, waiting...')
             time.sleep(30)
             devices = manager_session.endpoints.configuration_device_inventory.get_device_details('vedges')
-            for uuid in wan_edges_to_onboard:
-                device = devices.filter(uuid=uuid).single_or_default()
-                if device.cert_install_status == 'Installed' and device.reachability == 'reachable' and uuid not in wan_edges_onboarded:
-                    log.info(f'Onboarded WAN Edge with UUID: {uuid}')
-                    wan_edges_onboarded.append(uuid)
+            for dev_uuid in wan_edges_to_onboard:
+                device = devices.filter(uuid=dev_uuid).single_or_default()
+                if device.cert_install_status == 'Installed' and device.reachability == 'reachable' \
+                        and dev_uuid not in wan_edges_onboarded:
+                    log.info(f'Onboarded WAN Edge with UUID: {dev_uuid}')
+                    wan_edges_onboarded.append(dev_uuid)
         else:
             break

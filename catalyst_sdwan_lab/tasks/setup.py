@@ -24,7 +24,7 @@ def upload_image_and_create_definition(log, cml, existing_image_definitions, nod
             'id': f'{node_type}-{software_version}',
             'node_definition_id': node_type,
             'label': node_label + ' ' + software_version,
-            "disk_image": filename,
+            'disk_image': filename,
         }
         cml.definitions.upload_image_definition(body=json.dumps(image_def))
 
@@ -40,10 +40,10 @@ def main(cml, loglevel, migrate):
     # Collect node definitions from CML
     node_definitions = cml.definitions.node_definitions()
     for filename in os.listdir(CML_NODES_DEFINITION_DIR):
-        if filename.endswith(".yaml"):
+        if filename.endswith('.yaml'):
             # For every YAML file in the node definition folder, we need to do below steps
             # Load node definition from the file
-            with open(join(CML_NODES_DEFINITION_DIR, filename), "r") as f:
+            with open(join(CML_NODES_DEFINITION_DIR, filename), 'r') as f:
                 new_node_definition = yaml.load(f.read())
 
             # Check if the node is already defined in CML
@@ -58,8 +58,8 @@ def main(cml, loglevel, migrate):
                 else:
                     # If dicts are not the same, then we need to update the node definition
                     log.info(f'[UPDATE] Updating node {new_node_definition["id"]} with '
-                                 f'{new_node_definition["sim"]["linux_native"]["cpus"]} CPUs and '
-                                 f'{new_node_definition["sim"]["linux_native"]["ram"]} MB RAM.')
+                             f'{new_node_definition["sim"]["linux_native"]["cpus"]} CPUs and '
+                             f'{new_node_definition["sim"]["linux_native"]["ram"]} MB RAM.')
                     cml.session.put('node_definitions/', json=new_node_definition)
             else:
                 # If node is not yet created, we need to create it
@@ -85,14 +85,16 @@ def main(cml, loglevel, migrate):
             node_type = software_type_to_node_type_mapping[software_parser.group(1)]
             node_label = next((node['ui']['label'] for node in node_definitions if node['id'] == node_type), None)
             software_version = software_parser.group(2)
-            upload_image_and_create_definition(log, cml, existing_image_definitions, node_type, software_version, node_label, SOFTWARE_IMAGES_DIR, filename)
+            upload_image_and_create_definition(log, cml, existing_image_definitions, node_type, software_version,
+                                               node_label, SOFTWARE_IMAGES_DIR, filename)
 
         elif software_parser := re.match(r'c8000v-universalk9_\d+G_serial\.([.\w]+)\.qcow2$', filename):
             # For C8000v we need to make sure it is a serial image.
             node_type = 'cat-sdwan-edge'
             node_label = next((node['ui']['label'] for node in node_definitions if node['id'] == node_type), None)
             software_version = software_parser.group(1)
-            upload_image_and_create_definition(log, cml, existing_image_definitions, node_type, software_version, node_label, SOFTWARE_IMAGES_DIR, filename)
+            upload_image_and_create_definition(log, cml, existing_image_definitions, node_type, software_version,
+                                               node_label, SOFTWARE_IMAGES_DIR, filename)
 
         else:
             log.debug(f'Skipping file {filename} (not a valid image).')

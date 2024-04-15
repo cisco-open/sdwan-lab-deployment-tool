@@ -46,7 +46,7 @@ def main():
                              envvar='CML_PASSWORD', type=non_empty_type,
                              help='CML password, can also be defined via CML_PASSWORD environment variable. '
                                   ' If neither is provided user is prompted for CML password.')
-    main_parser.add_argument('-v', '--verbose', action="store_const", dest="loglevel", const=logging.INFO,
+    main_parser.add_argument('-v', '--verbose', action='store_const', dest='loglevel', const=logging.INFO,
                              default=logging.WARNING, help='Increase output verbosity.')
     main_parser.add_argument('--version', action='version',
                              version=f'SD-WAN Lab Version {catalyst_sdwan_lab.__version__}')
@@ -61,7 +61,7 @@ def main():
     task_subparsers.required = True
 
     setup_parser = task_subparsers.add_parser('setup', help='Setup on-prem CML to use Catalyst SD-WAN Lab automation.')
-    setup_parser.add_argument('--migrate', action="store_const", dest="migrate", const=True,
+    setup_parser.add_argument('--migrate', action='store_const', dest='migrate', const=True,
                               default=False, help='Migrate node and image definitions from SD-WAN Lab v1.x to v2.x. '
                                                   'This task should be run once if CML server was using '
                                                   'SD-WAN LAb Tool v1.x in the past.')
@@ -71,12 +71,12 @@ def main():
                                help='Software version that will be used on SD-WAN Control Components.')
     deploy_parser.add_argument('--manager', metavar='<manager-ip>', action=EnvVar, required=False,
                                envvar='MANAGER_IP', type=non_empty_type,
-                               help='SD-WAN Manager IP address, can also be defined via MANAGER_IP environment variable. '
-                                    'If neither is provided user is prompted for SD-WAN Manager IP.')
+                               help='SD-WAN Manager IP address, can also be defined via MANAGER_IP environment '
+                                    'variable. If neither is provided user is prompted for SD-WAN Manager IP.')
     deploy_parser.add_argument('--mmask', metavar='<manager-mask>', action=EnvVar, required=False,
                                envvar='MANAGER_MASK', type=non_empty_type,
-                               help='Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK '
-                                    'environment variable. '
+                               help='Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined '
+                                    'via MANAGER_MASK environment variable. '
                                     'If neither is provided user is prompted for SD-WAN Manager subnet mask.')
     deploy_parser.add_argument('--mgateway', metavar='<manager-gateway>', action=EnvVar, required=False,
                                envvar='MANAGER_GATEWAY', type=non_empty_type,
@@ -85,25 +85,28 @@ def main():
                                     'If neither is provided user is prompted for Manager gateway IP.')
     deploy_parser.add_argument('--muser', metavar='<manager-user>', action=EnvVar, required=False,
                                envvar='MANAGER_USER', type=non_empty_type,
-                               help='SD-WAN Manager username, can also be defined via MANAGER_USER environment variable. '
+                               help='SD-WAN Manager username, can also be defined via '
+                                    'MANAGER_USER environment variable. '
                                     'If neither is provided user is prompted for SD-WAN Manager username.')
     deploy_parser.add_argument('--mpassword', metavar='<manager-password>', action=EnvVar, required=False,
                                envvar='MANAGER_PASSWORD', type=non_empty_type,
-                               help='SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable. '
+                               help='SD-WAN Manager password, can also be defined via '
+                                    'MANAGER_PASSWORD environment variable. '
                                     ' If neither is provided user is prompted for SD-WAN Manager password.')
     deploy_parser.add_argument('--lab', metavar='<lab_name>', action=EnvVar, required=False, envvar='LAB_NAME',
-                               default=None, help='Set CML Lab name, can also be defined via LAB_NAME environment variable. '
-                               'If not provided, default name "sdwan<number>" will be assigned.')
+                               default=None, help='Set CML Lab name, can also be defined via '
+                                                  'LAB_NAME environment variable. '
+                                                  'If not provided, default name "sdwan<number>" will be assigned.')
     deploy_parser.add_argument('--bridge', metavar='<custom-bridge-name>', required=False,
-                               default="System Bridge", help='Set custom bridge for SD-WAN Manager external connection. '
-                                                             'Default is System Bridge')
+                               default='System Bridge', help='Set custom bridge for SD-WAN Manager external connection.'
+                                                             ' Default is System Bridge')
     deploy_parser.add_argument('--dns', metavar='<dns-server-ip>', required=False,
-                               default="192.168.255.1", help='Set custom DNS server for Internet/VPN0 transport. '
+                               default='192.168.255.1', help='Set custom DNS server for Internet/VPN0 transport. '
                                                              'Default is same as CML DNS')
-    deploy_parser.add_argument('--retry', action="store_const", dest='retry', const=True,
-                                default=False, help='If for some reason your script lost connectivity during SD-WAN Manager '
-                                                    'boot, you can add --retry to continue onboarding the lab that is '
-                                                    'already in CML')
+    deploy_parser.add_argument('--retry', action='store_const', dest='retry', const=True,
+                               default=False, help='If for some reason your script lost connectivity '
+                                                   'during SD-WAN Manager boot, you can add --retry to continue '
+                                                   'onboarding the lab that is already in CML')
 
     deploy_parser.set_defaults(prompt_deploy_arguments=[
         PromptArg('manager', 'SD-WAN Manager IP address: '),
@@ -124,7 +127,8 @@ def main():
                                  'If neither is provided user is prompted for SD-WAN Manager username.')
     add_parser.add_argument('--mpassword', metavar='<manager-password>', action=EnvVar, required=False,
                             envvar='MANAGER_PASSWORD', type=non_empty_type,
-                            help='SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable. '
+                            help='SD-WAN Manager password, can also be defined via '
+                                 'MANAGER_PASSWORD environment variable. '
                                  'If neither is provided user is prompted for SD-WAN Manager password.')
     add_parser.add_argument('--lab', metavar='<lab_name>', action=EnvVar, required=False,
                             envvar='LAB_NAME', type=non_empty_type,
@@ -147,15 +151,18 @@ def main():
     backup_parser = task_subparsers.add_parser('backup', help='Backup running Catalyst SD-WAN lab pod.')
     backup_parser.add_argument('--manager', metavar='<manager-ip>', action=EnvVar, required=False,
                                envvar='MANAGER_IP', type=non_empty_type,
-                               help='SD-WAN Manager IP address, can also be defined via MANAGER_IP environment variable. '
+                               help='SD-WAN Manager IP address, can also be defined via '
+                                    'MANAGER_IP environment variable. '
                                     'If neither is provided user is prompted for SD-WAN Manager IP.')
     backup_parser.add_argument('--muser', metavar='<manager-user>', action=EnvVar, required=False,
                                envvar='MANAGER_USER', type=non_empty_type,
-                               help='SD-WAN Manager username, can also be defined via MANAGER_USER environment variable. '
+                               help='SD-WAN Manager username, can also be defined via '
+                                    'MANAGER_USER environment variable. '
                                     'If neither is provided user is prompted for SD-WAN Manager username.')
     backup_parser.add_argument('--mpassword', metavar='<manager-password>', action=EnvVar, required=False,
                                envvar='MANAGER_PASSWORD', type=non_empty_type,
-                               help='SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable. '
+                               help='SD-WAN Manager password, can also be defined via '
+                                    'MANAGER_PASSWORD environment variable. '
                                     ' If neither is provided user is prompted for SD-WAN Manager password.')
     backup_parser.add_argument('--lab', metavar='<lab_name>', action=EnvVar, required=False,
                                envvar='LAB_NAME', type=non_empty_type,
@@ -175,25 +182,28 @@ def main():
     restore_parser = task_subparsers.add_parser('restore', help='Restore Catalyst SD-WAN POD from backup.')
     restore_parser.add_argument('--manager', metavar='<manager-ip>', action=EnvVar, required=False,
                                 envvar='MANAGER_IP', type=non_empty_type,
-                                help='SD-WAN Manager IP address, can also be defined via MANAGER_IP environment variable. '
+                                help='SD-WAN Manager IP address, can also be defined via '
+                                     'MANAGER_IP environment variable. '
                                      'If neither is provided user is prompted for SD-WAN Manager IP.')
     restore_parser.add_argument('--mmask', metavar='<manager-mask>', action=EnvVar, required=False,
                                 envvar='MANAGER_MASK', type=non_empty_type,
-                                help='Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK '
-                                     'environment variable. '
+                                help='Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via '
+                                     'MANAGER_MASK environment variable. '
                                      'If neither is provided user is prompted for SD-WAN Manager subnet mask.')
     restore_parser.add_argument('--mgateway', metavar='<manager-gateway>', action=EnvVar, required=False,
                                 envvar='MANAGER_GATEWAY', type=non_empty_type,
-                                help='Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY '
-                                     'environment variable. '
+                                help='Gateway IP for given SD-WAN Manager IP, can also be defined via '
+                                     'MANAGER_GATEWAY environment variable. '
                                      'If neither is provided user is prompted for Manager gateway IP.')
     restore_parser.add_argument('--muser', metavar='<manager-user>', action=EnvVar, required=False,
                                 envvar='MANAGER_USER', type=non_empty_type,
-                                help='SD-WAN Manager username, can also be defined via MANAGER_USER environment variable. '
+                                help='SD-WAN Manager username, can also be defined via '
+                                     'MANAGER_USER environment variable. '
                                      'If neither is provided user is prompted for SD-WAN Manager username.')
     restore_parser.add_argument('--mpassword', metavar='<manager-password>', action=EnvVar, required=False,
                                 envvar='MANAGER_PASSWORD', type=non_empty_type,
-                                help='SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable. '
+                                help='SD-WAN Manager password, can also be defined via '
+                                     'MANAGER_PASSWORD environment variable. '
                                      ' If neither is provided user is prompted for SD-WAN Manager password.')
     restore_parser.add_argument('--lab', metavar='<lab_name>', action=EnvVar, required=False,
                                 envvar='LAB_NAME', type=non_empty_type,
@@ -201,14 +211,14 @@ def main():
                                 'If neither is provided user is prompted for lab name.')
     restore_parser.add_argument('--workdir', metavar='<directory>', type=non_empty_type,
                                 default='backup', help='Restore source folder')
-    restore_parser.add_argument('--deleteexisting', action="store_const", dest='deleteexisting', const=True,
+    restore_parser.add_argument('--deleteexisting', action='store_const', dest='deleteexisting', const=True,
                                 default=False, help='If there is already lab running with same name and using same '
                                                     'SD-WAN Manager IP, delete this lab before restoring. '
                                                     'Note the all running lab data will be lost!')
-    restore_parser.add_argument('--retry', action="store_const", dest='retry', const=True,
-                                default=False, help='If for some reason your script lost connectivity during SD-WAN Manager '
-                                                    'boot, you can add --retry to continue restoring the lab that is '
-                                                    'already in CML')
+    restore_parser.add_argument('--retry', action='store_const', dest='retry', const=True,
+                                default=False, help='If for some reason your script lost connectivity '
+                                                    'during SD-WAN Manager boot, you can add --retry to continue '
+                                                    'restoring the lab that is already in CML')
 
     restore_parser.set_defaults(prompt_restore_arguments=[
         PromptArg('manager', 'SD-WAN Manager IP address: '),
@@ -225,7 +235,7 @@ def main():
                                envvar='LAB_NAME', type=non_empty_type,
                                help='CML Lab name, can also be defined via LAB_NAME environment variable. '
                                'If neither is provided user is prompted for lab name.')
-    delete_parser.add_argument('--force', action="store_const", dest='force', const=True,
+    delete_parser.add_argument('--force', action='store_const', dest='force', const=True,
                                default=False, help='Delete the lab without asking for confirmation. '
                                                    'Note the all lab data will be lost!')
 
@@ -252,7 +262,7 @@ def main():
     log.setLevel(cli_args.loglevel)
     logger = logging.getLogger('virl2_client.virl2_client')
     # Filter SSL Warning from virl2-client
-    logger.addFilter(lambda record: "SSL Verification disabled" not in record.getMessage())
+    logger.addFilter(lambda record: 'SSL Verification disabled' not in record.getMessage())
 
     # Check CML version
     log.info('Logging in to CML...')
@@ -262,11 +272,12 @@ def main():
         setup.main(cml, cli_args.loglevel, cli_args.migrate)
     elif cli_args.task == 'deploy':
         deploy.main(cml, cli_args.cml, cli_args.manager, cli_args.mmask, cli_args.mgateway,
-                    cli_args.muser, cli_args.mpassword, cli_args.software_version, cli_args.lab, cli_args.bridge, cli_args.dns,
-                    cli_args.retry, cli_args.loglevel)
+                    cli_args.muser, cli_args.mpassword, cli_args.software_version, cli_args.lab, cli_args.bridge,
+                    cli_args.dns, cli_args.retry, cli_args.loglevel)
     elif cli_args.task == 'add':
-        add.main(cml, cli_args.user, cli_args.password, cli_args.manager, cli_args.muser, cli_args.mpassword, cli_args.lab,
-                 cli_args.number_of_devices, cli_args.device_type.lower(), cli_args.software_version, cli_args.loglevel)
+        add.main(cml, cli_args.user, cli_args.password, cli_args.manager, cli_args.muser, cli_args.mpassword,
+                 cli_args.lab, cli_args.number_of_devices, cli_args.device_type.lower(), cli_args.software_version,
+                 cli_args.loglevel)
     elif cli_args.task == 'backup':
         backup.main(cml, cli_args.user, cli_args.password, cli_args.manager, cli_args.muser, cli_args.mpassword,
                     cli_args.lab, cli_args.workdir, cli_args.loglevel)

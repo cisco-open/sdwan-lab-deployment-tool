@@ -118,13 +118,16 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
             # Find all devices with this device type that are already onboarded
             # Check the last two digits of system-id. Find the higest one, and pick next one
             # This number will be used to generate system-ip and vpn0 ips
-            biggest_num = max([int(device.system_ip.split('.')[3]) for device in control_components.filter(device_type=device_type)])
+            biggest_num = max([int(device.system_ip.split('.')[3])
+                               for device in control_components.filter(device_type=device_type)])
             if len(str(biggest_num)) > 2:
                 # Shorten to two digits
                 biggest_num = int(str(biggest_num)[1:3])
             # Find the position of the right most controller value
-            next_node_x_position = max([node.x for node in lab.nodes() if node.node_definition in ['cat-sdwan-manager', 'cat-sdwan-validator', 'cat-sdwan-controller']])
-            next_node_y_position = max([node.y for node in lab.nodes() if node.node_definition in ['cat-sdwan-manager', 'cat-sdwan-validator', 'cat-sdwan-controller']])
+            next_node_x_position = max([node.x for node in lab.nodes() if node.node_definition in
+                                        ['cat-sdwan-manager', 'cat-sdwan-validator', 'cat-sdwan-controller']])
+            next_node_y_position = max([node.y for node in lab.nodes() if node.node_definition in
+                                        ['cat-sdwan-manager', 'cat-sdwan-validator', 'cat-sdwan-controller']])
 
             new_nodes_nums = []
             for i in range(1, number_of_devices + 1):
@@ -141,9 +144,9 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                 bootstrap_template = env.get_template(f'{cml_node_type.split("-")[2]}-cloud-init.j2')
                 # note we give manager/controller/validator_num parameters, but depending on device_type,
                 # only one will be used in the bootstrap_template
-                bootstrap_config = bootstrap_template.render(root_ca=ca_chain, org_name=org_name, validator_fqdn=validator_fqdn,
-                                                             manager_num=next_num_str, controller_num=next_num_str,
-                                                             validator_num=next_num_str)
+                bootstrap_config = bootstrap_template.render(root_ca=ca_chain, org_name=org_name,
+                                                             validator_fqdn=validator_fqdn, manager_num=next_num_str,
+                                                             controller_num=next_num_str, validator_num=next_num_str)
                 label = f'{cml_node_type.split("-")[2].capitalize()}{next_num_str}'
                 next_node_x_position += 120
                 # Create a node in CML
@@ -182,7 +185,8 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
             nodes_vpn0_ips = [vpn0_ip_prefix[device_type] + next_num_str for next_num_str in new_nodes_nums]
             with ThreadPoolExecutor() as executor:
                 # Make sure you can ping the devices before attemping to add to the SD-WAN Manager
-                ping_node_partial = partial(ping_node, manager_session=manager_session, manager_system_ip=manager_system_ip)
+                ping_node_partial = partial(ping_node, manager_session=manager_session,
+                                            manager_system_ip=manager_system_ip)
                 list(executor.map(ping_node_partial, nodes_vpn0_ips))
                 executor.shutdown(wait=True)
 
@@ -233,18 +237,20 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
             # Find all devices with this device type that are already onboarded
             # Check the last octet of system-id. Find the higest one, and pick next one
             # This number will be used to generate system-ip and vpn0 ips
-            biggest_num = max([int(device.system_ip.split('.')[3]) for device in device_list if device.system_ip], default=0)
+            biggest_num = max([int(device.system_ip.split('.')[3])
+                               for device in device_list if device.system_ip], default=0)
 
             # Find the position of the right most control component value
             next_node_x_position = max([node.x for node in lab.nodes() if node.y == 320], default=-400)
 
-            free_uuids = [device.uuid for device in device_list.filter(device_model='vedge-C8000V', cert_install_status=None)]
+            free_uuids = [device.uuid for device in device_list.filter(device_model='vedge-C8000V',
+                                                                       cert_install_status=None)]
 
             new_nodes_nums = []
             for i in range(1, number_of_devices + 1):
                 new_nodes_nums.append(f'{biggest_num + i}')
 
-            if edge_config_type == 1:  # workaround for https://github.com/CiscoDevNet/sastre/issues/12 and https://github.com/CiscoDevNet/sastre/pull/13
+            if edge_config_type == 1:  # workaround for https://github.com/CiscoDevNet/sastre/issues/12 and .../13
                 log.info('Attaching new routers to device template...')
                 track_progress(log, 'Attaching new routers to device template...')
                 device_templates = manager_session.get('dataservice/template/device').json()['data']
@@ -274,7 +280,8 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                         'csv-host-name': f'Edge{next_num_str}',
                         '/1/GigabitEthernet3/interface/ip/address': f'192.168.{next_num_str}.1/24',
                         '/1/GigabitEthernet3//dhcp-server/address-pool': f'192.168.{next_num_str}.0/24',
-                        '/1/GigabitEthernet3//dhcp-server/exclude': f'192.168.{next_num_str}.1-192.168.{next_num_str}.99',
+                        '/1/GigabitEthernet3//dhcp-server/exclude':
+                            f'192.168.{next_num_str}.1-192.168.{next_num_str}.99',
                         '/1/GigabitEthernet3//dhcp-server/options/default-gateway': f'192.168.{next_num_str}.1',
                         '/1/GigabitEthernet3//dhcp-server/options/dns-servers': f'192.168.{next_num_str}.1',
                         '/0/GigabitEthernet2/interface/ip/address': f'172.16.2.{next_num_str}/24',
@@ -286,16 +293,19 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                     })
                     increment_chassis += 1
 
-                task_id = manager_session.post('dataservice/template/device/config/attachfeature', json=attach_payload).json()['id']
+                task_id = manager_session.post('dataservice/template/device/config/attachfeature',
+                                               json=attach_payload).json()['id']
                 success_statuses = [OperationStatus.SUCCESS, OperationStatus.SUCCESS_SCHEDULED]
                 success_statuses_ids = [OperationStatusId.SUCCESS, OperationStatusId.SUCCESS_SCHEDULED]
-                Task(manager_session, task_id).wait_for_completed(success_statuses=success_statuses, success_statuses_ids=success_statuses_ids)
+                Task(manager_session, task_id).wait_for_completed(success_statuses=success_statuses,
+                                                                  success_statuses_ids=success_statuses_ids)
             else:
                 track_progress(log, 'Attaching new routers to configuration group...')
                 configuration_group = manager_session.endpoints.configuration_group
                 # Find the configuration group ID for basic configuration group
                 # Find the template ID for basic template
-                config_group_id = [cfg_gr['id'] for cfg_gr in manager_session.get('dataservice/v1/config-group').json() if cfg_gr['name'] == 'edge_basic'][0]
+                config_group_id = [cfg_gr['id'] for cfg_gr in manager_session.get('dataservice/v1/config-group').json()
+                                   if cfg_gr['name'] == 'edge_basic'][0]
 
                 increment_chassis = 0
                 new_routers_uuids = {}
@@ -325,18 +335,21 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                 # Associate devices with config group
                 configuration_group.associate(config_group_id, associate_payload)
                 # Fill variables
-                manager_session.put(f'dataservice/v1/config-group/{config_group_id}/device/variables', json.dumps(variables_payload))
+                manager_session.put(f'dataservice/v1/config-group/{config_group_id}/device/variables',
+                                    json.dumps(variables_payload))
                 # Deploy configuration group
                 task_id = configuration_group.deploy(config_group_id, associate_payload).parentTaskId
                 success_statuses = [OperationStatus.SUCCESS, OperationStatus.SUCCESS_SCHEDULED]
                 success_statuses_ids = [OperationStatusId.SUCCESS, OperationStatusId.SUCCESS_SCHEDULED]
-                Task(manager_session, task_id).wait_for_completed(success_statuses=success_statuses, success_statuses_ids=success_statuses_ids)
+                Task(manager_session, task_id).wait_for_completed(success_statuses=success_statuses,
+                                                                  success_statuses_ids=success_statuses_ids)
 
             track_progress(log, 'Preparing bootstrap configuration for new routers...')
             bootstrap_configs = {}
             for next_num_str, uuid in new_routers_uuids.items():
                 # Generate bootstrap configuration
-                bootstrap_configs[next_num_str] = device_inventory.generate_bootstrap_configuration(uuid).bootstrap_config
+                bootstrap_configs[next_num_str] = \
+                    device_inventory.generate_bootstrap_configuration(uuid).bootstrap_config
             log.info('Adding devices to topology...')
             new_nodes = []
             i = 0
@@ -381,14 +394,18 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
             # Find all devices with this device type that are already onboarded
             # Check the last octet of system-id. Find the higest one, and pick next one
             # This number will be used to generate system-ip and vpn0 ips
-            biggest_num = max([int(device.system_ip.split('.')[3]) for device in device_list if device.system_ip], default=0)
+            biggest_num = max([int(device.system_ip.split('.')[3])
+                               for device in device_list if device.system_ip], default=0)
 
             # Find the position of the right most controller value
             next_node_x_position = max([node.x for node in lab.nodes() if node.y == 320], default=-400)
 
-            free_uuids = [device.uuid for device in device_list.filter(device_model='vedge-C8000V-SD-ROUTING', cert_install_status=None)]
+            free_uuids = [device.uuid for device in device_list.filter(device_model='vedge-C8000V-SD-ROUTING',
+                                                                       cert_install_status=None)]
 
-            uuid_to_token = {device.uuid: device.serial_number for device in device_list.filter(device_model='vedge-C8000V-SD-ROUTING', cert_install_status=None)}
+            uuid_to_token = {device.uuid: device.serial_number
+                             for device in device_list.filter(device_model='vedge-C8000V-SD-ROUTING',
+                                                              cert_install_status=None)}
 
             new_nodes_nums = []
             for i in range(1, number_of_devices + 1):
@@ -404,9 +421,10 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                 token = uuid_to_token[uuid]
                 new_routers_uuids[next_num_str] = uuid
 
-                bootstrap_template = env.get_template(f'sdrouting-cloud-init.j2')
-                bootstrap_config = bootstrap_template.render(root_ca=ca_chain, org_name=org_name, validator_fqdn=validator_fqdn,
-                                                             next_num_str=next_num_str, uuid=uuid, token=token)
+                bootstrap_template = env.get_template('sdrouting-cloud-init.j2')
+                bootstrap_config = bootstrap_template.render(root_ca=ca_chain, org_name=org_name,
+                                                             validator_fqdn=validator_fqdn, next_num_str=next_num_str,
+                                                             uuid=uuid, token=token)
                 bootstrap_configs[next_num_str] = bootstrap_config
                 increment_chassis += 1
 
