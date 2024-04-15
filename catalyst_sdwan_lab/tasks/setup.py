@@ -7,10 +7,13 @@
 import json
 import os
 import re
-from httpx import HTTPStatusError
 from os.path import join
+
+from httpx import HTTPStatusError
 from ruamel.yaml import YAML
-from .utils import CML_NODES_DEFINITION_DIR, SOFTWARE_IMAGES_DIR, setup_logging, track_progress
+
+from .utils import (CML_NODES_DEFINITION_DIR, SOFTWARE_IMAGES_DIR,
+                    setup_logging, track_progress)
 
 
 def upload_image_and_create_definition(log, cml, existing_image_definitions, node_type, software_version,
