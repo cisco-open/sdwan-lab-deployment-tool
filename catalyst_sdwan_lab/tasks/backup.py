@@ -7,21 +7,21 @@
 import datetime
 import json
 import os
-from os.path import join
 import re
 import sys
+from os.path import join
 from typing import List
 
-from jinja2 import Environment, FileSystemLoader
-from ruamel.yaml import YAML
 import unicon.core.errors
-
 from catalystwan.session import create_manager_session
 from cisco_sdwan.base.rest_api import Rest
-from cisco_sdwan.tasks.implementation import TaskBackup, BackupArgs
+from cisco_sdwan.tasks.implementation import BackupArgs, TaskBackup
+from jinja2 import Environment, FileSystemLoader
+from ruamel.yaml import YAML
 from virl2_client.models.cl_pyats import ClPyats
 
-from .utils import CML_BACKUP_LAB_DEFINITION_DIR, load_certificate_details, setup_logging, track_progress
+from .utils import (CML_BACKUP_LAB_DEFINITION_DIR, load_certificate_details,
+                    setup_logging, track_progress)
 
 
 def update_associated_parcel(api, path, parcel):

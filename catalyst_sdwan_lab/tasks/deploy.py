@@ -8,18 +8,19 @@ import datetime
 import re
 from os.path import join
 
+from catalystwan.endpoints.configuration_device_inventory import \
+    SerialFilePayload
 from jinja2 import Environment, FileSystemLoader
 from passlib.hash import sha512_crypt
 
-from catalystwan.endpoints.configuration_device_inventory import SerialFilePayload
-
-from .utils import (CML_DEPLOY_LAB_DEFINITION_DIR, DATA_DIR, MANAGER_CONFIGS_DIR, ORG_NAME,
-                    VALIDATOR_FQDN, attach_basic_controller_template,
-                    check_manager_ip_is_free, configure_manager_basic_settings,
+from .utils import (CML_DEPLOY_LAB_DEFINITION_DIR, DATA_DIR,
+                    MANAGER_CONFIGS_DIR, ORG_NAME, VALIDATOR_FQDN,
+                    attach_basic_controller_template, check_manager_ip_is_free,
+                    configure_manager_basic_settings,
                     get_cml_sdwan_image_definition, get_sdwan_lab_parameters,
                     load_certificate_details, onboard_control_components,
-                    restore_manager_configuration, setup_logging, track_progress,
-                    wait_for_manager_session)
+                    restore_manager_configuration, setup_logging,
+                    track_progress, wait_for_manager_session)
 
 
 def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, manager_password,

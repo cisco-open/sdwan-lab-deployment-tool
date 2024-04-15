@@ -16,20 +16,23 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from os.path import abspath, dirname, exists, join
 
-from OpenSSL import crypto
-from requests.exceptions import ConnectionError
-
-from catalystwan.api.task_status_api import Task, OperationStatus, OperationStatusId
+from catalystwan.api.task_status_api import (OperationStatus,
+                                             OperationStatusId, Task)
 from catalystwan.endpoints.certificate_management_device import TargetDevice
-from catalystwan.endpoints.configuration_device_inventory import DeviceCreationPayload
-from catalystwan.endpoints.configuration_settings import Certificate, CloudX, DataStreamIPTypeEnum, Device, ModeEnum, \
-    Organization, VManageDataStream
+from catalystwan.endpoints.configuration_device_inventory import \
+    DeviceCreationPayload
+from catalystwan.endpoints.configuration_settings import (Certificate, CloudX,
+                                                          DataStreamIPTypeEnum,
+                                                          Device, ModeEnum,
+                                                          Organization,
+                                                          VManageDataStream)
 from catalystwan.exceptions import ManagerRequestException
 from catalystwan.session import create_manager_session
 from catalystwan.vmanage_auth import UnauthorizedAccessError
 from cisco_sdwan.base.rest_api import Rest
-from cisco_sdwan.tasks.implementation import TaskRestore, RestoreArgs
-
+from cisco_sdwan.tasks.implementation import RestoreArgs, TaskRestore
+from OpenSSL import crypto
+from requests.exceptions import ConnectionError
 
 # Base directory where utils.py is located
 BASE_DIR = dirname(dirname(abspath(__file__)))

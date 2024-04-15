@@ -11,18 +11,21 @@ import os
 import re
 import sys
 from os.path import join
+from typing import List
 
-from catalystwan.endpoints.configuration_device_inventory import SerialFilePayload
+from catalystwan.endpoints.configuration_device_inventory import \
+    SerialFilePayload
 from cisco_sdwan.base.rest_api import Rest
 from passlib.hash import sha512_crypt
 from ruamel.yaml import YAML
-from typing import List
 
 from . import delete
-from .utils import (DATA_DIR, check_manager_ip_is_free, configure_manager_basic_settings,
-                    get_sdwan_lab_parameters, load_certificate_details, onboard_control_components,
-                    restore_manager_configuration, setup_logging, track_progress,
-                    wait_for_manager_session, wait_for_wan_edge_onboaring)
+from .utils import (DATA_DIR, check_manager_ip_is_free,
+                    configure_manager_basic_settings, get_sdwan_lab_parameters,
+                    load_certificate_details, onboard_control_components,
+                    restore_manager_configuration, setup_logging,
+                    track_progress, wait_for_manager_session,
+                    wait_for_wan_edge_onboaring)
 
 
 def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, manager_password,

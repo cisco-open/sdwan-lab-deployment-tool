@@ -14,15 +14,15 @@ This module implements the command line top-level parser and task dispatcher
 import argparse
 import logging
 import sys
-import urllib3
-from urllib3.exceptions import InsecureRequestWarning
 
-from cisco_sdwan.tasks.utils import EnvVar, non_empty_type, PromptArg
+import urllib3
+from cisco_sdwan.tasks.utils import EnvVar, PromptArg, non_empty_type
+from urllib3.exceptions import InsecureRequestWarning
 from virl2_client import ClientLibrary
 
 import catalyst_sdwan_lab
-from .tasks import add, backup, delete, deploy, restore, setup
 
+from .tasks import add, backup, delete, deploy, restore, setup
 
 # Setup logging
 log = logging.getLogger(__name__)

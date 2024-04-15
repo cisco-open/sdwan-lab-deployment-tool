@@ -11,14 +11,17 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 
+from catalystwan.api.task_status_api import (OperationStatus,
+                                             OperationStatusId, Task)
+from catalystwan.endpoints.configuration_group import (
+    ConfigGroupAssociatePayload, DeviceId)
+from catalystwan.endpoints.troubleshooting_tools.device_connectivity import \
+    NPingRequest
+from catalystwan.session import create_manager_session
 from jinja2 import Environment, FileSystemLoader
 
-from catalystwan.api.task_status_api import Task, OperationStatus, OperationStatusId
-from catalystwan.endpoints.configuration_group import ConfigGroupAssociatePayload, DeviceId
-from catalystwan.endpoints.troubleshooting_tools.device_connectivity import NPingRequest
-from catalystwan.session import create_manager_session
-
-from .utils import (CML_DEPLOY_LAB_DEFINITION_DIR, attach_basic_controller_template,
+from .utils import (CML_DEPLOY_LAB_DEFINITION_DIR,
+                    attach_basic_controller_template,
                     get_cml_sdwan_image_definition, load_certificate_details,
                     onboard_control_components, setup_logging, track_progress,
                     wait_for_wan_edge_onboaring)
