@@ -1,3 +1,9 @@
+# Catalyst SD-WAN Lab 2.0.6 [Apr 15, 2024]
+
+#### Fixes:
+
+- Updated required packages
+
 # Catalyst SD-WAN Lab 2.0.5 [Mar 28, 2024]
 
 #### New Features:
