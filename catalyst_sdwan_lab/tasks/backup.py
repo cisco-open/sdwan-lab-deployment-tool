@@ -30,8 +30,8 @@ from .utils import (
 
 
 def update_associated_parcel(
-    api: Rest, path: str, parcel: Dict[str, Any[str, List, Dict]]
-) -> Dict[str, Any[str, List, Dict]]:
+    api: Rest, path: str, parcel: Dict[str, Any]
+) -> Dict[str, Any]:
     uuid_pattern = (
         r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
     )
