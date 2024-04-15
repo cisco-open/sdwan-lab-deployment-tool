@@ -1,0 +1,151 @@
+{
+  "deviceType": [
+    "vedge-C8000V"
+  ],
+  "templateType": "cisco_dhcp_server",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "vsdwan",
+  "editedTemplateDefinition": {
+    "address-pool": {
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipValue": "",
+      "vipVariableName": "vpn1_gi3_dhcp_pool"
+    },
+    "exclude": {
+      "vipObjectType": "list",
+      "vipType": "variableName",
+      "vipValue": "",
+      "vipVariableName": "vpn1_gi3_dhcp_address_exclude"
+    },
+    "lease-time": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 86400,
+      "vipVariableName": "lease_time"
+    },
+    "options": {
+      "interface-mtu": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_interface_mtu"
+      },
+      "domain-name": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_domain_name"
+      },
+      "default-gateway": {
+        "vipObjectType": "object",
+        "vipType": "variableName",
+        "vipValue": "",
+        "vipVariableName": "vpn1_gi3_dhcp_default_gateway"
+      },
+      "dns-servers": {
+        "vipObjectType": "list",
+        "vipType": "variableName",
+        "vipValue": "",
+        "vipVariableName": "vpn1_gi3_dhcp_dns"
+      },
+      "tftp-servers": {
+        "vipObjectType": "list",
+        "vipType": "ignore",
+        "vipVariableName": "tftp-server"
+      },
+      "option-code": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "code"
+        ]
+      }
+    },
+    "static-lease": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "mac-address"
+      ]
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "address-pool": {
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipValue": "",
+      "vipVariableName": "vpn1_gi3_dhcp_pool"
+    },
+    "exclude": {
+      "vipObjectType": "list",
+      "vipType": "variableName",
+      "vipValue": "",
+      "vipVariableName": "vpn1_gi3_dhcp_address_exclude"
+    },
+    "lease-time": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 86400,
+      "vipVariableName": "lease_time"
+    },
+    "options": {
+      "interface-mtu": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_interface_mtu"
+      },
+      "domain-name": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_domain_name"
+      },
+      "default-gateway": {
+        "vipObjectType": "object",
+        "vipType": "variableName",
+        "vipValue": "",
+        "vipVariableName": "vpn1_gi3_dhcp_default_gateway"
+      },
+      "dns-servers": {
+        "vipObjectType": "list",
+        "vipType": "variableName",
+        "vipValue": "",
+        "vipVariableName": "vpn1_gi3_dhcp_dns"
+      },
+      "tftp-servers": {
+        "vipObjectType": "list",
+        "vipType": "ignore",
+        "vipVariableName": "tftp-server"
+      },
+      "option-code": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "code"
+        ]
+      }
+    },
+    "static-lease": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "mac-address"
+      ]
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "c030ff60-2607-4079-927d-994eab189879",
+  "createdOn": 1706357989764,
+  "@rid": 3153,
+  "factoryDefault": false,
+  "feature": "vmanage-default",
+  "templateName": "edge_basic_vpn1_gi3_dhcp",
+  "createdBy": "vsdwan",
+  "devicesAttached": 0,
+  "templateDescription": "Do not modify!",
+  "lastUpdatedOn": 1706357989764
+}

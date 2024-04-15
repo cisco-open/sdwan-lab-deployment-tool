@@ -1,0 +1,249 @@
+{
+  "deviceType": [
+    "vedge-1000",
+    "vedge-2000",
+    "vedge-cloud",
+    "vedge-5000",
+    "vedge-ISR1100-6G",
+    "vedge-100-B",
+    "vedge-ISR1100-4G",
+    "vedge-100",
+    "vedge-ISR1100-4GLTE",
+    "vedge-100-WM",
+    "vedge-100-M",
+    "vedge-ISR1100X-6G",
+    "vedge-ISR1100X-4G"
+  ],
+  "templateType": "system-vedge",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "clock": {
+      "timezone": {
+        "vipObjectType": "object",
+        "vipValue": "America/Los_Angeles",
+        "vipType": "ignore"
+      }
+    },
+    "gps-location": {
+      "latitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "longitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "timer": {
+      "dns-cache-timeout": {
+        "vipObjectType": "object",
+        "vipValue": 30,
+        "vipType": "ignore"
+      }
+    },
+    "location": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "system-tunnel-mtu": {
+      "vipObjectType": "object",
+      "vipValue": 1024,
+      "vipType": "ignore"
+    },
+    "track-transport": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "port-offset": {
+      "vipObjectType": "object",
+      "vipValue": 0,
+      "vipType": "ignore"
+    },
+    "port-hop": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "control-session-pps": {
+      "vipObjectType": "object",
+      "vipValue": 300,
+      "vipType": "ignore"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "device-groups": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "site-id": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "system-ip": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "host-name": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "console-baud-rate": {
+      "vipObjectType": "object",
+      "vipValue": "115200",
+      "vipType": "ignore"
+    },
+    "max-controllers": {
+      "vipObjectType": "object",
+      "vipValue": 2,
+      "vipType": "ignore"
+    },
+    "usb-controller": {
+      "vipObjectType": "object",
+      "vipValue": "false",
+      "vipType": "ignore"
+    },
+    "track-default-gateway": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "host-policer-pps": {
+      "vipObjectType": "object",
+      "vipValue": 5000,
+      "vipType": "ignore"
+    },
+    "icmp-error-pps": {
+      "vipObjectType": "object",
+      "vipValue": 100,
+      "vipType": "ignore"
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "clock": {
+      "timezone": {
+        "vipObjectType": "object",
+        "vipValue": "America/Los_Angeles",
+        "vipType": "ignore"
+      }
+    },
+    "gps-location": {
+      "latitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "longitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "timer": {
+      "dns-cache-timeout": {
+        "vipObjectType": "object",
+        "vipValue": 30,
+        "vipType": "ignore"
+      }
+    },
+    "location": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "system-tunnel-mtu": {
+      "vipObjectType": "object",
+      "vipValue": 1024,
+      "vipType": "ignore"
+    },
+    "track-transport": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "port-offset": {
+      "vipObjectType": "object",
+      "vipValue": 0,
+      "vipType": "ignore"
+    },
+    "port-hop": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "control-session-pps": {
+      "vipObjectType": "object",
+      "vipValue": 300,
+      "vipType": "ignore"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "device-groups": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "site-id": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "system-ip": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "host-name": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "console-baud-rate": {
+      "vipObjectType": "object",
+      "vipValue": "115200",
+      "vipType": "ignore"
+    },
+    "max-controllers": {
+      "vipObjectType": "object",
+      "vipValue": 2,
+      "vipType": "ignore"
+    },
+    "usb-controller": {
+      "vipObjectType": "object",
+      "vipValue": "false",
+      "vipType": "ignore"
+    },
+    "track-default-gateway": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "host-policer-pps": {
+      "vipObjectType": "object",
+      "vipValue": 5000,
+      "vipType": "ignore"
+    },
+    "icmp-error-pps": {
+      "vipObjectType": "object",
+      "vipValue": 100,
+      "vipType": "ignore"
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "9140a5ea-d27c-4aae-bfce-6430b30e927f",
+  "createdOn": 1706313422614,
+  "@rid": 307,
+  "feature": "vmanage-default",
+  "factoryDefault": true,
+  "createdBy": "system",
+  "templateName": "Factory_Default_vEdge_System_Template",
+  "devicesAttached": 0,
+  "templateDescription": "Default System template settings for vEdge",
+  "lastUpdatedOn": 1706313422614
+}

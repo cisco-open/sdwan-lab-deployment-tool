@@ -1,0 +1,306 @@
+{
+  "deviceType": [
+    "vedge-C8000V",
+    "vedge-C1111-8PLTELA",
+    "vedge-CSR-1000v",
+    "vedge-ISR-4331"
+  ],
+  "templateType": "cisco_vpn",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "vpn-id": {
+      "vipValue": 0,
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "name": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "dns": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "dns-addr"
+      ]
+    },
+    "dns-ipv6": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "dns-addr"
+      ]
+    },
+    "ecmp-hash-key": {
+      "layer4": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "host": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "ip": {
+      "route": {
+        "vipValue": [
+          {
+            "prefix": {
+              "vipValue": "0.0.0.0/0",
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipVariableName": ""
+            },
+            "next-hop": {
+              "vipValue": [
+                {
+                  "address": {
+                    "vipValue": "10.1.15.13",
+                    "vipObjectType": "object",
+                    "vipType": "constant",
+                    "vipVariableName": ""
+                  },
+                  "distance": {
+                    "vipValue": "",
+                    "vipObjectType": "object",
+                    "vipType": "ignore"
+                  },
+                  "priority-order": [
+                    "address",
+                    "distance"
+                  ]
+                }
+              ],
+              "vipObjectType": "tree",
+              "vipType": "constant",
+              "vipPrimaryKey": [
+                "address"
+              ]
+            },
+            "distance": {
+              "vipValue": "",
+              "vipObjectType": "object",
+              "vipType": "ignore"
+            },
+            "priority-order": [
+              "prefix",
+              "next-hop",
+              "null0",
+              "distance",
+              "vpn"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipType": "constant",
+        "vipPrimaryKey": [
+          "prefix"
+        ]
+      }
+    },
+    "ipv6": {
+      "route": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "prefix"
+        ]
+      }
+    },
+    "omp": {
+      "advertise": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      },
+      "ipv6-advertise": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      }
+    },
+    "nat64": {
+      "v4": {
+        "pool": {
+          "vipValue": [],
+          "vipObjectType": "tree",
+          "vipType": "ignore",
+          "vipPrimaryKey": [
+            "name"
+          ]
+        }
+      }
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "vpn-id": {
+      "vipValue": 0,
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "name": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "dns": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "dns-addr"
+      ]
+    },
+    "dns-ipv6": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "dns-addr"
+      ]
+    },
+    "ecmp-hash-key": {
+      "layer4": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "host": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "ip": {
+      "route": {
+        "vipValue": [
+          {
+            "prefix": {
+              "vipValue": "0.0.0.0/0",
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipVariableName": ""
+            },
+            "next-hop": {
+              "vipValue": [
+                {
+                  "address": {
+                    "vipValue": "10.1.15.13",
+                    "vipObjectType": "object",
+                    "vipType": "constant",
+                    "vipVariableName": ""
+                  },
+                  "distance": {
+                    "vipValue": "",
+                    "vipObjectType": "object",
+                    "vipType": "ignore"
+                  },
+                  "priority-order": [
+                    "address",
+                    "distance"
+                  ]
+                }
+              ],
+              "vipObjectType": "tree",
+              "vipType": "constant",
+              "vipPrimaryKey": [
+                "address"
+              ]
+            },
+            "distance": {
+              "vipValue": "",
+              "vipObjectType": "object",
+              "vipType": "ignore"
+            },
+            "priority-order": [
+              "prefix",
+              "next-hop",
+              "null0",
+              "distance",
+              "vpn"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipType": "constant",
+        "vipPrimaryKey": [
+          "prefix"
+        ]
+      }
+    },
+    "ipv6": {
+      "route": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "prefix"
+        ]
+      }
+    },
+    "omp": {
+      "advertise": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      },
+      "ipv6-advertise": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      }
+    },
+    "nat64": {
+      "v4": {
+        "pool": {
+          "vipValue": [],
+          "vipObjectType": "tree",
+          "vipType": "ignore",
+          "vipPrimaryKey": [
+            "name"
+          ]
+        }
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 3,
+  "templateId": "ec51bc5e-f15d-41f5-bc79-9ad0815df4de",
+  "createdOn": 1706357786508,
+  "@rid": 1452,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_VPN_0_Cisco_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Factory Default template for VPN 0 cisco template",
+  "lastUpdatedOn": 1706357786508
+}

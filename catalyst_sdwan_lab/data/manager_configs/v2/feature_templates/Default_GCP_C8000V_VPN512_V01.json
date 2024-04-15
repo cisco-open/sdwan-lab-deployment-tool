@@ -1,0 +1,265 @@
+{
+  "deviceType": [
+    "vedge-C8000V"
+  ],
+  "templateType": "cisco_vpn",
+  "templateMinVersion": "20.4.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 512
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "Management",
+      "vipVariableName": "vpn_name"
+    },
+    "ecmp-hash-key": {
+      "layer4": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false",
+        "vipVariableName": "vpn_layer4"
+      }
+    },
+    "nat64-global": {
+      "prefix": {
+        "stateful": {}
+      }
+    },
+    "nat64": {
+      "v4": {
+        "pool": {
+          "vipType": "ignore",
+          "vipValue": [],
+          "vipObjectType": "tree",
+          "vipPrimaryKey": [
+            "name"
+          ]
+        }
+      }
+    },
+    "nat": {
+      "natpool": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "name"
+        ]
+      },
+      "port-forward": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-port",
+          "translate-port"
+        ]
+      },
+      "static": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-ip",
+          "translate-ip"
+        ]
+      }
+    },
+    "route-import": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "route-export": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "service": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "svc-type"
+      ]
+    },
+    "ip": {
+      "gre-route": {},
+      "ipsec-route": {},
+      "service-route": {}
+    },
+    "ipv6": {},
+    "omp": {
+      "advertise": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      },
+      "ipv6-advertise": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      }
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 512
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "Management",
+      "vipVariableName": "vpn_name"
+    },
+    "ecmp-hash-key": {
+      "layer4": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false",
+        "vipVariableName": "vpn_layer4"
+      }
+    },
+    "nat64-global": {
+      "prefix": {
+        "stateful": {}
+      }
+    },
+    "nat64": {
+      "v4": {
+        "pool": {
+          "vipType": "ignore",
+          "vipValue": [],
+          "vipObjectType": "tree",
+          "vipPrimaryKey": [
+            "name"
+          ]
+        }
+      }
+    },
+    "nat": {
+      "natpool": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "name"
+        ]
+      },
+      "port-forward": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-port",
+          "translate-port"
+        ]
+      },
+      "static": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-ip",
+          "translate-ip"
+        ]
+      }
+    },
+    "route-import": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "route-export": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "service": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "svc-type"
+      ]
+    },
+    "ip": {
+      "gre-route": {},
+      "ipsec-route": {},
+      "service-route": {}
+    },
+    "ipv6": {},
+    "omp": {
+      "advertise": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      },
+      "ipv6-advertise": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "1a013bb0-03fd-478c-bf2c-51adab5be3c9",
+  "createdOn": 1706357755676,
+  "@rid": 1367,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_GCP_C8000V_VPN512_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default VPN 512 template for GCP C8000V",
+  "lastUpdatedOn": 1706357755676
+}

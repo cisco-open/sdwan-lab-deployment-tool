@@ -1,0 +1,55 @@
+Content-Type: multipart/mixed; boundary="==BOUNDARY=="
+MIME-Version: 1.0
+
+--==BOUNDARY==
+Content-Type: text/cloud-config; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="cloud-config"
+
+#cloud-config
+vinitparam:
+ - uuid : {{ uuid }}
+ - otp : {{ token }}
+ - vbond : {{ validator_fqdn }}
+ - org : {{ org_name }}
+ - SD-Routing : true
+ - wanif : GigabitEthernet1
+ - rcc : true
+ca-certs:
+  remove-defaults: false
+  trusted:
+  - |
+{% filter indent(width=3, first=True) %}
+{{ root_ca }}
+{% endfilter %}
+
+--==BOUNDARY==
+Content-Type: text/cloud-boothook; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="config-{{ uuid }}.txt"
+
+#cloud-boothook
+config
+  sd-routing
+   system-ip         10.0.0.{{ next_num_str }}
+   site-id           {{ next_num_str }}
+   organization-name {{ org_name }}
+   vbond port 12346
+   vbond name {{ validator_fqdn }}
+   wan-interface GigabitEthernet1
+   is-vmanaged       true
+  !
+  hostname SD-Edge{{ next_num_str }}
+  username admin privilege 15 secret 9 $9$AgTQlMtscARkok$iVH3WejQXauZgaObxFgBQlLjdz9sNSeBGQE1AAw/6j2
+  ip route 0.0.0.0 0.0.0.0 172.16.1.254
+  ip name-server 172.16.1.254
+  interface GigabitEthernet1
+   ip address 172.16.1.{{ next_num_str }} 255.255.255.0
+   no shutdown
+  !
+ !
+!
+
+--===============5751899709292676174==--

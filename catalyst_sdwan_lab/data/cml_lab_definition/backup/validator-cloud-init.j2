@@ -1,0 +1,18 @@
+#cloud-config
+write_files:
+- path: /etc/default/personality
+  content: "vedge\n"
+- path: /etc/default/inited
+  content: "1\n"
+- path: /usr/share/viptela/symantec-root-ca.crt
+- path: /usr/share/viptela/root-ca.crt
+  content: |
+{% filter indent(width=4, first=True) %}
+{{ root_ca }}
+{% endfilter %}
+
+- path: /etc/confd/init/zcloud.xml
+  content: |
+{% filter indent(width=4, first=True) %}
+{{ config }}
+{% endfilter %}

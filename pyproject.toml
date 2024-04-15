@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "catalyst-sdwan-lab"
+version = "2.0.5"
+description = "Catalyst SD-WAN Lab Deployment Tool - Automation Tool for managing Cisco Catalyst SD-WAN labs inside Cisco Modelling Labs"
+license = "BSD-3-Clause"
+authors = ["Tomasz Zarski <tzarski@cisco.com>"]
+readme = "README.md"
+repository = "https://github.com/cisco-open/sdwan-lab-deployment-tool"
+keywords = ["cisco", "catalyst", "sdwan", "lab"]
+
+[tool.poetry.scripts]
+sdwan-lab = "catalyst_sdwan_lab.__main__:main"
+csdwan = "catalyst_sdwan_lab.__main__:main"
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+virl2-client = "^2.6.0"
+requests = "^2.28.1"
+pyopenssl = "^24.0.0"
+pyats = "^23.1"
+passlib = "^1.7.4"
+jinja2 = "^3.1.3"
+cisco-sdwan = "^1.23"
+ruamel-yaml = "^0.17.21"
+urllib3 = "^1.26.18"
+catalystwan = "^0.31.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

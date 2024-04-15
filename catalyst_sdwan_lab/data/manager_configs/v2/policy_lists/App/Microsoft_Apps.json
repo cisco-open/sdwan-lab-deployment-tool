@@ -1,0 +1,109 @@
+{
+  "listId": "a678e7b3-8ac3-47fb-af97-591cb8b0f819",
+  "name": "Microsoft_Apps",
+  "type": "app",
+  "description": "Microsoft Applications List",
+  "entries": [
+    {
+      "app": "bing"
+    },
+    {
+      "app": "hockeyapp"
+    },
+    {
+      "app": "live_hotmail"
+    },
+    {
+      "app": "lync"
+    },
+    {
+      "app": "lync_online"
+    },
+    {
+      "app": "ms-services"
+    },
+    {
+      "app": "ms_translator"
+    },
+    {
+      "app": "ms-office-365"
+    },
+    {
+      "app": "share-point"
+    },
+    {
+      "app": "skydrive"
+    },
+    {
+      "app": "skype"
+    },
+    {
+      "app": "windows_azure"
+    },
+    {
+      "app": "windows-azure"
+    },
+    {
+      "app": "windows_update"
+    },
+    {
+      "app": "windows_marketplace"
+    },
+    {
+      "app": "windowslive"
+    },
+    {
+      "app": "windowslivespace"
+    },
+    {
+      "app": "windowsmedia"
+    },
+    {
+      "app": "xbox"
+    },
+    {
+      "app": "xbox_music"
+    },
+    {
+      "app": "xbox_video"
+    },
+    {
+      "app": "xboxlive"
+    },
+    {
+      "app": "xboxlive_marketplace"
+    },
+    {
+      "app": "word_online"
+    },
+    {
+      "app": "powerpoint_online"
+    },
+    {
+      "app": "ms-lync"
+    },
+    {
+      "app": "ms-lync-audio"
+    },
+    {
+      "app": "ms-lync-control"
+    },
+    {
+      "app": "ms-lync-video"
+    },
+    {
+      "app": "ms-update"
+    },
+    {
+      "app": "outlook-web-service"
+    }
+  ],
+  "lastUpdated": 1706357793583,
+  "owner": "system",
+  "readOnly": true,
+  "version": "4.2",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

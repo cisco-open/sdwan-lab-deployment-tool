@@ -1,0 +1,13 @@
+[ v3_ext ]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, keyCertSign, cRLSign
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+
+[v3_svr]
+extendedKeyUsage = serverAuth, clientAuth
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+
+[v3_isr]
+keyUsage = digitalSignature, keyEncipherment

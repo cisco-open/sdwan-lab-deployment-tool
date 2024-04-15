@@ -1,0 +1,295 @@
+{
+  "deviceType": [
+    "vedge-1000",
+    "vedge-2000",
+    "vedge-5000",
+    "vedge-ISR1100-6G",
+    "vedge-ISR1100X-6G"
+  ],
+  "templateType": "vpn-vedge-interface",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "if-name": {
+      "vipObjectType": "object",
+      "vipVariableName": "vpn_if_name",
+      "vipType": "constant",
+      "vipValue": "mgmt0"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "ip": {
+      "address": {
+        "vipObjectType": "object",
+        "vipType": "constant",
+        "vipValue": "192.168.1.1/24"
+      }
+    },
+    "dhcp-helper": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "flow-control": {
+      "vipObjectType": "object",
+      "vipValue": "autoneg",
+      "vipType": "ignore"
+    },
+    "clear-dont-fragment": {
+      "vipObjectType": "object",
+      "vipValue": "false",
+      "vipType": "ignore"
+    },
+    "pmtu": {
+      "vipObjectType": "object",
+      "vipValue": "false",
+      "vipType": "ignore"
+    },
+    "mtu": {
+      "vipObjectType": "object",
+      "vipValue": 1500,
+      "vipType": "ignore"
+    },
+    "static-ingress-qos": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tcp-mss-adjust": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "mac-address": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tloc-extension": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "speed": {
+      "vipObjectType": "object",
+      "vipValue": "_empty",
+      "vipType": "ignore"
+    },
+    "duplex": {
+      "vipObjectType": "object",
+      "vipValue": "_empty",
+      "vipType": "ignore"
+    },
+    "shutdown": {
+      "vipObjectType": "object",
+      "vipVariableName": "",
+      "vipValue": "false",
+      "vipType": "constant"
+    },
+    "arp-timeout": {
+      "vipObjectType": "object",
+      "vipValue": 1200,
+      "vipType": "ignore"
+    },
+    "autonegotiate": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "shaping-rate": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "qos-map": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "rewrite-rule": {
+      "rule-name": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "access-list": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "direction"
+      ]
+    },
+    "policer": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "policer-name",
+        "direction"
+      ]
+    },
+    "ipv6": {},
+    "arp": {
+      "ip": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "addr"
+        ]
+      }
+    },
+    "vrrp": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "if-name": {
+      "vipObjectType": "object",
+      "vipVariableName": "vpn_if_name",
+      "vipType": "constant",
+      "vipValue": "mgmt0"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "ip": {
+      "address": {
+        "vipObjectType": "object",
+        "vipType": "constant",
+        "vipValue": "192.168.1.1/24"
+      }
+    },
+    "dhcp-helper": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "flow-control": {
+      "vipObjectType": "object",
+      "vipValue": "autoneg",
+      "vipType": "ignore"
+    },
+    "clear-dont-fragment": {
+      "vipObjectType": "object",
+      "vipValue": "false",
+      "vipType": "ignore"
+    },
+    "pmtu": {
+      "vipObjectType": "object",
+      "vipValue": "false",
+      "vipType": "ignore"
+    },
+    "mtu": {
+      "vipObjectType": "object",
+      "vipValue": 1500,
+      "vipType": "ignore"
+    },
+    "static-ingress-qos": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tcp-mss-adjust": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "mac-address": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tloc-extension": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "speed": {
+      "vipObjectType": "object",
+      "vipValue": "_empty",
+      "vipType": "ignore"
+    },
+    "duplex": {
+      "vipObjectType": "object",
+      "vipValue": "_empty",
+      "vipType": "ignore"
+    },
+    "shutdown": {
+      "vipObjectType": "object",
+      "vipVariableName": "",
+      "vipValue": "false",
+      "vipType": "constant"
+    },
+    "arp-timeout": {
+      "vipObjectType": "object",
+      "vipValue": 1200,
+      "vipType": "ignore"
+    },
+    "autonegotiate": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "shaping-rate": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "qos-map": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "rewrite-rule": {
+      "rule-name": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "access-list": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "direction"
+      ]
+    },
+    "policer": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "policer-name",
+        "direction"
+      ]
+    },
+    "ipv6": {},
+    "arp": {
+      "ip": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "addr"
+        ]
+      }
+    },
+    "vrrp": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 0,
+  "templateId": "ad01e474-f34a-4f4c-b238-0221ba697662",
+  "createdOn": 1706357770083,
+  "@rid": 1412,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_vEdge_Management_Interface",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default Management Interface template settings for vEdge",
+  "lastUpdatedOn": 1706357770083
+}

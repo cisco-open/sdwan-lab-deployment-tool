@@ -1,0 +1,30 @@
+{
+  "profileName": "edge_basic_cli",
+  "lastUpdatedBy": "admin",
+  "@rid": 3186,
+  "profileType": "cli",
+  "solution": "sdwan",
+  "createdBy": "admin",
+  "profileId": "3e3ccb8f-aa40-4fca-a4ad-a93aadc48f75",
+  "lastUpdatedOn": 1706359126683,
+  "description": "Do not modify!",
+  "createdOn": 1706359125404,
+  "associatedProfileParcels": [
+    {
+      "parcelId": "7ecbc8f3-bccd-45ce-9dd9-ec8b2598d21a",
+      "parcelType": "config",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706359126350,
+      "lastUpdatedOn": 1706359126350,
+      "payload": {
+        "name": "edge_basic_cli",
+        "description": "Do not modify!",
+        "data": {
+          "config": "platform console serial"
+        }
+      },
+      "subparcels": []
+    }
+  ]
+}

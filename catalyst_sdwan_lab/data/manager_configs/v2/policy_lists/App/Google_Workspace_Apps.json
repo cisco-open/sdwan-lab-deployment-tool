@@ -1,0 +1,55 @@
+{
+  "listId": "80fb84a5-d4c7-4772-9f68-c6db95f73680",
+  "name": "Google_Workspace_Apps",
+  "type": "app",
+  "description": "Default Google Workspace Applications",
+  "entries": [
+    {
+      "app": "gmail"
+    },
+    {
+      "app": "gmail_basic"
+    },
+    {
+      "app": "gmail_chat"
+    },
+    {
+      "app": "gmail_drive"
+    },
+    {
+      "app": "gmail_mobile"
+    },
+    {
+      "app": "google_docs"
+    },
+    {
+      "app": "google-docs"
+    },
+    {
+      "app": "google_calendar"
+    },
+    {
+      "app": "google-meet"
+    },
+    {
+      "app": "google-meet-audio"
+    },
+    {
+      "app": "google-meet-video"
+    },
+    {
+      "app": "google-meet-media"
+    },
+    {
+      "app": "google-chat"
+    }
+  ],
+  "lastUpdated": 1706357793774,
+  "owner": "system",
+  "readOnly": true,
+  "version": "1.1",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

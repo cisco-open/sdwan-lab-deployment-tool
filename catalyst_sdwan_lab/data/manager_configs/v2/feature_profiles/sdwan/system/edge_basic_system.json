@@ -1,0 +1,435 @@
+{
+  "profileName": "edge_basic_system",
+  "lastUpdatedBy": "admin",
+  "description": "Do not modify!",
+  "createdOn": 1706358537520,
+  "@rid": 3165,
+  "profileType": "system",
+  "solution": "sdwan",
+  "createdBy": "admin",
+  "profileId": "f369d282-dad9-4b6a-ac6f-2a0c3a7b9ae3",
+  "lastUpdatedOn": 1706359128305,
+  "associatedProfileParcels": [
+    {
+      "parcelId": "e5932b9b-5cb9-4d37-a98e-728564996331",
+      "parcelType": "logging",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706388514351,
+      "lastUpdatedOn": 1706388514351,
+      "payload": {
+        "name": "edge_basic_logging",
+        "description": "Do not modify!",
+        "data": {
+          "disk": {
+            "file": {
+              "diskFileSize": { "optionType": "default", "value": 10 },
+              "diskFileRotate": { "optionType": "default", "value": 10 }
+            }
+          }
+        }
+      },
+      "subparcels": []
+    },
+    {
+      "parcelId": "5744d8a2-3d47-4e91-afb4-7ad773792c06",
+      "parcelType": "omp",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706388514347,
+      "lastUpdatedOn": 1706388514347,
+      "payload": {
+        "name": "edge_basic_omp",
+        "description": "Do not modify!",
+        "data": {
+          "gracefulRestart": {
+            "optionType": "default",
+            "value": true
+          },
+          "sendPathLimit": {
+            "optionType": "default",
+            "value": 4
+          },
+          "ecmpLimit": {
+            "optionType": "default",
+            "value": 4
+          },
+          "advertisementInterval": {
+            "optionType": "default",
+            "value": 1
+          },
+          "holdtime": {
+            "optionType": "default",
+            "value": 60
+          },
+          "eorTimer": {
+            "optionType": "default",
+            "value": 300
+          },
+          "overlayAs": {
+            "optionType": "default"
+          },
+          "shutdown": {
+            "optionType": "default",
+            "value": false
+          },
+          "gracefulRestartTimer": {
+            "optionType": "default",
+            "value": 43200
+          },
+          "ompAdminDistanceIpv4": {
+            "optionType": "default",
+            "value": 251
+          },
+          "ompAdminDistanceIpv6": {
+            "optionType": "default",
+            "value": 251
+          },
+          "advertiseIpv4": {
+            "bgp": {
+              "optionType": "default",
+              "value": false
+            },
+            "ospf": {
+              "optionType": "default",
+              "value": false
+            },
+            "ospfv3": {
+              "optionType": "default",
+              "value": false
+            },
+            "connected": {
+              "optionType": "default",
+              "value": true
+            },
+            "static": {
+              "optionType": "default",
+              "value": true
+            },
+            "eigrp": {
+              "optionType": "default",
+              "value": false
+            },
+            "lisp": {
+              "optionType": "default",
+              "value": false
+            },
+            "isis": {
+              "optionType": "default",
+              "value": false
+            }
+          },
+          "advertiseIpv6": {
+            "bgp": {
+              "optionType": "default",
+              "value": false
+            },
+            "ospf": {
+              "optionType": "default",
+              "value": false
+            },
+            "static": {
+              "optionType": "default",
+              "value": false
+            },
+            "eigrp": {
+              "optionType": "default",
+              "value": false
+            },
+            "connected": {
+              "optionType": "default",
+              "value": false
+            },
+            "lisp": {
+              "optionType": "default",
+              "value": false
+            },
+            "isis": {
+              "optionType": "default",
+              "value": false
+            }
+          }
+        }
+      },
+      "subparcels": []
+    },
+    {
+      "parcelId": "b4cc7c15-039b-4926-b0b2-d8dc31b87340",
+      "parcelType": "global",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706388515080,
+      "lastUpdatedOn": 1706388515080,
+      "payload": {
+        "name": "edge_basic_global",
+        "description": "Do not modify!",
+        "data": {
+          "services_global": {
+            "services_ip": {
+              "servicesGlobalServicesIpHttpServer": {
+                "optionType": "default",
+                "value": false
+              },
+              "servicesGlobalServicesIpHttpsServer": {
+                "optionType": "default",
+                "value": false
+              },
+              "servicesGlobalServicesIpFtpPassive": {
+                "optionType": "default",
+                "value": false
+              },
+              "servicesGlobalServicesIpDomainLookup": {
+                "optionType": "default",
+                "value": false
+              },
+              "servicesGlobalServicesIpArpProxy": {
+                "optionType": "default",
+                "value": false
+              },
+              "servicesGlobalServicesIpRcmd": {
+                "optionType": "default",
+                "value": false
+              },
+              "servicesGlobalServicesIpLineVty": {
+                "optionType": "default",
+                "value": false
+              },
+              "servicesGlobalServicesIpCdp": {
+                "optionType": "default",
+                "value": true
+              },
+              "servicesGlobalServicesIpLldp": {
+                "optionType": "default",
+                "value": true
+              },
+              "servicesGlobalServicesIpSourceIntrf": {
+                "optionType": "default"
+              },
+              "globalOtherSettingsTcpKeepalivesIn": {
+                "optionType": "default",
+                "value": true
+              },
+              "globalOtherSettingsTcpKeepalivesOut": {
+                "optionType": "default",
+                "value": true
+              },
+              "globalOtherSettingsTcpSmallServers": {
+                "optionType": "default",
+                "value": false
+              },
+              "globalOtherSettingsUdpSmallServers": {
+                "optionType": "default",
+                "value": false
+              },
+              "globalOtherSettingsConsoleLogging": {
+                "optionType": "default",
+                "value": true
+              },
+              "globalOtherSettingsIPSourceRoute": {
+                "optionType": "default",
+                "value": false
+              },
+              "globalOtherSettingsVtyLineLogging": {
+                "optionType": "default",
+                "value": false
+              },
+              "globalOtherSettingsSnmpIfindexPersist": {
+                "optionType": "default",
+                "value": true
+              },
+              "globalOtherSettingsIgnoreBootp": {
+                "optionType": "default",
+                "value": true
+              },
+              "globalSettingsNat64UdpTimeout": {
+                "optionType": "default",
+                "value": 300
+              },
+              "globalSettingsNat64TcpTimeout": {
+                "optionType": "default",
+                "value": 3600
+              },
+              "globalSettingsHttpAuthentication": { "optionType": "default" },
+              "globalSettingsSSHVersion": { "optionType": "default" }
+            }
+          }
+        }
+      },
+      "subparcels": []
+    },
+    {
+      "parcelId": "716ecd27-bda3-4067-843f-e98843adc726",
+      "parcelType": "bfd",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706388514341,
+      "lastUpdatedOn": 1706388514341,
+      "payload": {
+        "name": "edge_basic_bfd",
+        "description": "Do not modify!",
+        "data": {
+          "pollInterval": {
+            "optionType": "default",
+            "value": 600000
+          },
+          "multiplier": {
+            "optionType": "default",
+            "value": 6
+          },
+          "defaultDscp": {
+            "optionType": "default",
+            "value": 48
+          }
+        }
+      },
+      "subparcels": []
+    },
+    {
+      "parcelId": "a8790173-f79c-48d8-bcd3-545a35ddc0fa",
+      "parcelType": "basic",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706388514422,
+      "lastUpdatedOn": 1706388514422,
+      "payload": {
+        "name": "edge_basic_system",
+        "description": "Do not modify!",
+        "data": {
+          "clock": {
+            "timezone": {
+              "optionType": "default",
+              "value": "UTC"
+            }
+          },
+          "description": {
+            "optionType": "default"
+          },
+          "location": {
+            "optionType": "default"
+          },
+          "gpsLocation": {
+            "latitude": {
+              "optionType": "default"
+            },
+            "longitude": {
+              "optionType": "default"
+            }
+          },
+          "deviceGroups": {
+            "optionType": "default"
+          },
+          "controllerGroupList": {
+            "optionType": "default"
+          },
+          "overlayId": {
+            "optionType": "default",
+            "value": 1
+          },
+          "portOffset": {
+            "optionType": "default",
+            "value": 0
+          },
+          "portHop": {
+            "optionType": "default",
+            "value": true
+          },
+          "controlSessionPps": {
+            "optionType": "default",
+            "value": 300
+          },
+          "trackTransport": {
+            "optionType": "default",
+            "value": true
+          },
+          "trackInterfaceTag": {
+            "optionType": "default"
+          },
+          "consoleBaudRate": {
+            "optionType": "default",
+            "value": "9600"
+          },
+          "maxOmpSessions": {
+            "optionType": "default"
+          },
+          "multiTenant": {
+            "optionType": "default",
+            "value": false
+          },
+          "trackDefaultGateway": {
+            "optionType": "default",
+            "value": true
+          },
+          "adminTechOnFailure": {
+            "optionType": "default",
+            "value": true
+          },
+          "idleTimeout": {
+            "optionType": "default"
+          },
+          "onDemand": {
+            "onDemandEnable": {
+              "optionType": "default",
+              "value": false
+            },
+            "onDemandIdleTimeout": {
+              "optionType": "default",
+              "value": 10
+            }
+          }
+        }
+      },
+      "subparcels": []
+    },
+    {
+      "parcelId": "7763316b-481d-4d16-a75a-91f9c2536a12",
+      "parcelType": "aaa",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706388515081,
+      "lastUpdatedOn": 1706388515081,
+      "payload": {
+        "name": "edge_basic_aaa",
+        "description": "Do not modify!",
+        "data": {
+          "authenticationGroup": {
+            "optionType": "default",
+            "value": false
+          },
+          "accountingGroup": {
+            "optionType": "default",
+            "value": false
+          },
+          "serverAuthOrder": {
+            "optionType": "global",
+            "value": ["local"]
+          },
+          "authorizationConsole": {
+            "optionType": "default",
+            "value": false
+          },
+          "authorizationConfigCommands": {
+            "optionType": "default",
+            "value": false
+          },
+          "user": [
+            {
+              "name": {
+                "optionType": "global",
+                "value": "admin"
+              },
+              "password": {
+                "optionType": "variable",
+                "value": "{{aaa_password}}"
+              },
+              "privilege": {
+                "optionType": "default",
+                "value": "15"
+              }
+            }
+          ]
+        }
+      },
+      "subparcels": []
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+#cloud-config
+fs_setup:
+- device: "/dev/sdb"
+  partition: "none"
+  filesystem: "ext4"
+mounts:
+- [ sdb, /opt/data ]
+write_files:
+- path: /etc/default/personality
+  content: "vmanage\n"
+- path: /etc/default/inited
+  content: "1\n"
+- path: /usr/share/viptela/symantec-root-ca.crt
+- path: /usr/share/viptela/root-ca.crt
+  content: |
+{% filter indent(width=4, first=True) %}
+{{ root_ca }}
+{% endfilter %}
+
+- path: /etc/confd/init/zcloud.xml
+  content: |
+    <config xmlns="http://tail-f.com/ns/config/1.0">
+      <system xmlns="http://viptela.com/system">
+        <personality>vmanage</personality>
+        <device-model>vmanage</device-model>
+        <organization-name>{{ org_name }}</organization-name>
+        <sp-organization-name>{{ org_name }}</sp-organization-name>
+        <vbond>
+          <remote>{{ validator_fqdn }}</remote>
+          <port>12346</port>
+        </vbond>
+        <site-id>100</site-id>
+        <system-ip>100.0.0.{{ manager_num }}</system-ip>
+        <host-name>Manager0{{ manager_num }}</host-name>
+        <domain-id>1</domain-id>
+        <aaa>
+          <user>
+            <name>admin</name>
+            <password>{{ manager_pass }}</password>
+            <group>netadmin</group>
+          </user>
+          <user>
+            <name>{{ manager_user }}</name>
+            <password>{{ manager_pass }}</password>
+            <group>netadmin</group>
+          </user>
+        </aaa>
+      </system>
+      <vpn xmlns="http://viptela.com/vpn">
+        <vpn-instance>
+          <vpn-id>0</vpn-id>
+          <dns>
+            <dns-addr>172.16.0.254</dns-addr>
+          </dns>
+          <ip>
+            <route>
+              <prefix>172.16.0.0/16</prefix>
+              <next-hop>
+                <address>172.16.0.254</address>
+              </next-hop>
+            </route>
+            <route>
+              <prefix>0.0.0.0/0</prefix>
+              <next-hop>
+                <address>172.16.0.254</address>
+              </next-hop>
+            </route>
+          </ip>
+          <interface>
+            <if-name>eth1</if-name>
+            <ip>
+              <address>172.16.0.{{ manager_num }}/24</address>
+            </ip>
+            <tunnel-interface>
+              <encapsulation>
+                <encap>ipsec</encap>
+              </encapsulation>
+              <color>
+                <value>default</value>
+              </color>
+              <allow-service>
+                <sshd>true</sshd>
+                <netconf>true</netconf>
+              </allow-service>
+            </tunnel-interface>
+            <shutdown>false</shutdown>
+          </interface>
+        </vpn-instance>
+        <vpn-instance>
+          <vpn-id>512</vpn-id>
+          <ip>
+            <route>
+              <prefix>0.0.0.0/0</prefix>
+              <next-hop>
+                <address>{{ external_gateway }}</address>
+              </next-hop>
+            </route>
+          </ip>
+          <interface>
+            <if-name>eth0</if-name>
+            <ip>
+              <address>{{ manager_external_ip }}{{ external_subnet_mask }}</address>
+            </ip>
+            <shutdown>false</shutdown>
+          </interface>
+        </vpn-instance>
+      </vpn>
+    </config>
