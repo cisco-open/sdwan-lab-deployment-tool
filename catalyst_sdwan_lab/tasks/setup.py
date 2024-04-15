@@ -7,10 +7,13 @@
 import json
 import os
 import re
+from logging import Logger
 from os.path import join
+from typing import List, Union
 
 from httpx import HTTPStatusError
 from ruamel.yaml import YAML
+from virl2_client import ClientLibrary
 
 from .utils import (
     CML_NODES_DEFINITION_DIR,
@@ -21,15 +24,15 @@ from .utils import (
 
 
 def upload_image_and_create_definition(
-    log,
-    cml,
-    existing_image_definitions,
-    node_type,
-    software_version,
-    node_label,
-    software_images_dir,
-    filename,
-):
+    log: Logger,
+    cml: ClientLibrary,
+    existing_image_definitions: List[str],
+    node_type: str,
+    software_version: str,
+    node_label: str,
+    software_images_dir: str,
+    filename: str,
+) -> None:
     if f"{node_type}-{software_version}" in existing_image_definitions:
         log.info(
             f"Skipping {filename} as {node_type}-{software_version} image definition already exists."
@@ -46,7 +49,7 @@ def upload_image_and_create_definition(
         cml.definitions.upload_image_definition(body=json.dumps(image_def))
 
 
-def main(cml, loglevel, migrate):
+def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
     # Setup logging
     log = setup_logging(loglevel)
 
@@ -114,12 +117,9 @@ def main(cml, loglevel, migrate):
             # For viptela software we need to extract image type (vmanage, smart, edge) and version.
             node_type = software_type_to_node_type_mapping[software_parser.group(1)]
             node_label = next(
-                (
-                    node["ui"]["label"]
-                    for node in node_definitions
-                    if node["id"] == node_type
-                ),
-                None,
+                node["ui"]["label"]
+                for node in node_definitions
+                if node["id"] == node_type
             )
             software_version = software_parser.group(2)
             upload_image_and_create_definition(
@@ -139,12 +139,9 @@ def main(cml, loglevel, migrate):
             # For C8000v we need to make sure it is a serial image.
             node_type = "cat-sdwan-edge"
             node_label = next(
-                (
-                    node["ui"]["label"]
-                    for node in node_definitions
-                    if node["id"] == node_type
-                ),
-                None,
+                node["ui"]["label"]
+                for node in node_definitions
+                if node["id"] == node_type
             )
             software_version = software_parser.group(1)
             upload_image_and_create_definition(

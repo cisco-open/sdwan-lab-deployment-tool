@@ -4,10 +4,16 @@
 #
 # SPDX-License-Identifier: bsd
 
+from typing import Union
+
+from virl2_client import ClientLibrary
+
 from .utils import setup_logging, track_progress
 
 
-def main(cml, lab_name, force, loglevel):
+def main(
+    cml: ClientLibrary, lab_name: str, force: bool, loglevel: Union[str, int]
+) -> None:
 
     # Setup logging
     log = setup_logging(loglevel)

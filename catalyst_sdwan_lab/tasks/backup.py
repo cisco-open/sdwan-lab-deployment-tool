@@ -10,7 +10,7 @@ import os
 import re
 import sys
 from os.path import join
-from typing import List
+from typing import Any, Dict, List, Union
 
 import unicon.core.errors
 from catalystwan.session import create_manager_session
@@ -18,6 +18,7 @@ from cisco_sdwan.base.rest_api import Rest
 from cisco_sdwan.tasks.implementation import BackupArgs, TaskBackup
 from jinja2 import Environment, FileSystemLoader
 from ruamel.yaml import YAML
+from virl2_client import ClientLibrary
 from virl2_client.models.cl_pyats import ClPyats
 
 from .utils import (
@@ -28,7 +29,9 @@ from .utils import (
 )
 
 
-def update_associated_parcel(api, path, parcel):
+def update_associated_parcel(
+    api: Rest, path: str, parcel: Dict[str, Any[str, List, Dict]]
+) -> Dict[str, Any[str, List, Dict]]:
     uuid_pattern = (
         r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
     )
@@ -46,16 +49,16 @@ def update_associated_parcel(api, path, parcel):
 
 
 def main(
-    cml,
-    cml_user,
-    cml_password,
-    manager_ip,
-    manager_user,
-    manager_password,
-    lab_name,
-    workdir,
-    loglevel,
-):
+    cml: ClientLibrary,
+    cml_user: str,
+    cml_password: str,
+    manager_ip: str,
+    manager_user: str,
+    manager_password: str,
+    lab_name: str,
+    workdir: str,
+    loglevel: Union[int, str],
+) -> None:
     # Time the script execution
     begin_time = datetime.datetime.now()
 
@@ -255,15 +258,21 @@ def main(
                             node.label, "show sd-routing certificate serial"
                         )
 
-                    uuid = re.search(r"Chassis\snumber:\s([\w-]+)\s", serial_output)[1]
-                    config = config_template.render(
-                        validator_fqdn=validator_fqdn,
-                        org_name=org_name,
-                        config=running_config,
-                        root_ca=ca_chain,
-                        uuid=uuid,
+                    uuid_search = re.search(
+                        r"Chassis\snumber:\s([\w-]+)\s", serial_output
                     )
-                    custom_node_backup[node.label] = config
+                    if uuid_search:
+                        uuid = uuid_search.group(1)
+                        config = config_template.render(
+                            validator_fqdn=validator_fqdn,
+                            org_name=org_name,
+                            config=running_config,
+                            root_ca=ca_chain,
+                            uuid=uuid,
+                        )
+                        custom_node_backup[node.label] = config
+                    else:
+                        exit(f"Cloud not find UUID for device {node.label}")
                 elif node.node_definition in node_types_supporting_config_extract:
                     log.info(f"Creating backup of {node.label} node ...")
                     track_progress(
@@ -358,7 +367,9 @@ def main(
                     pass
                 else:
                     # noinspection PyTypeChecker
-                    network_hierarchy: List = api.get("v1/network-hierarchy")
+                    network_hierarchy: List[Dict[str, Any[str, List, Dict]]] = api.get(
+                        "v1/network-hierarchy"
+                    )
                     mrf_regions = [
                         region
                         for region in network_hierarchy
