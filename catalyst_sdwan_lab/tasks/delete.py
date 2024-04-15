@@ -24,7 +24,8 @@ def main(cml, lab_name, force, loglevel):
         lab = lab[0]
 
         if not force:
-            confirmation = input("\nThis will remove lab and all its data. Are you sure you want to proceed? (yes/no): ")
+            confirmation = input('\nThis will remove lab and all its data. '
+                                 'Are you sure you want to proceed? (yes/no): ')
             if confirmation.lower() != 'yes':
                 exit('You did not confirm yes.')
 

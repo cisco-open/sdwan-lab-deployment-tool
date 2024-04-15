@@ -25,7 +25,8 @@ from .utils import (DATA_DIR, check_manager_ip_is_free, configure_manager_basic_
                     wait_for_manager_session, wait_for_wan_edge_onboaring)
 
 
-def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, manager_password, workdir, lab_name, deleteexisitng, retry, loglevel):
+def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, manager_password,
+         workdir, lab_name, deleteexisitng, retry, loglevel):
     # Time the script execution
     begin_time = datetime.datetime.now()
 
@@ -85,24 +86,34 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
         # Check if the IP allocated for SD-WAN Manager is not already it use.
         check_manager_ip_is_free(manager_ip)
         # Update SD-WAN Manager IP in lab title and description
-        cml_topology_dict['lab']['notes'] = f'-- Do not delete this text --\nmanager_external_ip = {manager_ip}\n-- Do not delete this text --'
+        cml_topology_dict['lab']['notes'] = f'-- Do not delete this text --\nmanager_external_ip = {manager_ip}\n-- ' \
+                                            f'Do not delete this text --'
         cml_topology_dict['lab']['title'] = lab_name
         # Update SD-WAN Manager cloud-init config with password
         encrypted_manager_password = sha512_crypt.encrypt(manager_password, rounds=5000)
-        manager_node = next(node for node in cml_topology_dict['nodes'] if node['node_definition'] == 'cat-sdwan-manager')
-        existing_manager_passwords = re.findall(r'<user>[\s\S]+?<password>(\S+)</password>', manager_node['configuration'])
+        manager_node = next(node for node in cml_topology_dict['nodes']
+                            if node['node_definition'] == 'cat-sdwan-manager')
+        existing_manager_passwords = re.findall(r'<user>[\s\S]+?<password>(\S+)</password>',
+                                                manager_node['configuration'])
         for existing_manager_password in existing_manager_passwords:
-            manager_node['configuration'] = manager_node['configuration'].replace(existing_manager_password, encrypted_manager_password)
+            manager_node['configuration'] = manager_node['configuration'].replace(existing_manager_password,
+                                                                                  encrypted_manager_password)
         # Update SD-WAN Manager cloud-init config with username
         existing_manager_users = re.findall(r'<user>[\s\S]+?<name>(\w+)</name>', manager_node['configuration'])
         existing_manager_users.remove('admin')
         if manager_user not in existing_manager_users:
-            manager_node['configuration'] = manager_node['configuration'].replace(existing_manager_users[0], manager_user)
+            manager_node['configuration'] = manager_node['configuration'].replace(existing_manager_users[0],
+                                                                                  manager_user)
         # Update SD-WAN Manager IP
-        existing_manager_ip_mask = re.search(r'<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<address>([\d./]+)</address>', manager_node['configuration']).group(1)
-        manager_node['configuration'] = manager_node['configuration'].replace(existing_manager_ip_mask, manager_ip + manager_mask)
+        existing_manager_ip_mask = re.search(r'<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?'
+                                             r'<address>([\d./]+)</address>',
+                                             manager_node['configuration']).group(1)
+        manager_node['configuration'] = manager_node['configuration'].replace(existing_manager_ip_mask,
+                                                                              manager_ip + manager_mask)
         # Update SD-WAN Manager Gateway
-        existing_manager_gateway = re.search(r'<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<next-hop>[\s\S]+?<address>([\d.]+)</address>', manager_node['configuration']).group(1)
+        existing_manager_gateway = re.search(r'<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?'
+                                             r'<next-hop>[\s\S]+?<address>([\d.]+)</address>',
+                                             manager_node['configuration']).group(1)
         manager_node['configuration'] = manager_node['configuration'].replace(existing_manager_gateway, manager_gateway)
 
         stream = io.StringIO()
@@ -141,8 +152,8 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
             node.start()
         elif node.node_definition == 'cat8000v' and node.is_booted() is False:
             # To workaround CML problem, after config export for this node
-            # we need to add "no shutdown" under all interfaces
-            node.config = re.sub(r'(interface\sGigabitEthernet\d\n)', rf'\1 no shutdown\n', node.config)
+            # we need to add 'no shutdown' under all interfaces
+            node.config = re.sub(r'(interface\sGigabitEthernet\d\n)', r'\1 no shutdown\n', node.config)
             node.start()
         elif node.node_definition != 'cat-sdwan-edge':
             # Start all the nodes except WAN Edges
@@ -160,7 +171,8 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
     onboard_control_components(manager_session, control_components, log)
 
     track_progress(log, 'Uploading Serial File...')
-    serial_file = SerialFilePayload(join(DATA_DIR, f'serial_files/serialFile-v{str(serial_file_version)}.viptela'), 'valid')
+    serial_file = SerialFilePayload(join(DATA_DIR, f'serial_files/serialFile-v{str(serial_file_version)}.viptela'),
+                                    'valid')
     manager_session.endpoints.configuration_device_inventory.upload_wan_edge_list(serial_file)
 
     manager_configs_dir = join(workdir, 'manager_configs')
@@ -176,7 +188,7 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
             mrf_regions_configured = [region for region in network_hierarchy if region['data']['label'] in ['REGION']]
             if not mrf_regions_configured:
                 if major_software_release == 20 and minor_software_release in [7, 8, 9, 10, 11, 12]:
-                    api.post({'enableMultiRegionFabric': True}, f'settings/configuration/multiRegionFabric')
+                    api.post({'enableMultiRegionFabric': True}, 'settings/configuration/multiRegionFabric')
                 else:
                     # noinspection PyTypeChecker
                     global_id = api.get('v1/network-hierarchy/nodes?label=GLOBAL')[0]['id']
@@ -204,7 +216,8 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
                                         elif folder == 'subregions':
                                             region_dict['data']['parentUuid'] = \
                                                 old_to_new_id_map[region_dict['data']['parentUuid']]
-                                        new_id = api.post(region_dict, f'v1/network-hierarchy')['Network Hierarchy UUID']
+                                        new_id = api.post(region_dict,
+                                                          'v1/network-hierarchy')['Network Hierarchy UUID']
                                         old_to_new_id_map[old_id] = new_id
                                     else:
                                         log.info(f'Region {region_dict["name"]} already exists, skipping...')
@@ -218,7 +231,8 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
                          for device in device_inventory.get_device_details('controllers')
                          if device.device_type == 'vsmart'}
 
-    # Modify SD-WAN Controllers UUID is sastre export so sastre attaches the template automatically during restore operation
+    # Modify SD-WAN Controllers UUID is sastre export
+    # so sastre attaches the template automatically during restore operation
     if os.path.isdir(join(manager_configs_dir, 'device_templates', 'attached')):
         for filename in os.listdir(join(manager_configs_dir, 'device_templates', 'attached')):
             with open(join(manager_configs_dir, 'device_templates', 'attached', filename), 'r+') as f1:

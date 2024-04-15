@@ -11,7 +11,7 @@ from os.path import join
 from jinja2 import Environment, FileSystemLoader
 from passlib.hash import sha512_crypt
 
-from catalystwan.endpoints.configuration_device_inventory import SerialFilePayload, Validity
+from catalystwan.endpoints.configuration_device_inventory import SerialFilePayload
 
 from .utils import (CML_DEPLOY_LAB_DEFINITION_DIR, DATA_DIR, MANAGER_CONFIGS_DIR, ORG_NAME,
                     VALIDATOR_FQDN, attach_basic_controller_template,
@@ -58,7 +58,7 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
             lab_name = f'sdwan{max(lab_list) + 1}'
         else:
             # If there are no vsdwan labs, this will be first vsdwan lab
-            lab_name = f'sdwan1'
+            lab_name = 'sdwan1'
 
     file_loader = FileSystemLoader(CML_DEPLOY_LAB_DEFINITION_DIR)
     env = Environment(loader=file_loader, trim_blocks=True)
@@ -69,8 +69,8 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
     encrypted_manager_password = sha512_crypt.encrypt(manager_password, rounds=5000)
 
     cml_topology = cml_tp_tmpl.render(title=lab_name, manager_image=manager_image,
-                                      controller_image=controller_image, validator_image=validator_image, root_ca=ca_chain,
-                                      org_name=ORG_NAME, validator_fqdn=VALIDATOR_FQDN,
+                                      controller_image=controller_image, validator_image=validator_image,
+                                      root_ca=ca_chain, org_name=ORG_NAME, validator_fqdn=VALIDATOR_FQDN,
                                       manager_num='1', controller_num='01', validator_num='01',
                                       manager_user=manager_user, manager_pass=encrypted_manager_password,
                                       manager_external_ip=manager_ip, external_subnet_mask=manager_mask,
@@ -103,7 +103,8 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
     onboard_control_components(manager_session, {'172.16.0.201': 'validator', '172.16.0.101': 'controller'}, log)
 
     track_progress(log, 'Uploading Serial File...')
-    serial_file = SerialFilePayload(join(DATA_DIR, f'serial_files/serialFile-v{str(serial_file_version)}.viptela'), 'valid')
+    serial_file = SerialFilePayload(join(DATA_DIR, f'serial_files/serialFile-v{str(serial_file_version)}.viptela'),
+                                    'valid')
     manager_session.endpoints.configuration_device_inventory.upload_wan_edge_list(serial_file)
 
     if config_version == 1:
@@ -111,14 +112,15 @@ def main(cml, cml_ip, manager_ip, manager_mask, manager_gateway, manager_user, m
     else:
         track_progress(log, 'Creating basic device templates and configuration groups...')
 
-    restore_manager_configuration(manager_ip, manager_user, manager_password, join(MANAGER_CONFIGS_DIR, f'v{config_version}'), False)
+    restore_manager_configuration(manager_ip, manager_user, manager_password,
+                                  join(MANAGER_CONFIGS_DIR, f'v{config_version}'), False)
 
     # If device is SD-WAN Controller we should attach it to the SD-WAN Controller device template
     attach_basic_controller_template(manager_session, log)
 
     manager_session.close()
     track_progress(log, 'Deploy task done\n')
-        
+
     print(f'#############################################\n'
           f'Lab is deployed.\n'
           f'CML URL: https://{cml_ip}\n'

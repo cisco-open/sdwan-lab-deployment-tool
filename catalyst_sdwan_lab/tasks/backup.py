@@ -125,16 +125,16 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                         pylab._testbed.devices[node.label].credentials.default.password = 'admin'
                         personality = '    <personality>vedge</personality>\n' \
                                       '    <device-model>vedge-cloud</device-model>'
-                    software_version = pylab.run_command(node.label, "show version")
+                    software_version = pylab.run_command(node.label, 'show version')
                     major_software_release = int(software_version.split('.')[0])
                     minor_software_release = int(software_version.split('.')[1])
                     if major_software_release <= 19 or (major_software_release == 20 and minor_software_release < 4):
                         sys.exit('Versions lower than 20.4 are not supported by the script.')
 
-                    running_config = pylab.run_command(node.label, "show run | display xml")
+                    running_config = pylab.run_command(node.label, 'show run | display xml')
                     # Adding personality to the config, otherwise it won't properly boot in restore task
                     running_config = re.sub('(<system xmlns="http://viptela.com/system">)',
-                                             rf'\1\n{personality}', running_config)
+                                            rf'\1\n{personality}', running_config)
 
                     config_template = env.get_template(f'{node_type}-cloud-init.j2')
                     config = config_template.render(org_name=org_name, validator_fqdn=validator_fqdn,
@@ -159,7 +159,7 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                         running_config = pylab.run_command(node.label, 'show sdwan run')
                         # Remove all logs that might appear before system command
                         running_config = re.sub(r'^.*?(?=system[\r\n])', '', running_config, flags=re.DOTALL)
-                        config_template = env.get_template(f'edge-cloud-init.j2')
+                        config_template = env.get_template('edge-cloud-init.j2')
                         serial_output = pylab.run_command(node.label, 'show sdwan certificate serial')
                     else:
                         # Backup SD-Routing Device
@@ -167,8 +167,9 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                         # If they are present in the boostrap, the cloud-init will fail during restore
                         running_config = pylab.run_command(node.label, 'show run')
                         running_config = re.sub(r'\ncrypto pki[\s\S]+?!', '!', running_config)
-                        running_config = re.sub(r'\nlicense udi[\s\S]+?\n', '', running_config, flags=re.DOTALL | re.MULTILINE)
-                        config_template = env.get_template(f'sdrouting-cloud-init.j2')
+                        running_config = re.sub(r'\nlicense udi[\s\S]+?\n', '', running_config,
+                                                flags=re.DOTALL | re.MULTILINE)
+                        config_template = env.get_template('sdrouting-cloud-init.j2')
                         serial_output = pylab.run_command(node.label, 'show sd-routing certificate serial')
 
                     uuid = re.search(r'Chassis\snumber:\s([\w-]+)\s', serial_output)[1]
@@ -180,7 +181,7 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                     track_progress(log, f'Creating backup of {node.label} node ({i}/{len(all_nodes)})...')
                     node.extract_configuration()
                 elif node.label not in ['VPN0-172.16.0.0/24', 'INET-172.16.1.0/24', 'MPLS-172.16.2.0/24',
-                                          'Internet', 'External']:
+                                        'Internet', 'External']:
                     log.info(f'Node {node.label} does not support configuration extract.')
 
             lab_extract = yaml.load(lab.download())
@@ -268,12 +269,15 @@ def main(cml, cml_user, cml_password, manager_ip, manager_user, manager_password
                                     'data': {
                                         'parentUuid': mrf_subregion['data']['parentUuid'],
                                         'label': mrf_subregion['data']['label'],
-                                        'hierarchyId': {'subRegionId': mrf_subregion['data']['hierarchyId']['subRegionId']},
+                                        'hierarchyId': {
+                                            'subRegionId': mrf_subregion['data']['hierarchyId']['subRegionId']
+                                        },
                                     },
                                 }
                                 if 'description' in mrf_subregion.keys():
                                     subregion_data['description'] = mrf_subregion['description']
-                                with open(f'{workdir}/manager_configs/mrf/subregions/{mrf_subregion["name"]}.json', 'w') as f:
+                                with open(f'{workdir}/manager_configs/mrf/subregions/{mrf_subregion["name"]}.json',
+                                          'w') as f:
                                     json.dump(subregion_data, f, indent=2)
 
         track_progress(log, 'Backup task done\n')

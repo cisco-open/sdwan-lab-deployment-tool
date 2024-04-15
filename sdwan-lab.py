@@ -5,7 +5,8 @@
 # SPDX-License-Identifier: bsd
 
 """
-Catalyst SD-WAN Lab Deployment Tool - Automation Tool for managing Cisco Catalyst SD-WAN labs inside Cisco Modelling Labs
+Catalyst SD-WAN Lab Deployment Tool - Automation Tool for managing
+Cisco Catalyst SD-WAN labs inside Cisco Modelling Labs
 """
 import re
 import sys
