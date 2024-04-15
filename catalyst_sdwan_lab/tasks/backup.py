@@ -367,7 +367,7 @@ def main(
                     pass
                 else:
                     # noinspection PyTypeChecker
-                    network_hierarchy: List[Dict[str, Any[str, List, Dict]]] = api.get(
+                    network_hierarchy: List[Dict[str, Any]] = api.get(
                         "v1/network-hierarchy"
                     )
                     mrf_regions = [

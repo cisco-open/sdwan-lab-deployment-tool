@@ -258,7 +258,7 @@ def main(
             major_software_release = int(software_version[0])
             minor_software_release = int(software_version[1])
             # noinspection PyTypeChecker
-            network_hierarchy: List[Dict[str, Any[str, List, Dict]]] = api.get(
+            network_hierarchy: List[Dict[str, Any]] = api.get(
                 "v1/network-hierarchy"
             )
             mrf_regions_configured = [
