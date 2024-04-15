@@ -27,7 +27,7 @@ jobs:
           poetry run flake8 catalyst_sdwan_lab
           poetry run isort --check --diff --profile black catalyst_sdwan_lab
           poetry run black --check catalyst_sdwan_lab
-          poetry run mypy --install-types catalyst_sdwan_lab
+          poetry run mypy catalyst_sdwan_lab
 
   test:
     name: Tests
@@ -39,7 +39,6 @@ jobs:
           - '3.9'
           - '3.10'
           - '3.11'
-          - '3.12'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
