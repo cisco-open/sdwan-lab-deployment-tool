@@ -7,10 +7,12 @@
 import datetime
 import re
 from os.path import join
+from typing import Union
 
 from catalystwan.endpoints.configuration_device_inventory import SerialFilePayload
 from jinja2 import Environment, FileSystemLoader
 from passlib.hash import sha512_crypt
+from virl2_client import ClientLibrary
 
 from .utils import (
     CML_DEPLOY_LAB_DEFINITION_DIR,
@@ -33,20 +35,20 @@ from .utils import (
 
 
 def main(
-    cml,
-    cml_ip,
-    manager_ip,
-    manager_mask,
-    manager_gateway,
-    manager_user,
-    manager_password,
-    software_version,
-    lab_name,
-    bridge,
-    dns_server,
-    retry,
-    loglevel,
-):
+    cml: ClientLibrary,
+    cml_ip: str,
+    manager_ip: str,
+    manager_mask: str,
+    manager_gateway: str,
+    manager_user: str,
+    manager_password: str,
+    software_version: str,
+    lab_name: str,
+    bridge: str,
+    dns_server: str,
+    retry: bool,
+    loglevel: Union[int, str],
+) -> None:
     # Time the script execution
     begin_time = datetime.datetime.now()
 
@@ -79,11 +81,12 @@ def main(
     if not lab_name:
         # User didn't provide lab name, generate by default
         # Find existing sdwan labs names
-        lab_list = [
-            int(re.search(r"sdwan(\d+)", lab.title).group(1))
+        lab_list_search = [
+            re.search(r"sdwan(\d+)", lab.title)
             for lab in cml.all_labs(show_all=True)
-            if lab.title.startswith("sdwan") and re.search(r"sdwan(\d+)", lab.title)
+            if lab.title.startswith("sdwan")
         ]
+        lab_list = [int(lab.group(1)) for lab in lab_list_search if lab]
         if lab_list:
             # New lab name is 1 number higher than higest existing lab name
             lab_name = f"sdwan{max(lab_list) + 1}"

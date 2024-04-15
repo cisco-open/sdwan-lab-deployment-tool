@@ -11,12 +11,13 @@ import os
 import re
 import sys
 from os.path import join
-from typing import List
+from typing import Any, Dict, List, Union
 
 from catalystwan.endpoints.configuration_device_inventory import SerialFilePayload
 from cisco_sdwan.base.rest_api import Rest
 from passlib.hash import sha512_crypt
 from ruamel.yaml import YAML
+from virl2_client import ClientLibrary
 
 from . import delete
 from .utils import (
@@ -35,19 +36,19 @@ from .utils import (
 
 
 def main(
-    cml,
-    cml_ip,
-    manager_ip,
-    manager_mask,
-    manager_gateway,
-    manager_user,
-    manager_password,
-    workdir,
-    lab_name,
-    deleteexisitng,
-    retry,
-    loglevel,
-):
+    cml: ClientLibrary,
+    cml_ip: str,
+    manager_ip: str,
+    manager_mask: str,
+    manager_gateway: str,
+    manager_user: str,
+    manager_password: str,
+    workdir: str,
+    lab_name: str,
+    deleteexisitng: bool,
+    retry: bool,
+    loglevel: Union[int, str],
+) -> None:
     # Time the script execution
     begin_time = datetime.datetime.now()
 
@@ -146,23 +147,27 @@ def main(
                 existing_manager_users[0], manager_user
             )
         # Update SD-WAN Manager IP
-        existing_manager_ip_mask = re.search(
+        existing_manager_ip_mask_search = re.search(
             r"<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?"
             r"<address>([\d./]+)</address>",
             manager_node["configuration"],
-        ).group(1)
-        manager_node["configuration"] = manager_node["configuration"].replace(
-            existing_manager_ip_mask, manager_ip + manager_mask
         )
+        if existing_manager_ip_mask_search:
+            existing_manager_ip_mask = existing_manager_ip_mask_search.group(1)
+            manager_node["configuration"] = manager_node["configuration"].replace(
+                existing_manager_ip_mask, manager_ip + manager_mask
+            )
         # Update SD-WAN Manager Gateway
-        existing_manager_gateway = re.search(
+        existing_manager_gateway_search = re.search(
             r"<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?"
             r"<next-hop>[\s\S]+?<address>([\d.]+)</address>",
             manager_node["configuration"],
-        ).group(1)
-        manager_node["configuration"] = manager_node["configuration"].replace(
-            existing_manager_gateway, manager_gateway
         )
+        if existing_manager_gateway_search:
+            existing_manager_gateway = existing_manager_gateway_search.group(1)
+            manager_node["configuration"] = manager_node["configuration"].replace(
+                existing_manager_gateway, manager_gateway
+            )
 
         stream = io.StringIO()
         yaml.dump(cml_topology_dict, stream)
@@ -187,17 +192,24 @@ def main(
             manager_node = node
         elif node.node_definition == "cat-sdwan-controller":
             # Add Controller VPN 0 IP to the list
-            vpn0_ip = re.search(r"(172.16.0.1\d+)/24", node.config)[1]
-            system_ip = re.search(r"<system-ip>([\d.]+)</system-ip>", node.config)[1]
-            device_ip_to_system_ip[vpn0_ip] = system_ip
-            device_ip_to_system_ip[system_ip] = system_ip
-            control_components[vpn0_ip] = "controller"
+            vpn0_ip_search = re.search(r"(172.16.0.1\d+)/24", node.config)
+            system_ip_search = re.search(
+                r"<system-ip>([\d.]+)</system-ip>", node.config
+            )
+            if vpn0_ip_search and system_ip_search:
+                vpn0_ip = vpn0_ip_search.group(1)
+                system_ip = system_ip_search.group(1)
+                device_ip_to_system_ip[vpn0_ip] = system_ip
+                device_ip_to_system_ip[system_ip] = system_ip
+                control_components[vpn0_ip] = "controller"
             log.info(f"Starting node {node.label}...")
             node.start()
         elif node.node_definition == "cat-sdwan-validator":
             # Add Validator VPN 0 IP to the list
-            vpn0_ip = re.search(r"(172.16.0.2\d+)/24", node.config)[1]
-            control_components[vpn0_ip] = "validator"
+            vpn0_ip_search = re.search(r"(172.16.0.2\d+)/24", node.config)
+            if vpn0_ip_search:
+                vpn0_ip = vpn0_ip_search.group(1)
+                control_components[vpn0_ip] = "validator"
             log.info(f"Starting node {node.label}...")
             node.start()
         elif node.node_definition == "cat8000v" and node.is_booted() is False:
@@ -246,7 +258,9 @@ def main(
             major_software_release = int(software_version[0])
             minor_software_release = int(software_version[1])
             # noinspection PyTypeChecker
-            network_hierarchy: List = api.get("v1/network-hierarchy")
+            network_hierarchy: List[Dict[str, Any[str, List, Dict]]] = api.get(
+                "v1/network-hierarchy"
+            )
             mrf_regions_configured = [
                 region
                 for region in network_hierarchy
@@ -283,12 +297,12 @@ def main(
                     )
                 # Check network hierarchy global ID
                 # noinspection PyTypeChecker
-                network_hierarchy: List = api.get("v1/network-hierarchy")
+                network_hierarchy = api.get("v1/network-hierarchy")
                 global_id = next(
                     _["id"] for _ in network_hierarchy if _["data"]["label"] == "GLOBAL"
                 )
                 existing_region_names = [_["name"] for _ in network_hierarchy]
-                old_to_new_id_map = {}
+                old_to_new_id_map: Dict[str, str] = {}
                 for folder in ["regions", "subregions"]:
                     path = f"{manager_configs_dir}/mrf/{folder}"
                     if os.path.exists(path):
@@ -378,14 +392,18 @@ def main(
     for node in lab.nodes():
         if node.node_definition == "cat-sdwan-edge" and node.is_booted() is False:
             # Before we boot Edge we need to update the cloud-init OTP token
-            uuid = re.search(r"vinitparam:[\w\W]+?uuid\s:\s([\w-]+)", node.config)[1]
-            token = uuid_to_token[uuid]
-            # Update node config with new otp token
-            node.config = re.sub(
-                r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)", rf"\1 {token}", node.config
+            uuid_search = re.search(
+                r"vinitparam:[\w\W]+?uuid\s:\s([\w-]+)", node.config
             )
+            if uuid_search:
+                uuid = uuid_search.group(1)
+                token = uuid_to_token[uuid]
+                # Update node config with new otp token
+                node.config = re.sub(
+                    r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)", rf"\1 {token}", node.config
+                )
+                wan_edges_to_onboard.append(uuid)
             node.start()
-            wan_edges_to_onboard.append(uuid)
 
     # Wait until Edges are onboarded.
     wait_for_wan_edge_onboaring(manager_session, wan_edges_to_onboard, log)

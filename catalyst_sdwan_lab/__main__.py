@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 urllib3.disable_warnings(InsecureRequestWarning)
 
 
-def main():
+def main() -> None:
     # Define main parser and options that are required regardless of selected task
     main_parser = argparse.ArgumentParser(
         description="Catalyst SD-WAN Lab - Automation Tool for managing "
@@ -584,7 +584,7 @@ def main():
         delete.main(cml, cli_args.lab, cli_args.force, cli_args.loglevel)
 
 
-def verify_cml_version(cml):
+def verify_cml_version(cml: ClientLibrary) -> None:
     if cml.VERSION.major == 2 and cml.VERSION.minor >= 6:
         pass
     else:

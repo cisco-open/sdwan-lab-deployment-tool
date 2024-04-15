@@ -10,6 +10,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
+from typing import Union
 
 from catalystwan.api.task_status_api import OperationStatus, OperationStatusId, Task
 from catalystwan.endpoints.configuration_group import (
@@ -17,8 +18,9 @@ from catalystwan.endpoints.configuration_group import (
     DeviceId,
 )
 from catalystwan.endpoints.troubleshooting_tools.device_connectivity import NPingRequest
-from catalystwan.session import create_manager_session
+from catalystwan.session import ManagerSession, create_manager_session
 from jinja2 import Environment, FileSystemLoader
+from virl2_client import ClientLibrary
 
 from .utils import (
     CML_DEPLOY_LAB_DEFINITION_DIR,
@@ -32,7 +34,9 @@ from .utils import (
 )
 
 
-def ping_node(vpn_ip, manager_session, manager_system_ip):
+def ping_node(
+    vpn_ip: str, manager_session: ManagerSession, manager_system_ip: str
+) -> None:
     nping_request = NPingRequest(host=vpn_ip, vpn="0", source="eth1")
     nping = (
         manager_session.endpoints.troubleshooting_tools.device_connectivity.nping_device
@@ -52,18 +56,18 @@ def ping_node(vpn_ip, manager_session, manager_system_ip):
 
 
 def main(
-    cml,
-    cml_user,
-    cml_password,
-    manager_ip,
-    manager_user,
-    manager_password,
-    lab_name,
-    number_of_devices,
-    device_type,
-    software_version,
-    loglevel,
-):
+    cml: ClientLibrary,
+    cml_user: str,
+    cml_password: str,
+    manager_ip: str,
+    manager_user: str,
+    manager_password: str,
+    lab_name: str,
+    number_of_devices: int,
+    device_type: str,
+    software_version: str,
+    loglevel: Union[int, str],
+) -> None:
     # Time the script execution
     begin_time = datetime.datetime.now()
 
@@ -381,6 +385,7 @@ def main(
                 for next_num_str in new_nodes_nums:
                     uuid = free_uuids[increment_chassis]
                     new_routers_uuids[next_num_str] = uuid
+                    dhcp_exlude = f"192.168.{next_num_str}.1-192.168.{next_num_str}.99"
                     # For every SD-WAN Controller, create a payload to attach template
                     attach_payload["deviceTemplateList"][0]["device"].append(
                         {
@@ -390,7 +395,7 @@ def main(
                             "csv-host-name": f"Edge{next_num_str}",
                             "/1/GigabitEthernet3/interface/ip/address": f"192.168.{next_num_str}.1/24",
                             "/1/GigabitEthernet3//dhcp-server/address-pool": f"192.168.{next_num_str}.0/24",
-                            "/1/GigabitEthernet3//dhcp-server/exclude": f"192.168.{next_num_str}.1-192.168.{next_num_str}.99",
+                            "/1/GigabitEthernet3//dhcp-server/exclude": dhcp_exlude,
                             "/1/GigabitEthernet3//dhcp-server/options/default-gateway": f"192.168.{next_num_str}.1",
                             "/1/GigabitEthernet3//dhcp-server/options/dns-servers": f"192.168.{next_num_str}.1",
                             "/0/GigabitEthernet2/interface/ip/address": f"172.16.2.{next_num_str}/24",
@@ -435,13 +440,13 @@ def main(
                 increment_chassis = 0
                 new_routers_uuids = {}
                 associate_payload = ConfigGroupAssociatePayload(devices=[])
-                variables_payload = {"solution": "sdwan", "devices": []}
+                devices_variables = []
                 for next_num_str in new_nodes_nums:
                     # For every WAN Edge create a payload to attach template
                     uuid = free_uuids[increment_chassis]
                     new_routers_uuids[next_num_str] = uuid
                     associate_payload.devices.append(DeviceId(id=uuid))
-                    variables_payload["devices"].append(
+                    devices_variables.append(
                         {
                             "device-id": uuid,
                             "variables": [
@@ -483,6 +488,7 @@ def main(
                     )
                     increment_chassis += 1
 
+                variables_payload = {"solution": "sdwan", "devices": devices_variables}
                 # Associate devices with config group
                 configuration_group.associate(config_group_id, associate_payload)
                 # Fill variables
@@ -551,7 +557,7 @@ def main(
                 node.start()
 
             # Wait until Edges are onboarded.
-            wan_edges_to_onboard = new_routers_uuids.values()
+            wan_edges_to_onboard = list(new_routers_uuids.values())
             wait_for_wan_edge_onboaring(manager_session, wan_edges_to_onboard, log)
 
         elif cml_node_type == "cat-sdwan-edge" and device_type == "sdrouting":
@@ -656,7 +662,7 @@ def main(
             for node in new_nodes:
                 node.start()
             # Wait until Edges are onboarded.
-            wan_edges_to_onboard = new_routers_uuids.values()
+            wan_edges_to_onboard = list(new_routers_uuids.values())
             wait_for_wan_edge_onboaring(manager_session, wan_edges_to_onboard, log)
 
         track_progress(log, "Add task done\n")

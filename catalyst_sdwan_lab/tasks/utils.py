@@ -14,11 +14,16 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
+from logging import Logger
 from os.path import abspath, dirname, exists, join
+from typing import Dict, List, Union
 
 from catalystwan.api.task_status_api import OperationStatus, OperationStatusId, Task
 from catalystwan.endpoints.certificate_management_device import TargetDevice
-from catalystwan.endpoints.configuration_device_inventory import DeviceCreationPayload
+from catalystwan.endpoints.configuration_device_inventory import (
+    DeviceCreationPayload,
+    DeviceDetailsResponse,
+)
 from catalystwan.endpoints.configuration_settings import (
     Certificate,
     CloudX,
@@ -29,12 +34,13 @@ from catalystwan.endpoints.configuration_settings import (
     VManageDataStream,
 )
 from catalystwan.exceptions import ManagerRequestException
-from catalystwan.session import create_manager_session
+from catalystwan.session import ManagerSession, create_manager_session
 from catalystwan.vmanage_auth import UnauthorizedAccessError
 from cisco_sdwan.base.rest_api import Rest
 from cisco_sdwan.tasks.implementation import RestoreArgs, TaskRestore
 from OpenSSL import crypto
 from requests.exceptions import ConnectionError
+from virl2_client import ClientLibrary
 
 # Base directory where utils.py is located
 BASE_DIR = dirname(dirname(abspath(__file__)))
@@ -49,7 +55,9 @@ SOFTWARE_IMAGES_DIR = os.getcwd()
 VALIDATOR_FQDN = "validator.sdwan.local"
 
 
-def attach_basic_controller_template(manager_session, log):
+def attach_basic_controller_template(
+    manager_session: ManagerSession, log: Logger
+) -> None:
     """
     Attach basic template to all SD-WAN controllers that have no template yet
     """
@@ -112,7 +120,7 @@ def attach_basic_controller_template(manager_session, log):
         )
 
 
-def check_manager_ip_is_free(ip):
+def check_manager_ip_is_free(ip: str) -> None:
     """
     Ping the IP address that will be allocated to SD-WAN Manager
     to verify it's not already used
@@ -129,7 +137,9 @@ def check_manager_ip_is_free(ip):
         )
 
 
-def configure_manager_basic_settings(manager_session, ca_chain, log):
+def configure_manager_basic_settings(
+    manager_session: ManagerSession, ca_chain: str, log: Logger
+) -> None:
     """
     Configure basic settings for SD-WAN Manager
     """
@@ -160,15 +170,15 @@ def configure_manager_basic_settings(manager_session, ca_chain, log):
     manager_config_settings.edit_cloudx(CloudX(mode=ModeEnum.ON))
 
 
-def create_cert(ca_cert, ca_key, csr):
+def create_cert(ca_cert_bytes: bytes, ca_key_bytes: bytes, csr_bytes: bytes) -> bytes:
     """
     Sign a CSR with the CAcert and CAkey.
     Certificate validity will be from -1 day to +2 years
     Return the resulting signed cert
     """
-    ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_cert)
-    ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_key)
-    csr = crypto.load_certificate_request(crypto.FILETYPE_PEM, csr)
+    ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_cert_bytes)
+    ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_key_bytes)
+    csr = crypto.load_certificate_request(crypto.FILETYPE_PEM, csr_bytes)
 
     cert = crypto.X509()
     cert.set_serial_number(uuid.uuid4().int)
@@ -181,7 +191,9 @@ def create_cert(ca_cert, ca_key, csr):
     return crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
 
 
-def get_cml_sdwan_image_definition(cml, node_definition, software_version):
+def get_cml_sdwan_image_definition(
+    cml: ClientLibrary, node_definition: str, software_version: str
+) -> str:
     """
     Verify if requested SD-WAN software version
     is present in CML for device type
@@ -199,13 +211,18 @@ def get_cml_sdwan_image_definition(cml, node_definition, software_version):
         if node_definition in ["cat-sdwan-controller", "cat-sdwan-validator"]:
             # If there's no requested Controller image, try one version lower
             # For example sometimes Manager is 20.9.3.2 and Controller/Validator is 20.9.3.1
-            new_software_version = software_version.split(".")
-            if int(new_software_version[-1]) == 1 and len(new_software_version) == 4:
+            new_software_version_elements = software_version.split(".")
+            if (
+                int(new_software_version_elements[-1]) == 1
+                and len(new_software_version_elements) == 4
+            ):
                 # If last digit is one and there are four digits try without this digit
-                new_software_version = new_software_version[:-1]
+                new_software_version_elements = new_software_version_elements[:-1]
             else:
-                new_software_version[-1] = f"{(int(new_software_version[-1]) - 1)}"
-            new_software_version = ".".join(new_software_version)
+                new_software_version_elements[-1] = (
+                    f"{(int(new_software_version_elements[-1]) - 1)}"
+                )
+            new_software_version = ".".join(new_software_version_elements)
             new_requested_image_definition = f"{node_definition}-{new_software_version}"
             if new_requested_image_definition in existing_image_definitions:
                 return new_requested_image_definition
@@ -226,7 +243,7 @@ def get_cml_sdwan_image_definition(cml, node_definition, software_version):
             )
 
 
-def get_sdwan_lab_parameters(software_version):
+def get_sdwan_lab_parameters(software_version: str) -> List[int]:
     major_release = int(software_version.split(".")[0])
     minor_release = int(software_version.split(".")[1])
     if major_release <= 19 or (major_release == 20 and minor_release < 4):
@@ -243,7 +260,7 @@ def get_sdwan_lab_parameters(software_version):
     return [serial_file_version, config_version]
 
 
-def load_certificate_details():
+def load_certificate_details() -> List[str]:
     ca_cert_name = "signCA.pem"
     ca_key_name = "signCA.key"
     ca_chain_name = "chainCA.pem"
@@ -266,7 +283,9 @@ def load_certificate_details():
         return [ca_cert, ca_key, ca_chain]
 
 
-def onboard_control_components(manager_session, new_control_components, log):
+def onboard_control_components(
+    manager_session: ManagerSession, new_control_components: Dict[str, str], log: Logger
+) -> None:
     """
     Add new Validators and Controllers to SD-WAN Manager
     new_control_components is a dict with ip: node_type
@@ -331,8 +350,12 @@ def onboard_control_components(manager_session, new_control_components, log):
 
 
 def restore_manager_configuration(
-    manager_ip, manager_user, manager_password, workdir, attach
-):
+    manager_ip: str,
+    manager_user: str,
+    manager_password: str,
+    workdir: str,
+    attach: bool,
+) -> None:
     """
     Restore configuration using Sastre
     """
@@ -354,7 +377,7 @@ def restore_manager_configuration(
         )
 
 
-def setup_logging(loglevel):
+def setup_logging(loglevel: Union[int, str]) -> Logger:
     # Setup logging
     log = logging.getLogger(__name__)
     log.setLevel(loglevel)
@@ -378,7 +401,13 @@ def setup_logging(loglevel):
     return log
 
 
-def sign_certificate(device, log, manager_session, ca_cert, ca_key):
+def sign_certificate(
+    device: DeviceDetailsResponse,
+    log: Logger,
+    manager_session: ManagerSession,
+    ca_cert: bytes,
+    ca_key: bytes,
+) -> None:
     """
     Generate CSR and sign the certificate
     for SD-WAN control component
@@ -400,7 +429,7 @@ def sign_certificate(device, log, manager_session, ca_cert, ca_key):
         log.info("Certificate is already signed for " + device.host_name + ".")
 
 
-def track_progress(log, message):
+def track_progress(log: Logger, message: str) -> None:
     """
     Print progress status message depending on the log
     settings either to stdout or to a log
@@ -417,7 +446,9 @@ def track_progress(log, message):
             log.info(message)
 
 
-def wait_for_manager_session(manager_ip, manager_user, manager_password, log):
+def wait_for_manager_session(
+    manager_ip: str, manager_user: str, manager_password: str, log: Logger
+) -> ManagerSession:
     """
     Retry to log in to SD-WAN Manager until API is up
     """
@@ -456,14 +487,16 @@ def wait_for_manager_session(manager_ip, manager_user, manager_password, log):
     return manager_session
 
 
-def wait_for_wan_edge_onboaring(manager_session, wan_edges_to_onboard, log):
+def wait_for_wan_edge_onboaring(
+    manager_session: ManagerSession, wan_edges_to_onboard: List[str], log: Logger
+) -> None:
     """
     Wait until WAN Edge routers are onboarded
     """
     log.info("Waiting for WAN Edge onboarding...")
     retries = 0
     max_retries = 120
-    wan_edges_onboarded = []
+    wan_edges_onboarded: List[str] = []
     while not set(wan_edges_to_onboard) == set(wan_edges_onboarded):
         retries += 1
         track_progress(
