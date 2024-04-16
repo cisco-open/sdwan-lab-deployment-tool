@@ -90,7 +90,12 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
                         f'{new_node_definition["sim"]["linux_native"]["cpus"]} CPUs and '
                         f'{new_node_definition["sim"]["linux_native"]["ram"]} MB RAM.'
                     )
-                    cml.session.put("node_definitions/", json=new_node_definition)
+                    try:
+                        # For virl2_client lower than 2.7.0
+                        cml.session.put("node_definitions/", json=new_node_definition)
+                    except AttributeError:
+                        # For virl2_client 2.7.0 and higher
+                        cml.definitions.upload_node_definition(new_node_definition, True)
             else:
                 # If node is not yet created, we need to create it
                 log.info(f'[CREATE] Creating node {new_node_definition["id"]}...')
