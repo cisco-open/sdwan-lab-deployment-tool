@@ -13,7 +13,7 @@ sdwan-lab = "catalyst_sdwan_lab.__main__:main"
 csdwan = "catalyst_sdwan_lab.__main__:main"
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.9"
 virl2-client = "^2.6.0"
 requests = "^2.28.1"
 pyopenssl = "^24.0.0"
