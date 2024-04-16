@@ -1,3 +1,6 @@
+[![Tests](https://github.com/cisco-open/sdwan-lab-deployment-tool/actions/workflows/test.yml/badge.svg)](https://github.com/netascode/iac-validate/actions/workflows/test.yml)
+![Python Support](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-informational "Python Support: 3.9, 3.10, 3.11")
+
 # Catalyst SD-WAN Lab Deployment Tool for Cisco Modeling Labs
 
 This tool automates [Cisco Catalyst SD-WAN](https://www.cisco.com/site/us/en/solutions/networking/sdwan/index.html) lab deployment inside [Cisco Modeling Labs (CML)](https://www.cisco.com/c/en/us/products/cloud-systems-management/modeling-labs/index.html).
