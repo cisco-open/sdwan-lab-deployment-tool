@@ -128,7 +128,8 @@ def check_pyats_device_connectivity(
                     return [personality, node_type, pylab]
                 else:
                     exit(
-                        f"Could not login to {node_label} using default credentials or Manager credentials."
+                        f"Could not login to {node_label} using admin username and default or SD-WAN Manager password."
+                        f"Please fix admin user password and rerun the script."
                     )
             # Move to the next cause in the chain
             current_exception = getattr(current_exception, "__cause__", None)
