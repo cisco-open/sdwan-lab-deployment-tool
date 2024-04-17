@@ -29,6 +29,114 @@ from .utils import (
 )
 
 
+def validate_credentials(pylab: ClPyats, node_label: str) -> bool:
+    try:
+        pylab.run_command(node_label, "show version")
+        return True
+    except unicon.core.errors.ConnectionError as conn_err:
+        current_exception = conn_err
+        # Loop to inspect the chain of causes
+        while current_exception:
+            if isinstance(
+                current_exception,
+                unicon.core.errors.UniconAuthenticationError,
+            ) or isinstance(
+                current_exception,
+                unicon.core.errors.CredentialsExhaustedError,
+            ):
+                return False
+            # Move to the next cause in the chain
+            current_exception = getattr(current_exception, "__cause__", None)
+        raise
+
+
+def check_pyats_device_connectivity(
+    pylab: ClPyats,
+    node_label: str,
+    node_definition: str,
+    manager_user: str,
+    manager_password: str,
+) -> List[Union[str, ClPyats]]:
+    personality = None
+    node_type = None
+    if node_definition == "cat-sdwan-manager":
+        node_type = "manager"
+        pylab._testbed.devices[node_label].credentials.default.username = manager_user
+        pylab._testbed.devices[node_label].credentials.default.password = (
+            manager_password
+        )
+        personality = (
+            "    <personality>vmanage</personality>\n"
+            "    <device-model>vmanage</device-model>"
+        )
+    elif node_definition == "cat-sdwan-controller":
+        node_type = "controller"
+        pylab._testbed.devices[node_label].credentials.default.username = "admin"
+        pylab._testbed.devices[node_label].credentials.default.password = "admin"
+        personality = (
+            "    <personality>vsmart</personality>\n"
+            "    <device-model>vsmart</device-model>"
+        )
+    elif node_definition == "cat-sdwan-validator":
+        node_type = "validator"
+        pylab._testbed.devices[node_label].credentials.default.username = "admin"
+        pylab._testbed.devices[node_label].credentials.default.password = "admin"
+        personality = (
+            "    <personality>vedge</personality>\n"
+            "    <device-model>vedge-cloud</device-model>"
+        )
+    elif node_definition == "cat-sdwan-edge":
+        node_type = "sdwan"
+        pylab._testbed.devices[node_label].credentials.default.username = "admin"
+        pylab._testbed.devices[node_label].credentials.default.password = "admin"
+        personality = ""
+
+    try:
+        if validate_credentials(pylab, node_label):
+            # If credentials are valid, proceed
+            return [personality, node_type, pylab]
+        else:
+            # If default credentials are not valid, try SD-WAN Manager credentials
+            pylab._testbed.devices[node_label].credentials.default.username = (
+                manager_user
+            )
+            pylab._testbed.devices[node_label].credentials.default.password = (
+                manager_password
+            )
+            if validate_credentials(pylab, node_label):
+                # If credentials are valid, proceed
+                return [personality, node_type, pylab]
+            else:
+                exit(
+                    f"Could not login to {node_label} using default credentials or Manager credentials."
+                )
+    except unicon.core.errors.ConnectionError as conn_err:
+        current_exception = conn_err
+        # Loop to inspect the chain of causes
+        while current_exception:
+            if (
+                isinstance(
+                    current_exception,
+                    unicon.core.errors.SubCommandFailure,
+                )
+                and node_definition == "cat-sdwan-edge"
+            ):
+                # show sdwan commands don't work so this device is in autonomous mode
+                # need to change pyats platform from "sdwan" to "csr1000v"
+                pylab._testbed.devices[node_label].destroy()
+                pylab._testbed.devices[node_label].platform = "csr1000v"
+                node_type = "sdrouting"
+                if validate_credentials(pylab, node_label):
+                    return [personality, node_type, pylab]
+                else:
+                    exit(
+                        f"Could not login to {node_label} using default credentials or Manager credentials."
+                    )
+            # Move to the next cause in the chain
+            current_exception = getattr(current_exception, "__cause__", None)
+        raise
+
+
 def update_associated_parcel(
     api: Rest, path: str, parcel: Dict[str, Any]
 ) -> Dict[str, Any]:
@@ -141,44 +249,14 @@ def main(
                         log,
                         f"Creating backup of {node.label} node ({i}/{len(all_nodes)})...",
                     )
-                    personality = None
-                    node_type = None
-                    if node.node_definition == "cat-sdwan-manager":
-                        node_type = "manager"
-                        pylab._testbed.devices[
-                            node.label
-                        ].credentials.default.username = manager_user
-                        pylab._testbed.devices[
-                            node.label
-                        ].credentials.default.password = manager_password
-                        personality = (
-                            "    <personality>vmanage</personality>\n"
-                            "    <device-model>vmanage</device-model>"
-                        )
-                    elif node.node_definition == "cat-sdwan-controller":
-                        node_type = "controller"
-                        pylab._testbed.devices[
-                            node.label
-                        ].credentials.default.username = "admin"
-                        pylab._testbed.devices[
-                            node.label
-                        ].credentials.default.password = "admin"
-                        personality = (
-                            "    <personality>vsmart</personality>\n"
-                            "    <device-model>vsmart</device-model>"
-                        )
-                    elif node.node_definition == "cat-sdwan-validator":
-                        node_type = "validator"
-                        pylab._testbed.devices[
-                            node.label
-                        ].credentials.default.username = "admin"
-                        pylab._testbed.devices[
-                            node.label
-                        ].credentials.default.password = "admin"
-                        personality = (
-                            "    <personality>vedge</personality>\n"
-                            "    <device-model>vedge-cloud</device-model>"
-                        )
+                    [personality, node_type, pylab] = check_pyats_device_connectivity(
+                        pylab,
+                        node.label,
+                        node.node_definition,
+                        manager_user,
+                        manager_password,
+                    )
+
                     software_version = pylab.run_command(node.label, "show version")
                     major_software_release = int(software_version.split(".")[0])
                     minor_software_release = int(software_version.split(".")[1])
@@ -213,22 +291,14 @@ def main(
                         log,
                         f"Creating backup of {node.label} node ({i}/{len(all_nodes)})...",
                     )
-                    pylab._testbed.devices[node.label].credentials.default.username = (
-                        "admin"
+                    [_, node_type, pylab] = check_pyats_device_connectivity(
+                        pylab,
+                        node.label,
+                        node.node_definition,
+                        manager_user,
+                        manager_password,
                     )
-                    pylab._testbed.devices[node.label].credentials.default.password = (
-                        "admin"
-                    )
-                    # Verify if router is in controller mode or autonomous mode (SD-Routing)
-                    try:
-                        show_version = pylab.run_command(node.label, "show version")
-                    except unicon.core.errors.ConnectionError:
-                        # show sdwan commands don't work so this device is in autonomous mode
-                        # need to change pyats platform from "sdwan" to "csr1000v"
-                        pylab._testbed.devices[node.label].destroy()
-                        pylab._testbed.devices[node.label].platform = "csr1000v"
-                        show_version = pylab.run_command(node.label, "show version")
-                    if "Controller-Managed" in show_version:
+                    if node_type == "sdwan":
                         # Backup SD-WAN Device
                         running_config = pylab.run_command(node.label, "show sdwan run")
                         # Remove all logs that might appear before system command
