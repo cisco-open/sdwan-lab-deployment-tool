@@ -234,7 +234,9 @@ def main(
     configure_manager_basic_settings(manager_session, ca_chain, log)
 
     # Add controllers to SD-WAN Manager and sing certificates
-    onboard_control_components(manager_session, control_components, log)
+    onboard_control_components(
+        manager_session, manager_password, control_components, log
+    )
 
     track_progress(log, "Uploading Serial File...")
     serial_file = SerialFilePayload(

@@ -96,10 +96,7 @@ def check_pyats_device_connectivity(
             # If credentials are valid, proceed
             return [personality, node_type, pylab]
         else:
-            # If default credentials are not valid, try SD-WAN Manager credentials
-            pylab._testbed.devices[node_label].credentials.default.username = (
-                manager_user
-            )
+            # If default credentials are not valid, try admin user and SD-WAN Manager password
             pylab._testbed.devices[node_label].credentials.default.password = (
                 manager_password
             )
@@ -108,7 +105,8 @@ def check_pyats_device_connectivity(
                 return [personality, node_type, pylab]
             else:
                 exit(
-                    f"Could not login to {node_label} using default credentials or Manager credentials."
+                    f"Could not login to {node_label} using admin username and default or SD-WAN Manager password."
+                    f"Please fix admin user password and rerun the script."
                 )
     except unicon.core.errors.ConnectionError as conn_err:
         current_exception = conn_err

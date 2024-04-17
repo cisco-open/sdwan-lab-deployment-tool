@@ -33,7 +33,7 @@ from catalystwan.endpoints.configuration_settings import (
     Organization,
     VManageDataStream,
 )
-from catalystwan.exceptions import ManagerRequestException
+from catalystwan.exceptions import ManagerRequestException, ManagerHTTPError
 from catalystwan.session import ManagerSession, create_manager_session
 from catalystwan.vmanage_auth import UnauthorizedAccessError
 from cisco_sdwan.base.rest_api import Rest
@@ -284,7 +284,10 @@ def load_certificate_details() -> List[str]:
 
 
 def onboard_control_components(
-    manager_session: ManagerSession, new_control_components: Dict[str, str], log: Logger
+    manager_session: ManagerSession,
+    manager_password: str,
+    new_control_components: Dict[str, str],
+    log: Logger,
 ) -> None:
     """
     Add new Validators and Controllers to SD-WAN Manager
@@ -322,15 +325,34 @@ def onboard_control_components(
                 exit(
                     f"Expected node_type validator or controller, but got {node_type} instead."
                 )
-            device_inventory.create_device(
-                payload=DeviceCreationPayload(
-                    device_ip=ip,
-                    username="admin",
-                    password="admin",
-                    generateCSR=False,
-                    personality=personality,
+            try:
+                device_inventory.create_device(
+                    payload=DeviceCreationPayload(
+                        device_ip=ip,
+                        username="admin",
+                        password="admin",
+                        generateCSR=False,
+                        personality=personality,
+                    )
                 )
-            )
+            except ManagerHTTPError:
+                # default credentials didn't work, try Manager username and password
+                try:
+                    device_inventory.create_device(
+                        payload=DeviceCreationPayload(
+                            device_ip=ip,
+                            username="admin",
+                            password=manager_password,
+                            generateCSR=False,
+                            personality=personality,
+                        )
+                    )
+                except ManagerHTTPError:
+                    exit(
+                        f"Could not add controller {node_type.title()} to SD-WAN Manager "
+                        f"using admin username and default or SD-WAN Manager password. "
+                        f"Please fix admin user password and rerun the script."
+                    )
 
     track_progress(log, "Generating certificates for control components...")
     # Prepare the CA for controllers certificate signing
