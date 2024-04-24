@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 2.0.7 [Apr, 2024]
+# Catalyst SD-WAN Lab 2.0.7 [Apr 24, 2024]
 
 #### Fixes:
 
