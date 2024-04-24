@@ -40,9 +40,9 @@ Upgrade initial virtual environment packages:
 
     pip install --upgrade pip setuptools
 
-To install SD-WAN Lab:
+To install SD-WAN Lab Deployment Tool:
 
-    pip install --upgrade git+https://github.com/cisco-open/sdwan-lab-deployment-tool.git
+    pip install --upgrade catalyst-sdwan-lab
     
 Verify that SD-WAN Lab tool can run:
 
