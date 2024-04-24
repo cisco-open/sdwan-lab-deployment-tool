@@ -33,7 +33,7 @@ from catalystwan.endpoints.configuration_settings import (
     Organization,
     VManageDataStream,
 )
-from catalystwan.exceptions import ManagerRequestException, ManagerHTTPError
+from catalystwan.exceptions import ManagerHTTPError, ManagerRequestException
 from catalystwan.session import ManagerSession, create_manager_session
 from catalystwan.vmanage_auth import UnauthorizedAccessError
 from cisco_sdwan.base.rest_api import Rest
