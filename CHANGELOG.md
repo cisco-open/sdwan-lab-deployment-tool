@@ -1,3 +1,12 @@
+# Catalyst SD-WAN Lab 2.0.7 [Apr, 2024]
+
+#### Fixes:
+
+- Raised minumum Python version to 3.9
+- Added support for CML 2.7.0
+- Increased gateway router CPU from 1 to 2
+- Added support for backup and restore task when SD-WAN Controller/Validator/Edge are custom admin password (same as SD-WAN Manager)
+
 # Catalyst SD-WAN Lab 2.0.6 [Apr 15, 2024]
 
 #### Fixes:
@@ -6,7 +15,7 @@
 
 #### Optimizations:
 
-- added automated testing using flake8, isort, black and mypy
+- Added automated testing using flake8, isort, black and mypy
 
 # Catalyst SD-WAN Lab 2.0.5 [Mar 28, 2024]
 
