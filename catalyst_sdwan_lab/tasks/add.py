@@ -279,7 +279,12 @@ def main(
             for vpn0_ip in nodes_vpn0_ips:
                 new_control_components[vpn0_ip] = cml_node_type.split("-")[2]
             # Onboard control components to SD-WAN Manager
-            onboard_control_components(manager_session, new_control_components, log)
+            onboard_control_components(
+                manager_session,
+                manager_password,
+                new_control_components,
+                log,
+            )
 
             if cml_node_type == "cat-sdwan-validator":
                 # For Validator, we need to update the DNS mapping on gateway

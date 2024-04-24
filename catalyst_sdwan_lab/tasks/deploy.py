@@ -152,6 +152,7 @@ def main(
     # Add controllers to SD-WAN Manager and sing certificates
     onboard_control_components(
         manager_session,
+        manager_password,
         {"172.16.0.201": "validator", "172.16.0.101": "controller"},
         log,
     )
