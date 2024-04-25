@@ -34,6 +34,16 @@
               }
             }
           ],
+          "dnsIpv4": {
+              "primaryDnsAddressIpv4": {
+                  "optionType": "global",
+                  "value": "172.16.1.254"
+              },
+              "secondaryDnsAddressIpv4": {
+                  "optionType": "global",
+                  "value": "1.1.1.1"
+              }
+          },
           "enableSdra": { "optionType": "global", "value": false }
         }
       },
@@ -120,7 +130,7 @@
                   },
                   "dnsServers": {
                     "optionType": "global",
-                    "value": ["1.1.1.1", "8.8.8.8"]
+                    "value": ["172.16.1.254", "1.1.1.1"]
                   },
                   "tftpServers": { "optionType": "default" },
                   "optionCode": [],
@@ -164,7 +174,7 @@
           },
           "dnsServers": {
             "optionType": "global",
-            "value": ["1.1.1.1", "8.8.8.8"]
+            "value": ["172.16.1.254", "1.1.1.1"]
           },
           "tftpServers": { "optionType": "default" },
           "optionCode": [],

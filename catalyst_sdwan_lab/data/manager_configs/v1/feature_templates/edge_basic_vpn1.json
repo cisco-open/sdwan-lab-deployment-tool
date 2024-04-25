@@ -80,7 +80,68 @@
           "source-ip",
           "translate-ip"
         ]
+      },
+      "subnet-static": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-ip-subnet",
+          "translate-ip-subnet"
+        ]
       }
+    },
+    "tenant-vpn-id": {},
+    "org-name": {},
+    "route-import-from": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol",
+        "source-vpn"
+      ]
+    },
+    "dns": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "role": {
+            "vipType": "constant",
+            "vipValue": "primary",
+            "vipObjectType": "object"
+          },
+          "dns-addr": {
+            "vipType": "constant",
+            "vipValue": "172.16.1.254",
+            "vipObjectType": "object"
+          },
+          "priority-order": [
+            "dns-addr",
+            "role"
+          ]
+        },
+        {
+          "role": {
+            "vipType": "constant",
+            "vipValue": "secondary",
+            "vipObjectType": "object"
+          },
+          "dns-addr": {
+            "vipType": "constant",
+            "vipValue": "1.1.1.1",
+            "vipObjectType": "object"
+          },
+          "priority-order": [
+            "dns-addr",
+            "role"
+          ]
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "dns-addr"
+      ]
     },
     "route-import": {
       "vipType": "ignore",
@@ -115,6 +176,32 @@
       ]
     },
     "ip": {
+      "route": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "prefix": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "0.0.0.0/0",
+              "vipVariableName": "vpn_ipv4_ip_prefix"
+            },
+            "vpn": {
+              "vipType": "constant",
+              "vipObjectType": "object",
+              "vipValue": 0
+            },
+            "priority-order": [
+              "prefix",
+              "vpn"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "prefix"
+        ]
+      },
       "gre-route": {},
       "ipsec-route": {},
       "service-route": {}
@@ -246,7 +333,68 @@
           "source-ip",
           "translate-ip"
         ]
+      },
+      "subnet-static": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-ip-subnet",
+          "translate-ip-subnet"
+        ]
       }
+    },
+    "tenant-vpn-id": {},
+    "org-name": {},
+    "route-import-from": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol",
+        "source-vpn"
+      ]
+    },
+    "dns": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "role": {
+            "vipType": "constant",
+            "vipValue": "primary",
+            "vipObjectType": "object"
+          },
+          "dns-addr": {
+            "vipType": "constant",
+            "vipValue": "172.16.1.254",
+            "vipObjectType": "object"
+          },
+          "priority-order": [
+            "dns-addr",
+            "role"
+          ]
+        },
+        {
+          "role": {
+            "vipType": "constant",
+            "vipValue": "secondary",
+            "vipObjectType": "object"
+          },
+          "dns-addr": {
+            "vipType": "constant",
+            "vipValue": "1.1.1.1",
+            "vipObjectType": "object"
+          },
+          "priority-order": [
+            "dns-addr",
+            "role"
+          ]
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "dns-addr"
+      ]
     },
     "route-import": {
       "vipType": "ignore",
@@ -281,6 +429,32 @@
       ]
     },
     "ip": {
+      "route": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "prefix": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "0.0.0.0/0",
+              "vipVariableName": "vpn_ipv4_ip_prefix"
+            },
+            "vpn": {
+              "vipType": "constant",
+              "vipObjectType": "object",
+              "vipValue": 0
+            },
+            "priority-order": [
+              "prefix",
+              "vpn"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "prefix"
+        ]
+      },
       "gre-route": {},
       "ipsec-route": {},
       "service-route": {}

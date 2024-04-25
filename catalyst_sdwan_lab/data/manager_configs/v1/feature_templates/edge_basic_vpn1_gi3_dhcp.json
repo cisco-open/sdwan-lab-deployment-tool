@@ -43,9 +43,12 @@
       },
       "dns-servers": {
         "vipObjectType": "list",
-        "vipType": "variableName",
-        "vipValue": "",
-        "vipVariableName": "vpn1_gi3_dhcp_dns"
+        "vipType": "constant",
+        "vipValue": [
+          "172.16.1.254",
+          "1.1.1.1"
+        ],
+        "vipVariableName": "dhcp_dns_server"
       },
       "tftp-servers": {
         "vipObjectType": "list",
@@ -109,9 +112,12 @@
       },
       "dns-servers": {
         "vipObjectType": "list",
-        "vipType": "variableName",
-        "vipValue": "",
-        "vipVariableName": "vpn1_gi3_dhcp_dns"
+        "vipType": "constant",
+        "vipValue": [
+          "172.16.1.254",
+          "1.1.1.1"
+        ],
+        "vipVariableName": "dhcp_dns_server"
       },
       "tftp-servers": {
         "vipObjectType": "list",
