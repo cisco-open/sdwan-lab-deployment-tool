@@ -402,7 +402,6 @@ def main(
                             "/1/GigabitEthernet3//dhcp-server/address-pool": f"192.168.{next_num_str}.0/24",
                             "/1/GigabitEthernet3//dhcp-server/exclude": dhcp_exlude,
                             "/1/GigabitEthernet3//dhcp-server/options/default-gateway": f"192.168.{next_num_str}.1",
-                            "/1/GigabitEthernet3//dhcp-server/options/dns-servers": f"192.168.{next_num_str}.1",
                             "/0/GigabitEthernet2/interface/ip/address": f"172.16.2.{next_num_str}/24",
                             "/0/GigabitEthernet1/interface/ip/address": f"172.16.1.{next_num_str}/24",
                             "//system/host-name": f"Edge{next_num_str}",

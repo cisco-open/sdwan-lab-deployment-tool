@@ -1,3 +1,9 @@
+# Catalyst SD-WAN Lab 2.0.8 [Apr 25, 2024]
+
+#### Fixes:
+
+- Fixed problem where devices connected on SD-WAN Edge Gi3 LAN interface after getting DHCP IP could not connect to the Internet
+
 # Catalyst SD-WAN Lab 2.0.7 [Apr 24, 2024]
 
 #### Fixes:
