@@ -244,8 +244,13 @@ def get_cml_sdwan_image_definition(
 
 
 def get_sdwan_lab_parameters(software_version: str) -> List[int]:
-    major_release = int(software_version.split(".")[0])
-    minor_release = int(software_version.split(".")[1])
+    if '.' in software_version and '-' not in software_version:
+        major_release = int(software_version.split(".")[0])
+        minor_release = int(software_version.split(".")[1])
+    elif '.' not in software_version and '-' in software_version:
+        major_release = int(software_version.split("-")[0])
+        minor_release = int(software_version.split("-")[1])
+
     if major_release <= 19 or (major_release == 20 and minor_release < 4):
         sys.exit("Versions lower than 20.4 are not supported by the script.")
     elif major_release == 20 and minor_release in [4, 5, 6, 7, 8, 9, 10, 11]:
