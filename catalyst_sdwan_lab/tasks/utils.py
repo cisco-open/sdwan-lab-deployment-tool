@@ -233,6 +233,8 @@ def get_cml_sdwan_image_definition(
                     f"Use setup task to upload the correct images."
                 )
         else:
+            for image_id in existing_image_definitions:
+                print(f'--> {image_id}\n')
             available_software_versions = [
                 image_id.split("-")[3] for image_id in existing_image_definitions
             ]
