@@ -233,10 +233,9 @@ def get_cml_sdwan_image_definition(
                     f"Use setup task to upload the correct images."
                 )
         else:
-            for image_id in existing_image_definitions:
-                print(f'--> {image_id}\n')
             available_software_versions = [
-                image_id.split("-")[3] for image_id in existing_image_definitions
+                # If version notation is with hyphens we need join all the elements into one string
+                "-".join(image_id.split("-")[3:]) for image_id in existing_image_definitions
             ]
             sys.exit(
                 f'Requested SD-WAN {node_definition.split("-")[2].title()} software image version '
@@ -246,6 +245,7 @@ def get_cml_sdwan_image_definition(
 
 
 def get_sdwan_lab_parameters(software_version: str) -> List[int]:
+    # Conditional required for version notation with hyphens. It happens if images are imported to CML from refplat
     if '.' in software_version and '-' not in software_version:
         major_release = int(software_version.split(".")[0])
         minor_release = int(software_version.split(".")[1])
