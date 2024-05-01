@@ -8,7 +8,8 @@ This tool automates [Cisco Catalyst SD-WAN](https://www.cisco.com/site/us/en/sol
 ## Getting Started
 
 ### Prerequisites
-Catalyst SD-WAN Lab Deployment Tool requires Linux or macOS system. To run is on Windows, please use [Linux on Windows with WSL](/README.md#appendix---wsl-installation) or set up Linux VM/container.
+Catalyst SD-WAN Lab Deployment Tool requires Linux or macOS system. 
+To run is on Windows, please use [Linux on Windows with WSL](/README.md#appendix---wsl-installation) or set up Linux VM/container.
 
 Catalyst SD-WAN Lab Deployment Tool requires Python 3.9 or newer. This can be verified by pasting the following to a terminal window:
 
