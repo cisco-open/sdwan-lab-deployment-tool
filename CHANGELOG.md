@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.0.10 [May, 2024]
+
+- Added support for Python3.12
+
 # Catalyst SD-WAN Lab 2.0.9 [Apr 26, 2024]
 
 #### Fixes:

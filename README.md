@@ -1,5 +1,5 @@
 [![Tests](https://github.com/cisco-open/sdwan-lab-deployment-tool/actions/workflows/test.yml/badge.svg)](https://github.com/netascode/iac-validate/actions/workflows/test.yml)
-![Python Support](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-informational "Python Support: 3.9, 3.10, 3.11")
+![Python Support](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-informational "Python Support: 3.9, 3.10, 3.11, 3.12")
 
 # Catalyst SD-WAN Lab Deployment Tool for Cisco Modeling Labs
 
@@ -8,9 +8,11 @@ This tool automates [Cisco Catalyst SD-WAN](https://www.cisco.com/site/us/en/sol
 ## Getting Started
 
 ### Prerequisites
-Catalyst SD-WAN Lab tool requires Python 3.8 or newer. This can be verified by pasting the following to a terminal window:
+Catalyst SD-WAN Lab Deployment Tool requires Linux or macOS system. To run is on Windows, please set up Linux VM/container or use [Linux on Windows with WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
 
-    % python3 -c "import sys;assert sys.version_info>(3,8)" && echo "ALL GOOD"
+Catalyst SD-WAN Lab Deployment Tool requires Python 3.9 or newer. This can be verified by pasting the following to a terminal window:
+
+    % python3 -c "import sys;assert sys.version_info>(3,9)" && echo "ALL GOOD"
 
 If 'ALL GOOD' is printed it means Python requirements are met. If not, download and install the latest 3.x version at Python.org (https://www.python.org/downloads/).
 
@@ -54,7 +56,7 @@ You can also use the following shortcut to run any lab task:
 
 Notes:
 - The virtual environment is deactivated by typing 'deactivate' at the command prompt.
-- Before running SD-WAN Lab again, make sure to activate the virtual environment back again (source venv/bin/activate).
+- Before running Catalyst SD-WAN Lab Deployment Tool again, make sure to activate the virtual environment back again (source venv/bin/activate).
 
 ## Usage
 Simmilar to [Sastre](https://github.com/CiscoDevNet/sastre), the command line is structured as a set of base parameters, the task specification followed by task-specific parameters:
