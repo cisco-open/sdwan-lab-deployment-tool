@@ -8,7 +8,7 @@ This tool automates [Cisco Catalyst SD-WAN](https://www.cisco.com/site/us/en/sol
 ## Getting Started
 
 ### Prerequisites
-Catalyst SD-WAN Lab Deployment Tool requires Linux or macOS system. To run is on Windows, please set up Linux VM/container or use [Linux on Windows with WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
+Catalyst SD-WAN Lab Deployment Tool requires Linux or macOS system. To run is on Windows, please use [Linux on Windows with WSL](/README.md#appendix---wsl-installation) or set up Linux VM/container.
 
 Catalyst SD-WAN Lab Deployment Tool requires Python 3.9 or newer. This can be verified by pasting the following to a terminal window:
 
@@ -303,6 +303,26 @@ This task has several task-specific parameters.
         -h, --help        show this help message and exit
         --lab <lab_name>  Lab name
         --force           Delete the lab without asking for confirmation. Note the all lab data will be lost!
+
+## Appendix - WSL Installation
+
+To install WSL on your Windows VM or Physical machine. Ensure that the HW Virutalization is enabled in the BIOS or VM Defintion.
+
+If its on Windows server you may need to run this command to allow the WSL to function properly
+
+Open PowerShell as Administrator and run:
+
+`Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux`
+
+Install WSL with default distribution (Ubuntu)
+Open PowerShell and run
+
+ `wsl --install`
+
+Once the installation is finished and you have restarted Windows you are able to continue the installation of this tool as described in the [installation section](README.md#installing) of this document.
+
+You can read more about [Linux on Windows with WSL here](https://learn.microsoft.com/en-us/windows/wsl/install).
+
 
 ## Authors
 Tomasz Zarski (tzarski@cisco.com)
