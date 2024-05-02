@@ -5,7 +5,9 @@
 
 This tool automates [Cisco Catalyst SD-WAN](https://www.cisco.com/site/us/en/solutions/networking/sdwan/index.html) lab deployment inside [Cisco Modeling Labs (CML)](https://www.cisco.com/c/en/us/products/cloud-systems-management/modeling-labs/index.html).
 
-The tool will help you automate your CML lab deployments with SD-WAN Manager, Controllers and Validators and up to 20 edges within one lab pod.
+The tool will help you automate your CML lab deployments with SD-WAN Manager, Controllers and Validators and up to 20 SD-WAN edges. You can build as pods as your CML platform can host. Please refer to the [Limitations and scale](#limitations-and-scale) for details.
+
+
 
 ## Getting Started
 
@@ -306,6 +308,17 @@ This task has several task-specific parameters.
         -h, --help        show this help message and exit
         --lab <lab_name>  Lab name
         --force           Delete the lab without asking for confirmation. Note the all lab data will be lost!
+
+## Limitations and scale
+The tool supports the following scale per CML lab:
+
+- 1 SD-wan Manager instance (Cluster is not yet supported)
+- 8 SD-WAN Validators (Documented support from CCO)
+- 12 SD-WAN Controllers (Documented support from CCO)
+- 20 SD-WAN Edges
+- 10 SD-Routing edges
+
+
 
 ## Appendix - WSL Installation
 
