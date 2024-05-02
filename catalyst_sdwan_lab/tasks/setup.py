@@ -26,14 +26,14 @@ from .utils import (
 def upload_image_and_create_definition(
     log: Logger,
     cml: ClientLibrary,
-    existing_image_definitions: List[str],
+    existing_image_definitions_ids: List[str],
     node_type: str,
     software_version: str,
     node_label: str,
     software_images_dir: str,
     filename: str,
 ) -> None:
-    if f"{node_type}-{software_version}" in existing_image_definitions:
+    if f"{node_type}-{software_version}" in existing_image_definitions_ids:
         log.info(
             f"Skipping {filename} as {node_type}-{software_version} image definition already exists."
         )
@@ -85,6 +85,13 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
                     )
                 else:
                     # If dicts are not the same, then we need to update the node definition
+                    # Before update, check if node definition is read only
+                    if current_node_definition["general"]["read_only"]:
+                        # Remove read-only flag
+                        cml.definitions.set_node_definition_read_only(
+                            current_node_definition["id"], False
+                        )
+
                     log.info(
                         f'[UPDATE] Updating node {new_node_definition["id"]} with '
                         f'{new_node_definition["sim"]["linux_native"]["cpus"]} CPUs and '
@@ -102,13 +109,38 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
                 # If node is not yet created, we need to create it
                 log.info(f'[CREATE] Creating node {new_node_definition["id"]}...')
                 cml.definitions.upload_node_definition(new_node_definition, json=True)
+
+    # Refresh node definitions
+    node_definitions = cml.definitions.node_definitions()
     track_progress(log, "Verifying software images...")
     # Get the list of all image definitions already created in CML.
     # This is to avoid image duplication during upload.
-    existing_image_definitions = [
-        image_definition["id"]
-        for image_definition in cml.definitions.image_definitions()
+    existing_image_definitions = cml.definitions.image_definitions()
+    existing_image_definitions_ids = [
+        image_definition["id"] for image_definition in existing_image_definitions
     ]
+    for image_definition in existing_image_definitions:
+        match = re.match(
+            r"^cat-sdwan-(edge|controller|validator|manager)-([\w\-]+)$",
+            image_definition["id"],
+        )
+        if match:
+            # Migrate image from using - in software version to using .
+            # For example from cat-sdwan-manager-20-13-1 to cat-sdwan-manager-20.13.1
+            # Before update, check if node definition is read only
+            if image_definition["read_only"]:
+                # Remove read-only flag
+                cml.definitions.set_image_definition_read_only(
+                    image_definition["id"], False
+                )
+            cml.definitions.remove_image_definition(image_definition["id"])
+            # Set new ID and disk folder
+            image_definition["id"] = (
+                f"cat-sdwan-{match.group(1)}-{match.group(2).replace('-', '.')}"
+            )
+            image_definition["disk_subfolder"] = image_definition["id"]
+            cml.definitions.upload_image_definition(image_definition)
+
     log.info(f"Looking for new software images in {os.getcwd()}...")
     software_type_to_node_type_mapping = {
         "edge": "cat-sdwan-validator",
@@ -116,8 +148,7 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
         "smart": "cat-sdwan-controller",
         "vmanage": "cat-sdwan-manager",
     }
-    # Refresh node definitions
-    node_definitions = cml.definitions.node_definitions()
+
     # Check for any software that is present in software_images folder.
     for filename in os.listdir(SOFTWARE_IMAGES_DIR):
         if software_parser := re.match(r"viptela-(\w+)-([\d.]+)-", filename):
@@ -132,7 +163,7 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
             upload_image_and_create_definition(
                 log,
                 cml,
-                existing_image_definitions,
+                existing_image_definitions_ids,
                 node_type,
                 software_version,
                 node_label,
@@ -154,7 +185,7 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
             upload_image_and_create_definition(
                 log,
                 cml,
-                existing_image_definitions,
+                existing_image_definitions_ids,
                 node_type,
                 software_version,
                 node_label,
