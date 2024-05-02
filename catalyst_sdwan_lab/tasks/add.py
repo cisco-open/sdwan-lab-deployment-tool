@@ -357,6 +357,12 @@ def main(
                 )
             ]
 
+            if number_of_devices > len(free_uuids):
+                exit(
+                    f"Cannot onboard {number_of_devices} WAN Edges as there are only "
+                    f"{len(free_uuids)} unused UUIDs available."
+                )
+
             new_nodes_nums = []
             for i in range(1, number_of_devices + 1):
                 new_nodes_nums.append(f"{biggest_num + i}")
@@ -601,6 +607,12 @@ def main(
                     device_model="vedge-C8000V-SD-ROUTING", cert_install_status=None
                 )
             ]
+
+            if number_of_devices > len(free_uuids):
+                exit(
+                    f"Cannot onboard {number_of_devices} WAN Edges as there are only "
+                    f"{len(free_uuids)} unused UUIDs available."
+                )
 
             uuid_to_token = {
                 device.uuid: device.serial_number
