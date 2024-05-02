@@ -5,6 +5,8 @@
 
 This tool automates [Cisco Catalyst SD-WAN](https://www.cisco.com/site/us/en/solutions/networking/sdwan/index.html) lab deployment inside [Cisco Modeling Labs (CML)](https://www.cisco.com/c/en/us/products/cloud-systems-management/modeling-labs/index.html).
 
+The tool will help you automate your CML lab deployments with SD-WAN Manager, Controllers and Validators and up to 20 edges within one lab pod.
+
 ## Getting Started
 
 ### Prerequisites
