@@ -1,5 +1,5 @@
 [![Tests](https://github.com/cisco-open/sdwan-lab-deployment-tool/actions/workflows/test.yml/badge.svg)](https://github.com/netascode/iac-validate/actions/workflows/test.yml)
-![Python Support](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-informational "Python Support: 3.9, 3.10, 3.11, 3.12")
+![Python Support](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-informational "Python Support: 3.9, 3.10, 3.11, 3.12")
 
 # Catalyst SD-WAN Lab Deployment Tool for Cisco Modeling Labs
 
