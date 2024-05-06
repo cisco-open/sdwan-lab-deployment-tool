@@ -101,14 +101,12 @@ def main() -> None:
         "setup", help="Setup on-prem CML to use Catalyst SD-WAN Lab automation."
     )
     setup_parser.add_argument(
-        "--migrate",
+        "--list",
         action="store_const",
-        dest="migrate",
+        dest="list",
         const=True,
         default=False,
-        help="Migrate node and image definitions from SD-WAN Lab v1.x to v2.x. "
-        "This task should be run once if CML server was using "
-        "SD-WAN LAb Tool v1.x in the past.",
+        help="After running setup task, list the available SD-WAN software per node type.",
     )
 
     deploy_parser = task_subparsers.add_parser(
@@ -522,7 +520,7 @@ def main() -> None:
     )
     verify_cml_version(cml)
     if cli_args.task == "setup":
-        setup.main(cml, cli_args.loglevel, cli_args.migrate)
+        setup.main(cml, cli_args.loglevel, cli_args.list)
     elif cli_args.task == "deploy":
         deploy.main(
             cml,

@@ -11,7 +11,6 @@ from logging import Logger
 from os.path import join
 from typing import List, Union
 
-from httpx import HTTPStatusError
 from ruamel.yaml import YAML
 from virl2_client import ClientLibrary
 
@@ -49,7 +48,7 @@ def upload_image_and_create_definition(
         cml.definitions.upload_image_definition(body=json.dumps(image_def))
 
 
-def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
+def main(cml: ClientLibrary, loglevel: Union[int, str], list: bool) -> None:
     # Setup logging
     log = setup_logging(loglevel)
 
@@ -196,71 +195,22 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], migrate: bool) -> None:
         else:
             log.debug(f"Skipping file {filename} (not a valid image).")
 
-    if migrate:
-        node_definition_map = {
-            "vmanage": "cat-sdwan-manager",
-            "vsmart": "cat-sdwan-controller",
-            "vedge": "cat-sdwan-validator",
-            "cedge": "cat-sdwan-edge",
-        }
-        node_label_map = {
-            "vmanage": "Catalyst SD-WAN Manager",
-            "vsmart": "Catalyst SD-WAN Controller",
-            "vedge": "Catalyst SD-WAN Validator",
-            "cedge": "Catalyst SD-WAN Edge",
-        }
-        track_progress(log, "Running migration of node/image definitions...")
-        # Migrate SD-WAN Lab Tool v1.x image definitions to v2.x
-        all_migrated = True
-        for image_definition in cml.definitions.image_definitions():
-            current_id = image_definition["id"]
-            current_node_definition = image_definition["node_definition_id"]
-            if current_node_definition in ["vmanage", "vsmart", "vedge", "cedge"]:
-                try:
-                    software_version = image_definition["id"].split("-")[1]
-                    new_image_definition = {
-                        "node_definition_id": node_definition_map[
-                            current_node_definition
-                        ],
-                        "id": f"{node_definition_map[current_node_definition]}-{software_version}",
-                        "read_only": False,
-                        "label": f"{node_label_map[current_node_definition]} {software_version}",
-                        "disk_image": image_definition["disk_image"],
-                    }
-
-                    cml.definitions.remove_image_definition(current_id)
-                    cml.definitions.upload_image_definition(new_image_definition)
-                    log.info(
-                        f"Migrated image definition {current_id} to "
-                        f"{node_definition_map[current_node_definition]}-{software_version}"
-                    )
-
-                except HTTPStatusError as e:
-                    all_migrated = False
-                    error = e.response.json()
-                    if error["code"] == 400 and error["description"].startswith(
-                        "Image Definition in use:"
-                    ):
-                        log.info(
-                            f"Cannot migrate image definition {current_id} as it is currently in use."
-                        )
-
-        for node_definition in cml.definitions.node_definitions():
-            node_id = node_definition["id"]
-            if node_id in ["vmanage", "vsmart", "vedge", "cedge"]:
-                if cml.definitions.image_definitions_for_node_definition(node_id):
-                    log.info(
-                        f"Cannot delete node definition {node_id} as it is currently in use."
-                    )
-                    all_migrated = False
-                else:
-                    cml.definitions.remove_node_definition(node_id)
-                    log.info(f"Node definition {node_id} successfully removed.")
-
-        if not all_migrated:
-            print(
-                "\rSome node/image definitions could not be migrated as they are in use. "
-                "Please remove the labs using the old definitions are rerun the setup with --migrate option."
-            )
-
     track_progress(log, "Setup task done\n")
+
+    if list:
+        print("Available Software Versions:")
+        for node_definition_id in [
+            "cat-sdwan-manager",
+            "cat-sdwan-controller",
+            "cat-sdwan-validator",
+            "cat-sdwan-edge",
+        ]:
+            available_software_versions = []
+            # List available SD-WAN software
+            for (
+                image_definition
+            ) in cml.definitions.image_definitions_for_node_definition(
+                node_definition_id
+            ):
+                available_software_versions.append(image_definition["id"].split("-")[3])
+            print(f"- {node_definition_id}: {available_software_versions}")
