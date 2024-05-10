@@ -1,3 +1,12 @@
+# Catalyst SD-WAN Lab 2.0.10 [May 10, 2024]
+
+- Added support for Python 3.12
+- In setup task, added functionality to covert refplat ISO SD-WAN images to proper format so script can use them
+- In setup task, added --list parameter to list all SD-WAN software images available on CML server
+- Fixed problem where setup task might fail with "Cannot modify read-only node definition"
+- Fixed problem where add task could fail with undescriptive error "IndexError: list index out of range"
+- Updated README with installation guide for Windows
+
 # Catalyst SD-WAN Lab 2.0.9 [Apr 26, 2024]
 
 #### Fixes:

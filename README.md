@@ -1,16 +1,23 @@
 [![Tests](https://github.com/cisco-open/sdwan-lab-deployment-tool/actions/workflows/test.yml/badge.svg)](https://github.com/netascode/iac-validate/actions/workflows/test.yml)
-![Python Support](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-informational "Python Support: 3.9, 3.10, 3.11")
+![Python Support](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-informational "Python Support: 3.9, 3.10, 3.11, 3.12")
 
 # Catalyst SD-WAN Lab Deployment Tool for Cisco Modeling Labs
 
 This tool automates [Cisco Catalyst SD-WAN](https://www.cisco.com/site/us/en/solutions/networking/sdwan/index.html) lab deployment inside [Cisco Modeling Labs (CML)](https://www.cisco.com/c/en/us/products/cloud-systems-management/modeling-labs/index.html).
 
+The tool will help you automate your CML lab deployments with SD-WAN Manager, Controllers and Validators and up to 20 SD-WAN edges. You can build as pods as your CML platform can host. Please refer to the [Limitations and scale](#limitations-and-scale) for details.
+
+
+
 ## Getting Started
 
 ### Prerequisites
-Catalyst SD-WAN Lab tool requires Python 3.8 or newer. This can be verified by pasting the following to a terminal window:
+Catalyst SD-WAN Lab Deployment Tool requires Linux or macOS system. 
+To run is on Windows, please use [Linux on Windows with WSL](/README.md#appendix---wsl-installation) or set up Linux VM/container.
 
-    % python3 -c "import sys;assert sys.version_info>(3,8)" && echo "ALL GOOD"
+Catalyst SD-WAN Lab Deployment Tool requires Python 3.9 or newer. This can be verified by pasting the following to a terminal window:
+
+    % python3 -c "import sys;assert sys.version_info>(3,9)" && echo "ALL GOOD"
 
 If 'ALL GOOD' is printed it means Python requirements are met. If not, download and install the latest 3.x version at Python.org (https://www.python.org/downloads/).
 
@@ -54,7 +61,7 @@ You can also use the following shortcut to run any lab task:
 
 Notes:
 - The virtual environment is deactivated by typing 'deactivate' at the command prompt.
-- Before running SD-WAN Lab again, make sure to activate the virtual environment back again (source venv/bin/activate).
+- Before running Catalyst SD-WAN Lab Deployment Tool again, make sure to activate the virtual environment back again (source venv/bin/activate).
 
 ## Usage
 Simmilar to [Sastre](https://github.com/CiscoDevNet/sastre), the command line is structured as a set of base parameters, the task specification followed by task-specific parameters:
@@ -301,6 +308,37 @@ This task has several task-specific parameters.
         -h, --help        show this help message and exit
         --lab <lab_name>  Lab name
         --force           Delete the lab without asking for confirmation. Note the all lab data will be lost!
+
+## Limitations and scale
+The tool supports the following scale per CML lab:
+
+- 1 SD-wan Manager instance (Cluster is not yet supported)
+- 8 SD-WAN Validators (Documented support from CCO)
+- 12 SD-WAN Controllers (Documented support from CCO)
+- 20 SD-WAN Edges
+- 10 SD-Routing edges
+
+
+
+## Appendix - WSL Installation
+
+To install WSL on your Windows VM or Physical machine. Ensure that the HW Virutalization is enabled in the BIOS or VM Defintion.
+
+If its on Windows server you may need to run this command to allow the WSL to function properly
+
+Open PowerShell as Administrator and run:
+
+`Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux`
+
+Install WSL with default distribution (Ubuntu)
+Open PowerShell and run
+
+ `wsl --install`
+
+Once the installation is finished and you have restarted Windows you are able to continue the installation of this tool as described in the [installation section](README.md#installing) of this document.
+
+You can read more about [Linux on Windows with WSL here](https://learn.microsoft.com/en-us/windows/wsl/install).
+
 
 ## Authors
 Tomasz Zarski (tzarski@cisco.com)
