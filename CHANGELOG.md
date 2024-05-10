@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 2.0.10 [May, 2024]
+# Catalyst SD-WAN Lab 2.0.10 [May 10, 2024]
 
 - Added support for Python 3.12
 - In setup task, added functionality to covert refplat ISO SD-WAN images to proper format so script can use them
