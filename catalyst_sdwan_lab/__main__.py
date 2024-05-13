@@ -595,6 +595,7 @@ def main() -> None:
             cli_args.loglevel,
         )
 
+
 def verify_cml_version(cml: ClientLibrary) -> None:
     if cml.VERSION.major == 2 and cml.VERSION.minor >= 6:
         pass
