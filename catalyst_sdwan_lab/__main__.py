@@ -22,7 +22,7 @@ from virl2_client import ClientLibrary
 
 import catalyst_sdwan_lab
 
-from .tasks import add, backup, delete, deploy, restore, setup
+from .tasks import add, backup, delete, deploy, restore, setup, sign
 
 # Setup logging
 log = logging.getLogger(__name__)
@@ -490,6 +490,15 @@ def main() -> None:
         ]
     )
 
+    sign_parser = task_subparsers.add_parser(
+        "sign", help="Sign CSR using the SD-WAN Lab Deployment Tool Root CA."
+    )
+    sign_parser.add_argument(
+        "csr_file",
+        metavar="<csr_file>",
+        help="Certificate Signing Request (CSR) File",
+    )
+
     cli_args = main_parser.parse_args()
 
     # Depending on the selected task, prompt for additional arguments (if needed).
@@ -580,6 +589,11 @@ def main() -> None:
         )
     elif cli_args.task == "delete":
         delete.main(cml, cli_args.lab, cli_args.force, cli_args.loglevel)
+    elif cli_args.task == "sign":
+        sign.main(
+            cli_args.csr_file,
+            cli_args.loglevel,
+        )
 
 
 def verify_cml_version(cml: ClientLibrary) -> None:

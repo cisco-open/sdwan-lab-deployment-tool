@@ -77,6 +77,7 @@ Task indicates the operation to be performed. The following tasks are currently 
 * [Backup](#backup-task): Backup the Catalyst SD-WAN Lab runnning in CML, including the CML topology and all its nodes, SD-WAN device states and templates / configuration groups.
 * [Restore](#restore-task): Restore the Catalyst SD-WAN Lab from backup, onboard and confgure control components and create basic feature templates / configuration groups. If there are any WAN Edges, automatically onboard the WAN Edges back to the SD-WAN Manager using the configuration from the backup.
 * [Delete](#delete-task): Delete currently running lab from CML and remove all lab data.
+* [Sign](#sign-task): Sign Certificate Signing Request (CSR) using SD-WAN Lab Deployment Tool Root CA
 
 Task-specific parameters are provided after the task argument.
 
@@ -96,6 +97,7 @@ Task-specific parameters are provided after the task argument.
           backup              Backup running Catalyst SD-WAN lab pod.
           restore             Restore Catalyst SD-WAN POD from backup.
           delete              Delete the CML lab and all the lab data.
+          sign                Sign CSR using the SD-WAN Lab Deployment Tool Root CA.
       
       optional arguments:
         -h, --help            show this help message and exit
@@ -308,6 +310,18 @@ This task has several task-specific parameters.
         -h, --help        show this help message and exit
         --lab <lab_name>  Lab name
         --force           Delete the lab without asking for confirmation. Note the all lab data will be lost!
+
+### Sign Task
+This tasks reads the Certificate Signing Request (CSR) from a file and signs it using SD-WAN Lab Deployment Tool Root CA.
+At the end, the task prints the signed certificate in standard output.
+
+This task has several task-specific parameters.
+
+      sdwan-lab delete -h
+      usage: sdwan-lab.py sign [-h] <csr_file>
+      
+      positional arguments:
+        <csr_file>  Certificate Signing Request (CSR) File
 
 ## Limitations and scale
 The tool supports the following scale per CML lab:
