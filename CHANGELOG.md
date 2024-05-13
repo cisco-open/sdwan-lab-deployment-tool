@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.0.10 [May 13, 2024]
+
+- Added sign task
+
 # Catalyst SD-WAN Lab 2.0.10 [May 10, 2024]
 
 - Added support for Python 3.12
