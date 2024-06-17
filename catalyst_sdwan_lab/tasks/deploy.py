@@ -80,7 +80,15 @@ def main(
     # Prepare the CA for controllers certificate signing
     ca_cert, ca_key, ca_chain = load_certificate_details()
 
-    if not lab_name:
+    if lab_name:
+        # Verify lab name is not duplicated
+        # Although CML allows labs with same name,
+        # this crete confusion for other tasks where lab name is used
+        existing_lab_names = [lab.title for lab in cml.all_labs(show_all=True)]
+        if lab_name in existing_lab_names:
+            exit(f"Lab with name '{lab_name}' already exists. "
+                 f"Please provide a different name to avoid confusion.")
+    else:
         # User didn't provide lab name, generate by default
         # Find existing sdwan labs names
         lab_list_search = [

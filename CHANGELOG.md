@@ -3,6 +3,7 @@
 - Added CML PATty support
 - Bump pyats from 24.2 to 24.5
 - In delete task, print lab name when asking user to confirm if lab should be deleted
+- In add task, added check to avoid deploying labs with duplicate names (although CML allows labs with duplicate names, this creates confusion for other tasks where lab name is used)
 
 # Catalyst SD-WAN Lab 2.0.11 [May 13, 2024]
 
