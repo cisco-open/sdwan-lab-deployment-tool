@@ -60,6 +60,7 @@ def main(
     cml_user: str,
     cml_password: str,
     manager_ip: str,
+    manager_port: int,
     manager_user: str,
     manager_password: str,
     lab_name: str,
@@ -124,7 +125,10 @@ def main(
 
     log.info("Logging in to SD-WAN Manager...")
     manager_session = create_manager_session(
-        url=manager_ip, username=manager_user, password=manager_password
+        url=manager_ip,
+        username=manager_user,
+        password=manager_password,
+        port=manager_port,
     )
     manager_config_settings = manager_session.endpoints.configuration_settings
     org_name = manager_config_settings.get_organizations()[0].org

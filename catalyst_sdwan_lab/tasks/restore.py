@@ -39,12 +39,14 @@ def main(
     cml: ClientLibrary,
     cml_ip: str,
     manager_ip: str,
+    manager_port: int,
     manager_mask: str,
     manager_gateway: str,
     manager_user: str,
     manager_password: str,
     workdir: str,
     lab_name: str,
+    patty_used: bool,
     deleteexisitng: bool,
     retry: bool,
     loglevel: Union[int, str],
@@ -115,11 +117,12 @@ def main(
             )
     else:
         track_progress(log, "Updating lab parameters...")
-        # Check if the IP allocated for SD-WAN Manager is not already it use.
-        check_manager_ip_is_free(manager_ip)
+        if not patty_used:
+            # Check if the IP allocated for SD-WAN Manager is not already it use.
+            check_manager_ip_is_free(manager_ip)
         # Update SD-WAN Manager IP in lab title and description
         cml_topology_dict["lab"]["notes"] = (
-            f"-- Do not delete this text --\nmanager_external_ip = {manager_ip}\n-- "
+            f"-- Do not delete this text --\nmanager_external_ip = {manager_ip}:{manager_port}\n-- "
             f"Do not delete this text --"
         )
         cml_topology_dict["lab"]["title"] = lab_name
@@ -168,6 +171,8 @@ def main(
             manager_node["configuration"] = manager_node["configuration"].replace(
                 existing_manager_gateway, manager_gateway
             )
+        if patty_used:
+            manager_node["tags"] = [f"pat:{manager_port}:443"]
 
         stream = io.StringIO()
         yaml.dump(cml_topology_dict, stream)
@@ -192,9 +197,9 @@ def main(
             manager_node = node
         elif node.node_definition == "cat-sdwan-controller":
             # Add Controller VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"(172.16.0.1\d+)/24", node.config)
+            vpn0_ip_search = re.search(r"(172.16.0.1\d+)/24", node.configuration)
             system_ip_search = re.search(
-                r"<system-ip>([\d.]+)</system-ip>", node.config
+                r"<system-ip>([\d.]+)</system-ip>", node.configuration
             )
             if vpn0_ip_search and system_ip_search:
                 vpn0_ip = vpn0_ip_search.group(1)
@@ -206,7 +211,7 @@ def main(
             node.start()
         elif node.node_definition == "cat-sdwan-validator":
             # Add Validator VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"(172.16.0.2\d+)/24", node.config)
+            vpn0_ip_search = re.search(r"(172.16.0.2\d+)/24", node.configuration)
             if vpn0_ip_search:
                 vpn0_ip = vpn0_ip_search.group(1)
                 control_components[vpn0_ip] = "validator"
@@ -216,7 +221,9 @@ def main(
             # To workaround CML problem, after config export for this node
             # we need to add 'no shutdown' under all interfaces
             node.config = re.sub(
-                r"(interface\sGigabitEthernet\d\n)", r"\1 no shutdown\n", node.config
+                r"(interface\sGigabitEthernet\d\n)",
+                r"\1 no shutdown\n",
+                node.configuration,
             )
             node.start()
         elif node.node_definition != "cat-sdwan-edge":
@@ -228,7 +235,7 @@ def main(
     manager_node.wait_until_converged()
     # Wait for SD-WAN Manager API to be available
     manager_session = wait_for_manager_session(
-        manager_ip, manager_user, manager_password, log
+        manager_ip, manager_port, manager_user, manager_password, log
     )
     # Configure basic settings like org-name, validator fqdn etc.
     configure_manager_basic_settings(manager_session, ca_chain, log)
@@ -378,6 +385,7 @@ def main(
 
     restore_manager_configuration(
         manager_ip,
+        manager_port,
         manager_user,
         manager_password,
         join(workdir, manager_configs_dir),
@@ -393,14 +401,16 @@ def main(
         if node.node_definition == "cat-sdwan-edge" and node.is_booted() is False:
             # Before we boot Edge we need to update the cloud-init OTP token
             uuid_search = re.search(
-                r"vinitparam:[\w\W]+?uuid\s:\s([\w-]+)", node.config
+                r"vinitparam:[\w\W]+?uuid\s:\s([\w-]+)", node.configuration
             )
             if uuid_search:
                 uuid = uuid_search.group(1)
                 token = uuid_to_token[uuid]
                 # Update node config with new otp token
                 node.config = re.sub(
-                    r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)", rf"\1 {token}", node.config
+                    r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)",
+                    rf"\1 {token}",
+                    node.configuration,
                 )
                 wan_edges_to_onboard.append(uuid)
             node.start()

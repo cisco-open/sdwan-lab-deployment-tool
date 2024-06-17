@@ -88,6 +88,7 @@ write_files:
         </vpn-instance>
         <vpn-instance>
           <vpn-id>512</vpn-id>
+{% if not patty_used %}
           <ip>
             <route>
               <prefix>0.0.0.0/0</prefix>
@@ -96,10 +97,15 @@ write_files:
               </next-hop>
             </route>
           </ip>
+{% endif %}
           <interface>
             <if-name>eth0</if-name>
             <ip>
+{% if patty_used %}
+              <dhcp-client>true</dhcp-client>
+{% else %}
               <address>{{ manager_external_ip }}{{ external_subnet_mask }}</address>
+{% endif %}
             </ip>
             <shutdown>false</shutdown>
           </interface>

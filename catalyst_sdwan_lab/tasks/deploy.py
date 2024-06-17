@@ -38,6 +38,7 @@ def main(
     cml: ClientLibrary,
     cml_ip: str,
     manager_ip: str,
+    manager_port: int,
     manager_mask: str,
     manager_gateway: str,
     manager_user: str,
@@ -46,6 +47,7 @@ def main(
     lab_name: str,
     bridge: str,
     dns_server: str,
+    patty_used: bool,
     retry: bool,
     loglevel: Union[int, str],
 ) -> None:
@@ -78,7 +80,17 @@ def main(
     # Prepare the CA for controllers certificate signing
     ca_cert, ca_key, ca_chain = load_certificate_details()
 
-    if not lab_name:
+    if lab_name:
+        # Verify lab name is not duplicated
+        # Although CML allows labs with same name,
+        # this crete confusion for other tasks where lab name is used
+        existing_lab_names = [lab.title for lab in cml.all_labs(show_all=True)]
+        if lab_name in existing_lab_names:
+            exit(
+                f"Lab with name '{lab_name}' already exists. "
+                f"Please provide a different name to avoid confusion."
+            )
+    else:
         # User didn't provide lab name, generate by default
         # Find existing sdwan labs names
         lab_list_search = [
@@ -102,6 +114,10 @@ def main(
     # Encrypt SD-WAN Manager password to SHA512. The encrypted password will be used in bootstrap configuration.
     encrypted_manager_password = sha512_crypt.encrypt(manager_password, rounds=5000)
 
+    if patty_used:
+        # PATty should be used for SD-WAN Manager reachability. This means bridge configuration needs to be set to NAT
+        bridge = "NAT"
+
     cml_topology = cml_tp_tmpl.render(
         title=lab_name,
         manager_image=manager_image,
@@ -120,6 +136,8 @@ def main(
         external_gateway=manager_gateway,
         bridge=bridge,
         dns_server=dns_server,
+        manager_port=manager_port,
+        patty_used=patty_used,
     )
 
     if retry:
@@ -134,8 +152,10 @@ def main(
             )
     else:
         # Prepare and deploy the lab to CML
-        # Check if the IP allocated for SD-WAN Manager is not already it use.
-        check_manager_ip_is_free(manager_ip)
+
+        if not patty_used:
+            # If PATty is not used, check if the IP allocated for SD-WAN Manager is not already it use.
+            check_manager_ip_is_free(manager_ip)
         log.info("Importing the lab...")
         lab = cml.import_lab(cml_topology, lab_name)
         track_progress(log, "Waiting for nodes to boot...")
@@ -144,7 +164,7 @@ def main(
 
     # Wait for SD-WAN Manager API to be available
     manager_session = wait_for_manager_session(
-        manager_ip, manager_user, manager_password, log
+        manager_ip, manager_port, manager_user, manager_password, log
     )
     # Configure basic settings like org-name, validator fqdn etc.
     configure_manager_basic_settings(manager_session, ca_chain, log)
@@ -175,6 +195,7 @@ def main(
 
     restore_manager_configuration(
         manager_ip,
+        manager_port,
         manager_user,
         manager_password,
         join(MANAGER_CONFIGS_DIR, f"v{config_version}"),
@@ -191,7 +212,7 @@ def main(
         f"#############################################\n"
         f"Lab is deployed.\n"
         f"CML URL: https://{cml_ip}\n"
-        f"SD-WAN Manager URL: https://{manager_ip}:8443\n"
+        f"SD-WAN Manager URL: https://{manager_ip}:{manager_port}\n"
         f"Use the username/password set with the script for CML and SD-WAN Manager login.\n"
         f"All other nodes use default username/password.\n"
         f"#############################################"

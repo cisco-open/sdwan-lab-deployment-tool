@@ -139,6 +139,10 @@ The easiest way to run the tool is to provide all the lab variables in the rc fi
 
 Note that if password was not defined, the user will be prompted for a password.
 
+Note that MANAGER_IP can be:
+- an IP address: SD-WAN Manager will be reachable over this IP address. By default the IP address should come from the same subnet as CML IP, unless custom bridge is specified during deploy task.
+- a PATty port in format "pat:<outside-port>": SD-WAN Manager will be reachable over CML IP port <outside-port>. Before using this option, PATTy needs to be enabled on the CML server as per [CML documentation](https://developer.cisco.com/docs/modeling-labs/patty-tool-overview/).
+
 ### Task-specific Parameters
 Task-specific parameters and options are defined after the task is provided. Each task has its own set of parameters. Check the task documentation to learn more about task-specific parameters.
 
