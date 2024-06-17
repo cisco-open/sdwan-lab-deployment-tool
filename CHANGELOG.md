@@ -1,4 +1,8 @@
-# Catalyst SD-WAN Lab 2.0.10 [May 13, 2024]
+# Catalyst SD-WAN Lab 2.0.12 [2024]
+
+- Added CML PATty support
+
+# Catalyst SD-WAN Lab 2.0.11 [May 13, 2024]
 
 - Added sign task
 

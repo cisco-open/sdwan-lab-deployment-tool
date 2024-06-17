@@ -13,7 +13,9 @@ This module implements the command line top-level parser and task dispatcher
 
 import argparse
 import logging
+import re
 import sys
+from typing import Tuple
 
 import urllib3
 from cisco_sdwan.tasks.utils import EnvVar, PromptArg, non_empty_type
@@ -531,10 +533,14 @@ def main() -> None:
     if cli_args.task == "setup":
         setup.main(cml, cli_args.loglevel, cli_args.list)
     elif cli_args.task == "deploy":
+        patty_used, manager_ip, manager_port = set_manager_details(
+            cli_args.cml, cli_args.manager
+        )
         deploy.main(
             cml,
             cli_args.cml,
-            cli_args.manager,
+            manager_ip,
+            manager_port,
             cli_args.mmask,
             cli_args.mgateway,
             cli_args.muser,
@@ -543,15 +549,20 @@ def main() -> None:
             cli_args.lab,
             cli_args.bridge,
             cli_args.dns,
+            patty_used,
             cli_args.retry,
             cli_args.loglevel,
         )
     elif cli_args.task == "add":
+        patty_used, manager_ip, manager_port = set_manager_details(
+            cli_args.cml, cli_args.manager
+        )
         add.main(
             cml,
             cli_args.user,
             cli_args.password,
-            cli_args.manager,
+            manager_ip,
+            manager_port,
             cli_args.muser,
             cli_args.mpassword,
             cli_args.lab,
@@ -561,11 +572,15 @@ def main() -> None:
             cli_args.loglevel,
         )
     elif cli_args.task == "backup":
+        patty_used, manager_ip, manager_port = set_manager_details(
+            cli_args.cml, cli_args.manager
+        )
         backup.main(
             cml,
             cli_args.user,
             cli_args.password,
-            cli_args.manager,
+            manager_ip,
+            manager_port,
             cli_args.muser,
             cli_args.mpassword,
             cli_args.lab,
@@ -573,16 +588,21 @@ def main() -> None:
             cli_args.loglevel,
         )
     elif cli_args.task == "restore":
+        patty_used, manager_ip, manager_port = set_manager_details(
+            cli_args.cml, cli_args.manager
+        )
         restore.main(
             cml,
             cli_args.cml,
-            cli_args.manager,
+            manager_ip,
+            manager_port,
             cli_args.mmask,
             cli_args.mgateway,
             cli_args.muser,
             cli_args.mpassword,
             cli_args.workdir,
             cli_args.lab,
+            patty_used,
             cli_args.deleteexisting,
             cli_args.retry,
             cli_args.loglevel,
@@ -601,6 +621,24 @@ def verify_cml_version(cml: ClientLibrary) -> None:
         pass
     else:
         exit("Upgrade CML to 2.6 or later to use the tool.")
+
+
+def set_manager_details(cml_ip: str, manager_ip: str) -> Tuple[bool, str, int]:
+    patty_used = False
+    manager_port = 443
+    if manager_ip.startswith("pat:"):
+        # PATty should be used for SD-WAN Manager reachability.
+        patty_used = True
+        manager_port_search = re.search(r"pat:(\d+)", manager_ip)
+        if manager_port_search:
+            manager_port = int(manager_port_search.group(1))
+        else:
+            exit(
+                "Wrong PATty configuration for manager_ip (expected pat:<outside_port>)."
+            )
+        manager_ip = cml_ip
+
+    return patty_used, manager_ip, manager_port
 
 
 if __name__ == "__main__":

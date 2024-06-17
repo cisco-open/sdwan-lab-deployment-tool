@@ -15,7 +15,12 @@ nodes:
     label: Manager0{{ manager_num }}
     node_definition: cat-sdwan-manager
     ram: null
+{% if patty_used %}
+    tags:
+      - pat:{{ manager_port }}:443
+{% else %}
     tags: []
+{% endif %}
     x: -280
     y: -80
     interfaces:
@@ -773,7 +778,7 @@ lab:
   description: This lab was deployed using SD-WAN lab automation.
   notes: |-
     -- Do not delete this text --
-    manager_external_ip = {{ manager_external_ip }}
+    manager_external_ip = {{ manager_external_ip }}:{{ manager_port }}
     -- Do not delete this text --
   title: '{{ title }}'
   version: 0.2.1

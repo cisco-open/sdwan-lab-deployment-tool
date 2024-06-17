@@ -18,6 +18,7 @@ from cisco_sdwan.base.rest_api import Rest
 from cisco_sdwan.tasks.implementation import BackupArgs, TaskBackup
 from jinja2 import Environment, FileSystemLoader
 from ruamel.yaml import YAML
+from ruamel.yaml.scalarstring import LiteralScalarString
 from virl2_client import ClientLibrary
 from virl2_client.models.cl_pyats import ClPyats
 
@@ -160,6 +161,7 @@ def main(
     cml_user: str,
     cml_password: str,
     manager_ip: str,
+    manager_port: int,
     manager_user: str,
     manager_password: str,
     lab_name: str,
@@ -192,7 +194,10 @@ def main(
     # Login to SD-WAN Manager
     log.info("Logging in to SD-WAN Manager...")
     manager_session = create_manager_session(
-        url=manager_ip, username=manager_user, password=manager_password
+        url=manager_ip,
+        username=manager_user,
+        password=manager_password,
+        port=manager_port,
     )
     manager_config_settings = manager_session.endpoints.configuration_settings
     org_name = manager_config_settings.get_organizations()[0].org
@@ -369,9 +374,9 @@ def main(
                     "cat-sdwan-controller",
                     "cat-sdwan-edge",
                 ]:
-                    lab_extract["nodes"][i]["configuration"] = custom_node_backup[
-                        lab_extract["nodes"][i]["label"]
-                    ]
+                    lab_extract["nodes"][i]["configuration"] = LiteralScalarString(
+                        custom_node_backup[lab_extract["nodes"][i]["label"]]
+                    )
 
             os.mkdir(workdir)
             with open(rf"{workdir}/cml_topology.yaml", "w") as file:
@@ -388,7 +393,7 @@ def main(
             )
 
             with Rest(
-                base_url=f"https://{manager_ip}",
+                base_url=f"https://{manager_ip}:{manager_port}",
                 username=manager_user,
                 password=manager_password,
             ) as api:

@@ -373,6 +373,7 @@ def onboard_control_components(
 
 def restore_manager_configuration(
     manager_ip: str,
+    manager_port: int,
     manager_user: str,
     manager_password: str,
     workdir: str,
@@ -384,7 +385,7 @@ def restore_manager_configuration(
     sastre_task_args = RestoreArgs(workdir=workdir, attach=attach, tag="all")
 
     with Rest(
-        base_url=f"https://{manager_ip}",
+        base_url=f"https://{manager_ip}:{manager_port}",
         username=manager_user,
         password=manager_password,
     ) as api:
@@ -469,7 +470,11 @@ def track_progress(log: Logger, message: str) -> None:
 
 
 def wait_for_manager_session(
-    manager_ip: str, manager_user: str, manager_password: str, log: Logger
+    manager_ip: str,
+    manager_patty_port: int,
+    manager_user: str,
+    manager_password: str,
+    log: Logger,
 ) -> ManagerSession:
     """
     Retry to log in to SD-WAN Manager until API is up
@@ -483,7 +488,10 @@ def wait_for_manager_session(
     while True:
         try:
             manager_session = create_manager_session(
-                url=manager_ip, username=manager_user, password=manager_password
+                url=manager_ip,
+                port=manager_patty_port,
+                username=manager_user,
+                password=manager_password,
             )
         except (
             ConnectionRefusedError,
