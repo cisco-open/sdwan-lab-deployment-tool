@@ -1,6 +1,7 @@
-# Catalyst SD-WAN Lab 2.0.12 [2024]
+# Catalyst SD-WAN Lab 2.0.12 [Jun 18, 2024]
 
 - Added CML PATty support
+- Bump pyats from 24.2 to 24.5
 
 # Catalyst SD-WAN Lab 2.0.11 [May 13, 2024]
 
