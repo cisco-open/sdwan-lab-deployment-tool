@@ -221,7 +221,9 @@ def main(
             # To workaround CML problem, after config export for this node
             # we need to add 'no shutdown' under all interfaces
             node.config = re.sub(
-                r"(interface\sGigabitEthernet\d\n)", r"\1 no shutdown\n", node.configuration
+                r"(interface\sGigabitEthernet\d\n)",
+                r"\1 no shutdown\n",
+                node.configuration,
             )
             node.start()
         elif node.node_definition != "cat-sdwan-edge":
@@ -406,7 +408,9 @@ def main(
                 token = uuid_to_token[uuid]
                 # Update node config with new otp token
                 node.config = re.sub(
-                    r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)", rf"\1 {token}", node.configuration
+                    r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)",
+                    rf"\1 {token}",
+                    node.configuration,
                 )
                 wan_edges_to_onboard.append(uuid)
             node.start()
