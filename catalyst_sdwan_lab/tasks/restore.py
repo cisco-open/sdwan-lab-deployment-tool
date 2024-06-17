@@ -197,9 +197,9 @@ def main(
             manager_node = node
         elif node.node_definition == "cat-sdwan-controller":
             # Add Controller VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"(172.16.0.1\d+)/24", node.config)
+            vpn0_ip_search = re.search(r"(172.16.0.1\d+)/24", node.configuration)
             system_ip_search = re.search(
-                r"<system-ip>([\d.]+)</system-ip>", node.config
+                r"<system-ip>([\d.]+)</system-ip>", node.configuration
             )
             if vpn0_ip_search and system_ip_search:
                 vpn0_ip = vpn0_ip_search.group(1)
@@ -211,7 +211,7 @@ def main(
             node.start()
         elif node.node_definition == "cat-sdwan-validator":
             # Add Validator VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"(172.16.0.2\d+)/24", node.config)
+            vpn0_ip_search = re.search(r"(172.16.0.2\d+)/24", node.configuration)
             if vpn0_ip_search:
                 vpn0_ip = vpn0_ip_search.group(1)
                 control_components[vpn0_ip] = "validator"
@@ -221,7 +221,7 @@ def main(
             # To workaround CML problem, after config export for this node
             # we need to add 'no shutdown' under all interfaces
             node.config = re.sub(
-                r"(interface\sGigabitEthernet\d\n)", r"\1 no shutdown\n", node.config
+                r"(interface\sGigabitEthernet\d\n)", r"\1 no shutdown\n", node.configuration
             )
             node.start()
         elif node.node_definition != "cat-sdwan-edge":
@@ -399,14 +399,14 @@ def main(
         if node.node_definition == "cat-sdwan-edge" and node.is_booted() is False:
             # Before we boot Edge we need to update the cloud-init OTP token
             uuid_search = re.search(
-                r"vinitparam:[\w\W]+?uuid\s:\s([\w-]+)", node.config
+                r"vinitparam:[\w\W]+?uuid\s:\s([\w-]+)", node.configuration
             )
             if uuid_search:
                 uuid = uuid_search.group(1)
                 token = uuid_to_token[uuid]
                 # Update node config with new otp token
                 node.config = re.sub(
-                    r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)", rf"\1 {token}", node.config
+                    r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)", rf"\1 {token}", node.configuration
                 )
                 wan_edges_to_onboard.append(uuid)
             node.start()
