@@ -23,7 +23,7 @@ cisco-sdwan = "^1.23"
 ruamel-yaml = "^0.17.21"
 urllib3 = "^1.26.18"
 catalystwan = "^0.31.0"
-pyats = "^24.5"
+pyats = ">=23.1,<=24.2"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"
