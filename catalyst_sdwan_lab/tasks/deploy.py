@@ -86,8 +86,10 @@ def main(
         # this crete confusion for other tasks where lab name is used
         existing_lab_names = [lab.title for lab in cml.all_labs(show_all=True)]
         if lab_name in existing_lab_names:
-            exit(f"Lab with name '{lab_name}' already exists. "
-                 f"Please provide a different name to avoid confusion.")
+            exit(
+                f"Lab with name '{lab_name}' already exists. "
+                f"Please provide a different name to avoid confusion."
+            )
     else:
         # User didn't provide lab name, generate by default
         # Find existing sdwan labs names
