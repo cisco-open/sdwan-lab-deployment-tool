@@ -26,14 +26,14 @@ def main(
         # so we ask user to make sure the lab names are unique
         if len(lab) > 1:
             exit(
-                f'There are multiple labs/topologies with name "{lab_name}". Please make sure '
+                f"There are multiple labs/topologies with name '{lab_name}'. Please make sure "
                 f"lab names are unique and rerun the delete task."
             )
         lab = lab[0]
 
         if not force:
             confirmation = input(
-                "\nThis will remove lab and all its data. "
+                f"\nThis will remove '{lab_name}' lab and all its data. "
                 "Are you sure you want to proceed? (yes/no): "
             )
             if confirmation.lower() != "yes":
