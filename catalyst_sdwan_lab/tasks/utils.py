@@ -148,6 +148,7 @@ def configure_manager_basic_settings(
     else:
         log.info("Org-name is already set")
     manager_config_settings.edit_devices(Device(domain_ip=VALIDATOR_FQDN))
+    manager_session.post('/dataservice/settings/configuration/certificate', json={"certificateSigning": "enterprise"})
     manager_config_settings.edit_certificates(
         Certificate(certificate_signing="enterprise")
     )
