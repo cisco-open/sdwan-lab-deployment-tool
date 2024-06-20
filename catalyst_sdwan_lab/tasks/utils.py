@@ -27,9 +27,7 @@ from catalystwan.endpoints.configuration_device_inventory import (
 from catalystwan.endpoints.configuration_settings import (
     Certificate,
     CloudX,
-    DataStreamIPTypeEnum,
     Device,
-    ModeEnum,
     Organization,
     VManageDataStream,
 )
@@ -151,9 +149,7 @@ def configure_manager_basic_settings(
         log.info("Org-name is already set")
     manager_config_settings.edit_devices(Device(domain_ip=VALIDATOR_FQDN))
     manager_config_settings.edit_certificates(
-        Certificate(
-            certificate_signing="enterprise", validityPeriod="1Y", retrieveInterval="60"
-        )
+        Certificate(certificate_signing="enterprise")
     )
     manager_session.put(
         "dataservice/settings/configuration/certificate/enterpriserootca",
@@ -162,12 +158,12 @@ def configure_manager_basic_settings(
     manager_config_settings.edit_vmanage_data_stream(
         VManageDataStream(
             enable=True,
-            ip_type=DataStreamIPTypeEnum.SYSTEM,
-            serverHostName=DataStreamIPTypeEnum.SYSTEM,
+            ip_type="systemIp",
+            serverHostName="systemIp",
             vpn=0,
         )
     )
-    manager_config_settings.edit_cloudx(CloudX(mode=ModeEnum.ON))
+    manager_config_settings.edit_cloudx(CloudX(mode="on"))
 
 
 def create_cert(ca_cert_bytes: bytes, ca_key_bytes: bytes, csr_bytes: bytes) -> bytes:

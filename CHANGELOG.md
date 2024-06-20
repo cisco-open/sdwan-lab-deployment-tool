@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.0.13 [Jun, 2024]
+
+- Added support for SD-WAN Manager 20.15
+
 # Catalyst SD-WAN Lab 2.0.12 [Jun 18, 2024]
 
 - Added CML PATty support
