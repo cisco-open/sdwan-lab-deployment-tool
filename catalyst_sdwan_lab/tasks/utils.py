@@ -25,7 +25,6 @@ from catalystwan.endpoints.configuration_device_inventory import (
     DeviceDetailsResponse,
 )
 from catalystwan.endpoints.configuration_settings import (
-    Certificate,
     CloudX,
     Device,
     Organization,
