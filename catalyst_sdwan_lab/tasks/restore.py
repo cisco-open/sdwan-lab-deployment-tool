@@ -88,7 +88,7 @@ def main(
         lab = next(
             (
                 lab
-                for lab in cml.find_labs_by_title(cml_topology_dict["lab"]["title"])
+                for lab in cml.find_labs_by_title(lab_name)
                 if manager_ip in lab.notes
             ),
             None,
