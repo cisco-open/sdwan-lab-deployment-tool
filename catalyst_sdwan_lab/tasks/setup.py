@@ -11,6 +11,7 @@ from logging import Logger
 from os.path import join
 from typing import List, Union
 
+from httpx import HTTPStatusError
 from ruamel.yaml import YAML
 from virl2_client import ClientLibrary
 
@@ -118,6 +119,7 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], list: bool) -> None:
     existing_image_definitions_ids = [
         image_definition["id"] for image_definition in existing_image_definitions
     ]
+    warnings = []
     for image_definition in existing_image_definitions:
         match = re.match(
             r"^cat-sdwan-(edge|controller|validator|manager)-([\w\-]+)$",
@@ -132,13 +134,18 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], list: bool) -> None:
                 cml.definitions.set_image_definition_read_only(
                     image_definition["id"], False
                 )
-            cml.definitions.remove_image_definition(image_definition["id"])
-            # Set new ID and disk folder
-            image_definition["id"] = (
-                f"cat-sdwan-{match.group(1)}-{match.group(2).replace('-', '.')}"
-            )
-            image_definition["disk_subfolder"] = image_definition["id"]
-            cml.definitions.upload_image_definition(image_definition)
+            try:
+                cml.definitions.remove_image_definition(image_definition["id"])
+                # Set new ID and disk folder
+                image_definition["id"] = (
+                    f"cat-sdwan-{match.group(1)}-{match.group(2).replace('-', '.')}"
+                )
+                image_definition["disk_subfolder"] = image_definition["id"]
+                cml.definitions.upload_image_definition(image_definition)
+            except HTTPStatusError:
+                warnings.append(
+                    f"Cannot setup image {image_definition['id']} as it's currently in use by a lab."
+                )
 
     log.info(f"Looking for new software images in {os.getcwd()}...")
     software_type_to_node_type_mapping = {
@@ -196,6 +203,8 @@ def main(cml: ClientLibrary, loglevel: Union[int, str], list: bool) -> None:
             log.debug(f"Skipping file {filename} (not a valid image).")
 
     track_progress(log, "Setup task done\n")
+    if warnings:
+        print("Warnings:\n" + "\n".join(f"- {warning}" for warning in warnings))
 
     if list:
         print("Available Software Versions:")
