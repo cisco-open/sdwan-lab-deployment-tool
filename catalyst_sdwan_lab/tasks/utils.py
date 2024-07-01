@@ -223,10 +223,14 @@ def get_cml_sdwan_image_definition(
             if new_requested_image_definition in existing_image_definitions:
                 return new_requested_image_definition
             else:
+                available_software_versions = [
+                    image_id.split("-")[3] for image_id in existing_image_definitions
+                ]
                 sys.exit(
                     f'Requested SD-WAN {node_definition.split("-")[2].title()} software image version '
                     f"{software_version} or {new_software_version} is not found in CML. "
-                    f"Use setup task to upload the correct images."
+                    f"Use setup task to upload the correct images or "
+                    f"use any available image: {available_software_versions}"
                 )
         else:
             available_software_versions = [
