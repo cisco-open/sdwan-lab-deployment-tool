@@ -193,10 +193,12 @@ def main(
         )
 
     restore_manager_configuration(
+        manager_session,
         manager_ip,
         manager_port,
         manager_user,
         manager_password,
+        config_version,
         join(MANAGER_CONFIGS_DIR, f"v{config_version}"),
         False,
     )
