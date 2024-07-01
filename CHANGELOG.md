@@ -1,6 +1,7 @@
 # Catalyst SD-WAN Lab 2.0.13 [Jun, 2024]
 
 - Added support for SD-WAN Manager 20.15
+- In add task, added comment that Validator takes few minutes to build the control connections
 
 # Catalyst SD-WAN Lab 2.0.12 [Jun 18, 2024]
 

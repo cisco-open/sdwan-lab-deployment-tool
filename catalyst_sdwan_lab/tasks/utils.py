@@ -147,7 +147,10 @@ def configure_manager_basic_settings(
     else:
         log.info("Org-name is already set")
     manager_config_settings.edit_devices(Device(domain_ip=VALIDATOR_FQDN))
-    manager_session.post('/dataservice/settings/configuration/certificate', json={"certificateSigning": "enterprise"})
+    manager_session.post(
+        "/dataservice/settings/configuration/certificate",
+        json={"certificateSigning": "enterprise"},
+    )
     manager_session.put(
         "dataservice/settings/configuration/certificate/enterpriserootca",
         json={"enterpriseRootCA": ca_chain},
@@ -396,13 +399,29 @@ def restore_manager_configuration(
     if config_version == 2:
         # If configuration version is 2, attach policy group to configuration group
         # Get the profile ID of the policy object
-        policy_profile_id = manager_session.get("dataservice/v1/feature-profile/sdwan/policy-object").json()[0]["profileId"]
-        config_group_id = next(cfg_grp["id"] for cfg_grp in manager_session.get("dataservice/v1/config-group").json() if cfg_grp["name"] == "edge_basic")
-        config_group = manager_session.api.config_group.get().filter(name="edge_basic").single_or_default()
+        policy_profile_id = manager_session.get(
+            "dataservice/v1/feature-profile/sdwan/policy-object"
+        ).json()[0]["profileId"]
+        config_group_id = next(
+            cfg_grp["id"]
+            for cfg_grp in manager_session.get("dataservice/v1/config-group").json()
+            if cfg_grp["name"] == "edge_basic"
+        )
+        config_group = (
+            manager_session.api.config_group.get()
+            .filter(name="edge_basic")
+            .single_or_default()
+        )
         profile_ids = [profile.id for profile in config_group.profiles]
         if policy_profile_id not in profile_ids:
             profile_ids.append(policy_profile_id)
-            manager_session.api.config_group.edit(config_group_id, config_group.name, config_group.description, config_group.solution, profile_ids)
+            manager_session.api.config_group.edit(
+                config_group_id,
+                config_group.name,
+                config_group.description,
+                config_group.solution,
+                profile_ids,
+            )
 
 
 def setup_logging(loglevel: Union[int, str]) -> Logger:

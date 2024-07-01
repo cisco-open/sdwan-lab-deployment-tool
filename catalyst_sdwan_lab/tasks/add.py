@@ -686,6 +686,11 @@ def main(
             wait_for_wan_edge_onboaring(manager_session, wan_edges_to_onboard, log)
 
         track_progress(log, "Add task done\n")
+        if cml_node_type == "cat-sdwan-validator":
+            print(
+                "The validator is now spun up, it takes 5-10 minutes, "
+                "before it shows up in the Manager due to DNS and cert updates."
+            )
 
     else:
         exit(f"Could not find a lab with name {lab_name}.")
