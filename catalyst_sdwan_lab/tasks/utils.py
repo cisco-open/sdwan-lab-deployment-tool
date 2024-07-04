@@ -403,9 +403,18 @@ def restore_manager_configuration(
     if config_version == 2:
         # If configuration version is 2, attach policy group to configuration group
         # Get the profile ID of the policy object
-        policy_profile_id = manager_session.get(
+        policy_profile_search = manager_session.get(
             "dataservice/v1/feature-profile/sdwan/policy-object"
-        ).json()[0]["profileId"]
+        ).json()
+        if policy_profile_search:
+            # Use existing policy profile
+            policy_profile_id = policy_profile_search[0]["profileId"]
+        else:
+            # Create new policy profile
+            policy_profile_id = manager_session.post(
+                "dataservice/v1/feature-profile/sdwan/policy-object",
+                json={"name": "policy_object_profile", "description": ""},
+            ).json()["id"]
         config_group_id = next(
             cfg_grp["id"]
             for cfg_grp in manager_session.get("dataservice/v1/config-group").json()

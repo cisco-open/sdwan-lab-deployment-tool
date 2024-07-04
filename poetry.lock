@@ -464,13 +464,13 @@ files = [
 
 [[package]]
 name = "cisco-sdwan"
-version = "1.23.1"
+version = "1.24"
 description = "Cisco-SDWAN Automation Toolset"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "cisco_sdwan-1.23.1-py3-none-any.whl", hash = "sha256:6190cd6ac266eb6528832921f95c0997dd370d5c75ca8bb7941a3ab9c96b6f91"},
-    {file = "cisco_sdwan-1.23.1.tar.gz", hash = "sha256:1e0fbe0bcc4fa9d4ceb77352e40a89c562c676c3e5f12f126f92a2a566d7d23f"},
+    {file = "cisco_sdwan-1.24-py3-none-any.whl", hash = "sha256:da39b1c6034bac49c7d41743f9c029532c6d81a4f46358a29f13d0fe2622d60f"},
+    {file = "cisco_sdwan-1.24.tar.gz", hash = "sha256:bf0d945000ba971468cd9a80b4fad72ecb551eca53b449bde437c8ba9322cb9a"},
 ]
 
 [package.dependencies]
@@ -2585,4 +2585,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "0816b29a1ae49094aa5a2c193ccf26952b07b4d2eeb35931aaecc6d909ba5538"
+content-hash = "605d09c692ac2e46dfb57676b51ca997d3238b1af8db10fc2cc692d886509b12"
