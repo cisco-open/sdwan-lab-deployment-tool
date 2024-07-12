@@ -21,7 +21,7 @@ passlib = "^1.7.4"
 jinja2 = "3.1.4"
 cisco-sdwan = "^1.24"
 ruamel-yaml = "^0.17.21"
-urllib3 = "^1.26.18"
+urllib3 = ">=1.26.18,<3.0.0"
 catalystwan = "^0.33.10"
 pyats = ">=23.1,<=24.2"
 
