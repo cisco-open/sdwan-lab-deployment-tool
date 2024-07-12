@@ -14,19 +14,19 @@
       "templateType": "aaa"
     },
     {
-      "templateId": "3f366597-f83a-4e88-94f0-ccd59b53ace7",
+      "templateId": "f7fa273b-3099-4573-b2fd-2c68e539e821",
       "templateType": "omp-vsmart"
     },
     {
-      "templateId": "bf11620f-4e20-432b-9ae6-a3304643dbce",
+      "templateId": "cea02597-6e42-44d2-8cb9-5e49d385360a",
       "templateType": "security-vsmart"
     },
     {
-      "templateId": "fbba7b22-678b-4208-bb41-2323086c8536",
+      "templateId": "a9bf737b-88d9-4ab3-a5cf-453284015dbb",
       "templateType": "system-vsmart",
       "subTemplates": [
         {
-          "templateId": "29d0a283-14f0-4bac-b897-0ae9f62eedad",
+          "templateId": "44f060c2-1846-4dd8-8ec4-a7436f8928b3",
           "templateType": "logging"
         }
       ]
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "templateId": "bdeef0d9-0d2e-4ae6-8624-a05710e2de2a",
+      "templateId": "1a7a69e8-49b1-4054-a6da-6ceb18af4fb3",
       "templateType": "vpn-vsmart"
     }
   ],

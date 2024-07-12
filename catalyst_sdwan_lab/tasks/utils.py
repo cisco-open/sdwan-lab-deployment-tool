@@ -25,11 +25,8 @@ from catalystwan.endpoints.configuration_device_inventory import (
     DeviceDetailsResponse,
 )
 from catalystwan.endpoints.configuration_settings import (
-    Certificate,
     CloudX,
-    DataStreamIPTypeEnum,
     Device,
-    ModeEnum,
     Organization,
     VManageDataStream,
 )
@@ -150,10 +147,9 @@ def configure_manager_basic_settings(
     else:
         log.info("Org-name is already set")
     manager_config_settings.edit_devices(Device(domain_ip=VALIDATOR_FQDN))
-    manager_config_settings.edit_certificates(
-        Certificate(
-            certificate_signing="enterprise", validityPeriod="1Y", retrieveInterval="60"
-        )
+    manager_session.post(
+        "/dataservice/settings/configuration/certificate",
+        json={"certificateSigning": "enterprise"},
     )
     manager_session.put(
         "dataservice/settings/configuration/certificate/enterpriserootca",
@@ -162,12 +158,12 @@ def configure_manager_basic_settings(
     manager_config_settings.edit_vmanage_data_stream(
         VManageDataStream(
             enable=True,
-            ip_type=DataStreamIPTypeEnum.SYSTEM,
-            serverHostName=DataStreamIPTypeEnum.SYSTEM,
+            ip_type="systemIp",
+            serverHostName="systemIp",
             vpn=0,
         )
     )
-    manager_config_settings.edit_cloudx(CloudX(mode=ModeEnum.ON))
+    manager_config_settings.edit_cloudx(CloudX(mode="on"))
 
 
 def create_cert(ca_cert_bytes: bytes, ca_key_bytes: bytes, csr_bytes: bytes) -> bytes:
@@ -227,10 +223,14 @@ def get_cml_sdwan_image_definition(
             if new_requested_image_definition in existing_image_definitions:
                 return new_requested_image_definition
             else:
+                available_software_versions = [
+                    image_id.split("-")[3] for image_id in existing_image_definitions
+                ]
                 sys.exit(
                     f'Requested SD-WAN {node_definition.split("-")[2].title()} software image version '
                     f"{software_version} or {new_software_version} is not found in CML. "
-                    f"Use setup task to upload the correct images."
+                    f"Use setup task to upload the correct images or "
+                    f"use any available image: {available_software_versions}"
                 )
         else:
             available_software_versions = [
@@ -372,10 +372,12 @@ def onboard_control_components(
 
 
 def restore_manager_configuration(
+    manager_session: ManagerSession,
     manager_ip: str,
     manager_port: int,
     manager_user: str,
     manager_password: str,
+    config_version: int,
     workdir: str,
     attach: bool,
 ) -> None:
@@ -398,6 +400,41 @@ def restore_manager_configuration(
         task.log_info(
             f'Template Restore task completed {task.outcome("successfully", "with caveats: {tally}")}'
         )
+    if config_version == 2:
+        # If configuration version is 2, attach policy group to configuration group
+        # Get the profile ID of the policy object
+        policy_profile_search = manager_session.get(
+            "dataservice/v1/feature-profile/sdwan/policy-object"
+        ).json()
+        if policy_profile_search:
+            # Use existing policy profile
+            policy_profile_id = policy_profile_search[0]["profileId"]
+        else:
+            # Create new policy profile
+            policy_profile_id = manager_session.post(
+                "dataservice/v1/feature-profile/sdwan/policy-object",
+                json={"name": "policy_object_profile", "description": ""},
+            ).json()["id"]
+        config_group_id = next(
+            cfg_grp["id"]
+            for cfg_grp in manager_session.get("dataservice/v1/config-group").json()
+            if cfg_grp["name"] == "edge_basic"
+        )
+        config_group = (
+            manager_session.api.config_group.get()
+            .filter(name="edge_basic")
+            .single_or_default()
+        )
+        profile_ids = [profile.id for profile in config_group.profiles]
+        if policy_profile_id not in profile_ids:
+            profile_ids.append(policy_profile_id)
+            manager_session.api.config_group.edit(
+                config_group_id,
+                config_group.name,
+                config_group.description,
+                config_group.solution,
+                profile_ids,
+            )
 
 
 def setup_logging(loglevel: Union[int, str]) -> Logger:

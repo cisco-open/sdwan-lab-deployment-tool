@@ -80,17 +80,7 @@ def main(
     # Prepare the CA for controllers certificate signing
     ca_cert, ca_key, ca_chain = load_certificate_details()
 
-    if lab_name:
-        # Verify lab name is not duplicated
-        # Although CML allows labs with same name,
-        # this crete confusion for other tasks where lab name is used
-        existing_lab_names = [lab.title for lab in cml.all_labs(show_all=True)]
-        if lab_name in existing_lab_names:
-            exit(
-                f"Lab with name '{lab_name}' already exists. "
-                f"Please provide a different name to avoid confusion."
-            )
-    else:
+    if not lab_name:
         # User didn't provide lab name, generate by default
         # Find existing sdwan labs names
         lab_list_search = [
@@ -152,6 +142,15 @@ def main(
             )
     else:
         # Prepare and deploy the lab to CML
+        # Verify lab name is not duplicated
+        # Although CML allows labs with same name,
+        # this crete confusion for other tasks where lab name is used
+        existing_lab_names = [lab.title for lab in cml.all_labs(show_all=True)]
+        if lab_name in existing_lab_names:
+            exit(
+                f"Lab with name '{lab_name}' already exists. "
+                f"Please provide a different name to avoid confusion."
+            )
 
         if not patty_used:
             # If PATty is not used, check if the IP allocated for SD-WAN Manager is not already it use.
@@ -194,10 +193,12 @@ def main(
         )
 
     restore_manager_configuration(
+        manager_session,
         manager_ip,
         manager_port,
         manager_user,
         manager_password,
+        config_version,
         join(MANAGER_CONFIGS_DIR, f"v{config_version}"),
         False,
     )

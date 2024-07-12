@@ -88,7 +88,7 @@ def main(
         lab = next(
             (
                 lab
-                for lab in cml.find_labs_by_title(cml_topology_dict["lab"]["title"])
+                for lab in cml.find_labs_by_title(lab_name)
                 if manager_ip in lab.notes
             ),
             None,
@@ -184,6 +184,7 @@ def main(
     device_ip_to_system_ip = {}
     serial_file_version = None
     manager_node = None
+    config_version = 2
     for node in lab.nodes():
         if node.node_definition == "cat-sdwan-manager":
             # Choose the parameters
@@ -384,10 +385,12 @@ def main(
                         json.dump(data, f2, indent=2)
 
     restore_manager_configuration(
+        manager_session,
         manager_ip,
         manager_port,
         manager_user,
         manager_password,
+        config_version,
         join(workdir, manager_configs_dir),
         True,
     )

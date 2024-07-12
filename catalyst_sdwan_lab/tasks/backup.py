@@ -137,25 +137,6 @@ def check_pyats_device_connectivity(
         raise
 
 
-def update_associated_parcel(
-    api: Rest, path: str, parcel: Dict[str, Any]
-) -> Dict[str, Any]:
-    uuid_pattern = (
-        r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
-    )
-    match = re.search(rf"(?<={uuid_pattern}/).*?(?=/{uuid_pattern})", path)
-    parcel_type = parcel["parcelType"]
-    if match and f"{match[0]}/" in parcel_type:
-        parcel_type = re.sub(rf"{match[0]}/", "", parcel_type)
-
-    new_path = join(path, parcel_type, parcel["parcelId"])
-    parcel["payload"]["data"] = api.get(new_path)["payload"]["data"]
-    for subparcel in parcel.get("subparcels", []):
-        update_associated_parcel(api, new_path, subparcel)
-
-    return parcel
-
-
 def main(
     cml: ClientLibrary,
     cml_user: str,
@@ -406,27 +387,6 @@ def main(
                 task.log_info(
                     f'Task completed {task.outcome("successfully", "with caveats: {tally}")}'
                 )
-
-                feature_profiles_dir = join(
-                    workdir, "manager_configs", "feature_profiles"
-                )
-                if os.path.isdir(join(workdir, "manager_configs", "feature_profiles")):
-                    # Workaround sastre bug https://github.com/CiscoDevNet/sastre/issues/12
-                    for root, dirs, files in os.walk(feature_profiles_dir):
-                        for filename in files:
-                            filepath = join(root, filename)
-                            with open(filepath, "r", encoding="utf-8") as file:
-                                profile = json.load(file)
-                            path = join(
-                                "/v1/feature-profile/",
-                                profile["solution"],
-                                profile["profileType"],
-                                profile["profileId"],
-                            )
-                            for parcel in profile["associatedProfileParcels"]:
-                                update_associated_parcel(api, path, parcel)
-                            with open(filepath, "w") as file:
-                                json.dump(profile, file, indent=2)
 
                 # Check SD-WAN Manager version
                 manager_version = api.server_version

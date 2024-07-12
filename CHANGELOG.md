@@ -1,3 +1,11 @@
+# Catalyst SD-WAN Lab 2.0.13 [Jul 5, 2024]
+
+- Added support for SD-WAN Manager 20.15
+- In add task, added comment that Validator takes few minutes to build the control connections
+- In add task, when requested image version is not available, added print of available images
+- In setup task, print warning when image could not be migrated as it is used by some existing labs
+- In controller_basic device template, changed default feature profiles to custom one to allow easy change of configuration
+
 # Catalyst SD-WAN Lab 2.0.12 [Jun 18, 2024]
 
 - Added CML PATty support
