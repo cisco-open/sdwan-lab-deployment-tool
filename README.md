@@ -137,7 +137,7 @@ The easiest way to run the tool is to provide all the lab variables in the rc fi
     export LAB_NAME='sdwan'
     % source rc-example.sh
 
-Note that if password was not defined, the user will be prompted for a password.
+Note that if password was not defined, the user will be prompted for a password. Also please note we recommend not to use admin user as MANAGER_USER. Instead, configure a different user name to always have a backup user. By default, the MANAGER_PASSWORD will be set for both admin user and the MANAGER_USER that you specify.
 
 Note that MANAGER_IP can be:
 - an IP address: SD-WAN Manager will be reachable over this IP address. By default the IP address should come from the same subnet as CML IP, unless custom bridge is specified during deploy task.

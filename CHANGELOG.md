@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.0.14 [Aug 2, 2024]
+
+- Fixed problem where restore task might fail with "IndexError: list index out of range"
+
 # Catalyst SD-WAN Lab 2.0.13 [Jul 5, 2024]
 
 - Added support for SD-WAN Manager 20.15
