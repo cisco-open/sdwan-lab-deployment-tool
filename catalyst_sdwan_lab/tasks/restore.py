@@ -145,7 +145,7 @@ def main(
             r"<user>[\s\S]+?<name>(\w+)</name>", manager_node["configuration"]
         )
         existing_manager_users.remove("admin")
-        if manager_user not in existing_manager_users:
+        if existing_manager_users and manager_user not in existing_manager_users:
             manager_node["configuration"] = manager_node["configuration"].replace(
                 existing_manager_users[0], manager_user
             )
