@@ -14,6 +14,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+#If you want to use external ip address for your Manager use this section.
 export CML_IP='10.0.0.1'
 export CML_USER='user1'
 export CML_PASSWORD='2ajG$I2?8k'
@@ -23,3 +24,13 @@ export MANAGER_PASSWORD='2ajG$I2?8k'
 export MANAGER_MASK='/24'
 export MANAGER_GATEWAY='10.0.0.254'
 export LAB_NAME='sdwan'
+
+#If you want to use PAT then use the following example.
+
+export CML_IP='10.0.0.1'
+export CML_USER='user1'
+export CML_PASSWORD='2ajG$I2?8k'
+export MANAGER_IP='pat:2001'
+export MANAGER_USER='sdwan'
+export MANAGER_PASSWORD='2ajG$I2?8k'
+export LAB_NAME='sdwan-PAT'
