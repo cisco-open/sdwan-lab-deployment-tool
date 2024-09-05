@@ -126,15 +126,26 @@ For any of the required arguments, user is prompted for a value if they are not 
 The easiest way to run the tool is to provide all the lab variables in the rc file and source that file. The example file below contains all the variables required to run all the tasks.
 
     % cat rc-example.sh
+    #If you want to use external ip address for your Manager use this section.
     export CML_IP='10.0.0.1'
     export CML_USER='user1'
-    export CML_PASSWORD='password123'
+    export CML_PASSWORD='2ajG$I2?8k'
     export MANAGER_IP='10.0.0.10'
     export MANAGER_USER='sdwan'
-    export MANAGER_PASSWORD='sdwanlab123'
+    export MANAGER_PASSWORD='2ajG$I2?8k'
     export MANAGER_MASK='/24'
     export MANAGER_GATEWAY='10.0.0.254'
     export LAB_NAME='sdwan'
+
+    #If you want to use PAT then use the following example.
+
+    export CML_IP='10.0.0.1'
+    export CML_USER='user1'
+    export CML_PASSWORD='2ajG$I2?8k'
+    export MANAGER_IP='pat:2001'
+    export MANAGER_USER='sdwan'
+    export MANAGER_PASSWORD='2ajG$I2?8k'
+    export LAB_NAME='sdwan-PAT'
     % source rc-example.sh
 
 Note that if password was not defined, the user will be prompted for a password. Also please note we recommend not to use admin user as MANAGER_USER. Instead, configure a different user name to always have a backup user. By default, the MANAGER_PASSWORD will be set for both admin user and the MANAGER_USER that you specify.
