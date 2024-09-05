@@ -126,7 +126,6 @@ For any of the required arguments, user is prompted for a value if they are not 
 The easiest way to run the tool is to provide all the lab variables in the rc file and source that file. The example file below contains all the variables required to run all the tasks.
 
     % cat rc-example.sh
-    #If you want to use external ip address for your Manager use this section.
     export CML_IP='10.0.0.1'
     export CML_USER='user1'
     export CML_PASSWORD='2ajG$I2?8k'
@@ -136,16 +135,6 @@ The easiest way to run the tool is to provide all the lab variables in the rc fi
     export MANAGER_MASK='/24'
     export MANAGER_GATEWAY='10.0.0.254'
     export LAB_NAME='sdwan'
-
-    #If you want to use PAT then use the following example.
-
-    export CML_IP='10.0.0.1'
-    export CML_USER='user1'
-    export CML_PASSWORD='2ajG$I2?8k'
-    export MANAGER_IP='pat:2001'
-    export MANAGER_USER='sdwan'
-    export MANAGER_PASSWORD='2ajG$I2?8k'
-    export LAB_NAME='sdwan-PAT'
     % source rc-example.sh
 
 Note that if password was not defined, the user will be prompted for a password. Also please note we recommend not to use admin user as MANAGER_USER. Instead, configure a different user name to always have a backup user. By default, the MANAGER_PASSWORD will be set for both admin user and the MANAGER_USER that you specify.
@@ -153,6 +142,18 @@ Note that if password was not defined, the user will be prompted for a password.
 Note that MANAGER_IP can be:
 - an IP address: SD-WAN Manager will be reachable over this IP address. By default the IP address should come from the same subnet as CML IP, unless custom bridge is specified during deploy task.
 - a PATty port in format "pat:<outside-port>": SD-WAN Manager will be reachable over CML IP port <outside-port>. Before using this option, PATTy needs to be enabled on the CML server as per [CML documentation](https://developer.cisco.com/docs/modeling-labs/patty-tool-mapping-configuration/).
+
+If you want to use PATty the rc file above will change slighty to the following.
+
+    % cat rc-PATty-example.sh
+    export CML_IP='10.0.0.1'
+    export CML_USER='user1'
+    export CML_PASSWORD='2ajG$I2?8k'
+    export MANAGER_IP='pat:2002'
+    export MANAGER_USER='sdwan'
+    export MANAGER_PASSWORD='2ajG$I2?8k'
+    export LAB_NAME='sdwan-PATty'
+    % source rc-PATty-example.sh
 
 ### Task-specific Parameters
 Task-specific parameters and options are defined after the task is provided. Each task has its own set of parameters. Check the task documentation to learn more about task-specific parameters.
