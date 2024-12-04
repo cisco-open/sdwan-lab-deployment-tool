@@ -25,6 +25,8 @@ All the Python prerequisites are automaticaly installed when you install the pac
 
 This tool requires CML 2.6 or higher.
 
+Demo of the tool and guide on how to use it can be found on this [youtube video](https://www.youtube.com/watch?v=WxiZ5bxlDk8)
+
 ### Installing
 The recommended way to install is via pip.
 
