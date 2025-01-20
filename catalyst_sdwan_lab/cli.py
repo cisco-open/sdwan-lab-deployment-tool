@@ -474,7 +474,7 @@ def cli_delete(ctx: click.Context, lab: str, force: bool):
     metavar="<csr_file>",
 )
 @click.pass_context
-def cli_sign(ctx: click.Context, csr_file: str):
+def cli_sign(ctx: click.Context, csr_file: str) -> None:
     """
     \b
     positional arguments:
