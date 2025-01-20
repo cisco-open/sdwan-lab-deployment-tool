@@ -460,7 +460,7 @@ def cli_restore(
     "Note the all lab data will be lost!",
 )
 @click.pass_context
-def cli_delete(ctx: click.Context, lab: str, force: bool):
+def cli_delete(ctx: click.Context, lab: str, force: bool) -> None:
     cml = ctx.obj["CML"]
     loglevel = ctx.obj["LOGLEVEL"]
     delete.main(cml, lab, force, loglevel)
