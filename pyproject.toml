@@ -11,6 +11,7 @@ keywords = ["cisco", "catalyst", "sdwan", "lab"]
 [tool.poetry.scripts]
 sdwan-lab = "catalyst_sdwan_lab.__main__:main"
 csdwan = "catalyst_sdwan_lab.__main__:main"
+cs = "catalyst_sdwan_lab.cli:cli"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -24,6 +25,7 @@ ruamel-yaml = "^0.17.21"
 urllib3 = "^1.26.18"
 catalystwan = "^0.33.10"
 pyats = ">=23.1,<=24.2"
+click = "^8.1.7"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"
