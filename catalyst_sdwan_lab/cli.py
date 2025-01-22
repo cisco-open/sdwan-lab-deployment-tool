@@ -82,7 +82,7 @@ def cli(
         return
 
     ctx.ensure_object(dict)
-    loglevel = logging.WARNING - 10 * verbose
+    loglevel = max(logging.DEBUG, logging.WARNING - 10 * verbose)
     ctx.obj["LOGLEVEL"] = loglevel
     log = logging.getLogger(__name__)
     log.setLevel(loglevel)
