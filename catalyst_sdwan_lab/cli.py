@@ -5,7 +5,6 @@ import sys
 from collections.abc import Callable
 from typing import Any
 
-import click
 import rich_click as click
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
