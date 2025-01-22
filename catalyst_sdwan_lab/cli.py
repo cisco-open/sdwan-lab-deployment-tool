@@ -6,6 +6,7 @@ from collections.abc import Callable
 from typing import Any
 
 import click
+import rich_click as click
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
 from virl2_client import ClientLibrary
@@ -78,7 +79,6 @@ def cli(
     user: str,
     password: str,
 ) -> None:
-    ctx.max_content_width = 512
     if ctx.resilient_parsing or ctx.invoked_subcommand is None or "--help" in sys.argv:
         return
 
