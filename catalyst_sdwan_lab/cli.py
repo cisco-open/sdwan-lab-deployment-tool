@@ -50,6 +50,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option(
     "-v",
     "--verbose",
+    metavar="<verbosity level>",
     count=True,
     help="Verbose mode. Multiple -v options increase the verbosity.",
 )
