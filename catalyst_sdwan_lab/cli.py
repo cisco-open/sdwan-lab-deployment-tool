@@ -42,24 +42,30 @@ def set_manager_details(cml_ip: str, manager_ip: str) -> tuple[bool, str, int]:
     return patty_used, manager_ip, manager_port
 
 
-@click.group()
-@click.version_option(version=f"SD-WAN Lab Version {catalyst_sdwan_lab.__version__}")
-@click.option("-v", "--verbose", count=True)
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(version=catalyst_sdwan_lab.__version__, prog_name="SD-WAN Lab")
+@click.option(
+    "-v",
+    "--verbose",
+    count=True,
+    help="Verbose mode. Multiple -v options increase the verbosity.",
+)
 @click.option(
     "--cml",
     "-c",
     metavar="<cml-ip>",
     envvar="CML_IP",
-    help="CML IP address, can also be defined via CML_IP environment variable. "
-    "If neither is provided user is prompted for CML IP.",
+    help="CML IP address, can also be defined via CML_IP environment variable. ",
 )
 @click.option(
     "--user",
     "-u",
     metavar="<cml-user>",
     envvar="CML_USER",
-    help="CML username, can also be defined via CML_USER environment variable. "
-    "If neither is provided user is prompted for CML username.",
+    help="CML username, can also be defined via CML_USER environment variable. ",
 )
 @click.option(
     "--password",
@@ -67,8 +73,7 @@ def set_manager_details(cml_ip: str, manager_ip: str) -> tuple[bool, str, int]:
     metavar="<cml-password>",
     envvar="CML_PASSWORD",
     hide_input=True,
-    help="CML password, can also be defined via CML_PASSWORD environment variable. "
-    " If neither is provided user is prompted for CML password.",
+    help="CML password, can also be defined via CML_PASSWORD environment variable. ",
 )
 @click.pass_context
 def cli(
@@ -78,7 +83,10 @@ def cli(
     user: str,
     password: str,
 ) -> None:
-    if ctx.resilient_parsing or ctx.invoked_subcommand is None or "--help" in sys.argv:
+
+    if ctx.resilient_parsing or ctx.invoked_subcommand is None:
+        return
+    if "-h" in sys.argv or "--help" in sys.argv:
         return
 
     ctx.ensure_object(dict)
@@ -128,8 +136,7 @@ def manager_options(f: Callable[..., Any]) -> Callable[..., Any]:
         metavar="<manager-ip>",
         envvar="MANAGER_IP",
         prompt="SD-WAN Manager IP address",
-        help="SD-WAN Manager IP address, can also be defined via MANAGER_IP environment "
-        "variable. If neither is provided user is prompted for SD-WAN Manager IP.",
+        help="SD-WAN Manager IP address, can also be defined via MANAGER_IP environment ",
     )
     @click.option(
         "--muser",
@@ -137,8 +144,7 @@ def manager_options(f: Callable[..., Any]) -> Callable[..., Any]:
         envvar="MANAGER_USER",
         prompt="SD-WAN Manager user",
         help="SD-WAN Manager username, can also be defined via "
-        "MANAGER_USER environment variable. "
-        "If neither is provided user is prompted for SD-WAN Manager username.",
+        "MANAGER_USER environment variable. ",
     )
     @click.option(
         "--mpassword",
@@ -147,8 +153,29 @@ def manager_options(f: Callable[..., Any]) -> Callable[..., Any]:
         prompt="SD-WAN Manager password",
         hide_input=True,
         help="SD-WAN Manager password, can also be defined via "
-        "MANAGER_PASSWORD environment variable. "
-        " If neither is provided user is prompted for SD-WAN Manager password.",
+        "MANAGER_PASSWORD environment variable. ",
+    )
+    @functools.wraps(f)
+    def wrapper_common_options(*args: Any, **kwargs: Any) -> Any:
+        return f(*args, **kwargs)
+
+    return wrapper_common_options
+
+
+def gateway_mask_options(f: Callable[..., Any]) -> Callable[..., Any]:
+    @click.option(
+        "--mmask",
+        metavar="<manager-mask>",
+        envvar="MANAGER_MASK",
+        help="Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined "
+        "via MANAGER_MASK environment variable. ",
+    )
+    @click.option(
+        "--mgateway",
+        metavar="<manager-gateway>",
+        envvar="MANAGER_GATEWAY",
+        help="Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY "
+        "environment variable. ",
     )
     @functools.wraps(f)
     def wrapper_common_options(*args: Any, **kwargs: Any) -> Any:
@@ -159,25 +186,8 @@ def manager_options(f: Callable[..., Any]) -> Callable[..., Any]:
 
 @cli.command(name="deploy", short_help="Deploy a new Catalyst SD-WAN lab pod.")
 @manager_options
+@gateway_mask_options
 @click.argument("software_version", metavar="<software-version>")
-@click.option(
-    "--mmask",
-    metavar="<manager-mask>",
-    envvar="MANAGER_MASK",
-    prompt="SD-WAN Manager subnet mask (e.g. /24)",
-    help="Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined "
-    "via MANAGER_MASK environment variable. "
-    "If neither is provided user is prompted for SD-WAN Manager subnet mask.",
-)
-@click.option(
-    "--mgateway",
-    metavar="<manager-gateway>",
-    envvar="MANAGER_GATEWAY",
-    prompt="SD-WAN Manager gateway IP",
-    help="Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY "
-    "environment variable. "
-    "If neither is provided user is prompted for Manager gateway IP.",
-)
 @click.option(
     "--lab",
     metavar="<lab_name>",
@@ -232,6 +242,11 @@ def cli_deploy(
     loglevel = ctx.obj["LOGLEVEL"]
     patty_used, manager_ip, manager_port = set_manager_details(cml_ip, manager)
 
+    if not patty_used and not mgateway:
+        mmask = click.prompt("SD-WAN Manager subnet mask (e.g. /24)")
+    if not patty_used and not mgateway:
+        mgateway = click.prompt("SD-WAN Manager gateway IP")
+
     deploy.main(
         cml,
         cml_ip,
@@ -258,8 +273,7 @@ def cli_deploy(
     metavar="<lab_name>",
     envvar="LAB_NAME",
     prompt="CML lab name",
-    help="CML Lab name, can also be defined via LAB_NAME environment variable. "
-    "If neither is provided user is prompted for lab name.",
+    help="CML Lab name, can also be defined via LAB_NAME environment variable. ",
 )
 @click.argument(
     "number_of_devices",
@@ -322,8 +336,7 @@ def cli_add(
     metavar="<lab_name>",
     envvar="LAB_NAME",
     prompt="CML lab name",
-    help="CML Lab name, can also be defined via LAB_NAME environment variable. "
-    "If neither is provided user is prompted for lab name.",
+    help="CML Lab name, can also be defined via LAB_NAME environment variable. ",
 )
 @click.option(
     "--workdir",
@@ -358,31 +371,13 @@ def cli_backup(
 
 @cli.command(name="restore", short_help="Restore Catalyst SD-WAN POD from backup.")
 @manager_options
-@click.option(
-    "--mmask",
-    metavar="<manager-mask>",
-    envvar="MANAGER_MASK",
-    prompt="SD-WAN Manager subnet mask (e.g. /24)",
-    help="Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined "
-    "via MANAGER_MASK environment variable. "
-    "If neither is provided user is prompted for SD-WAN Manager subnet mask.",
-)
-@click.option(
-    "--mgateway",
-    metavar="<manager-gateway>",
-    envvar="MANAGER_GATEWAY",
-    prompt="SD-WAN Manager gateway IP",
-    help="Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY "
-    "environment variable. "
-    "If neither is provided user is prompted for Manager gateway IP.",
-)
+@gateway_mask_options
 @click.option(
     "--lab",
     metavar="<lab_name>",
     envvar="LAB_NAME",
     prompt="CML lab name",
-    help="CML Lab name, can also be defined via LAB_NAME environment variable. "
-    "If neither is provided user is prompted for lab name.",
+    help="CML Lab name, can also be defined via LAB_NAME environment variable. ",
 )
 @click.option(
     "--workdir",
@@ -422,6 +417,12 @@ def cli_restore(
     cml = ctx.obj["CML"]
     cml_ip = ctx.obj["CML_IP"]
     patty_used, manager_ip, manager_port = set_manager_details(cml_ip, manager)
+
+    if not patty_used and not mgateway:
+        mmask = click.prompt("SD-WAN Manager subnet mask (e.g. /24)")
+    if not patty_used and not mgateway:
+        mgateway = click.prompt("SD-WAN Manager gateway IP")
+
     loglevel = ctx.obj["LOGLEVEL"]
 
     restore.main(
@@ -448,8 +449,7 @@ def cli_restore(
     metavar="<lab_name>",
     envvar="LAB_NAME",
     prompt="CML lab name",
-    help="CML Lab name, can also be defined via LAB_NAME environment variable. "
-    "If neither is provided user is prompted for lab name.",
+    help="CML Lab name, can also be defined via LAB_NAME environment variable. ",
 )
 @click.option(
     "--force",
