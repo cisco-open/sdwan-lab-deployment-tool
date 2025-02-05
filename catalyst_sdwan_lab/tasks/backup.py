@@ -407,12 +407,12 @@ def main(
                     mrf_regions = [
                         region
                         for region in network_hierarchy
-                        if region["data"]["label"] in ["REGION"]
+                        if region["data"].get("label") == "REGION"
                     ]
                     mrf_subregions = [
                         region
                         for region in network_hierarchy
-                        if region["data"]["label"] == "SUB_REGION"
+                        if region["data"].get("label") == "SUB_REGION"
                     ]
                     if mrf_regions:
                         track_progress(
