@@ -9,9 +9,8 @@ repository = "https://github.com/cisco-open/sdwan-lab-deployment-tool"
 keywords = ["cisco", "catalyst", "sdwan", "lab"]
 
 [tool.poetry.scripts]
-sdwan-lab = "catalyst_sdwan_lab.__main__:main"
-csdwan = "catalyst_sdwan_lab.__main__:main"
-cs = "catalyst_sdwan_lab.cli:cli"
+sdwan-lab = "catalyst_sdwan_lab.cli:cli"
+csdwan = "catalyst_sdwan_lab.cli:cli"
 
 [tool.poetry.dependencies]
 python = "^3.9"
