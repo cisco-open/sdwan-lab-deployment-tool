@@ -89,6 +89,8 @@ def cli(
         return
     if "-h" in sys.argv or "--help" in sys.argv:
         return
+    if sys.argv[-1] == ctx.invoked_subcommand:
+        return
 
     ctx.ensure_object(dict)
     loglevel = max(logging.DEBUG, logging.WARNING - 10 * verbose)
@@ -117,7 +119,9 @@ def cli(
 
 
 @cli.command(
-    name="setup", short_help="Setup on-prem CML to use Catalyst SD-WAN Lab automation."
+    name="setup",
+    short_help="Setup on-prem CML to use Catalyst SD-WAN Lab automation.",
+    no_args_is_help=True,
 )
 @click.option(
     "--list",
@@ -185,7 +189,11 @@ def gateway_mask_options(f: Callable[..., Any]) -> Callable[..., Any]:
     return wrapper_common_options
 
 
-@cli.command(name="deploy", short_help="Deploy a new Catalyst SD-WAN lab pod.")
+@cli.command(
+    name="deploy",
+    short_help="Deploy a new Catalyst SD-WAN lab pod.",
+    no_args_is_help=True,
+)
 @manager_options
 @gateway_mask_options
 @click.argument("software_version", metavar="<software-version>")
@@ -267,7 +275,11 @@ def cli_deploy(
     )
 
 
-@cli.command(name="add", short_help="Add Catalyst SD-WAN device to running lab pod.")
+@cli.command(
+    name="add",
+    short_help="Add Catalyst SD-WAN device to running lab pod.",
+    no_args_is_help=True,
+)
 @manager_options
 @click.option(
     "--lab",
@@ -330,7 +342,11 @@ def cli_add(
     )
 
 
-@cli.command(name="backup", short_help="Backup running Catalyst SD-WAN lab pod.")
+@cli.command(
+    name="backup",
+    short_help="Backup running Catalyst SD-WAN lab pod.",
+    no_args_is_help=True,
+)
 @manager_options
 @click.option(
     "--lab",
@@ -370,7 +386,11 @@ def cli_backup(
     )
 
 
-@cli.command(name="restore", short_help="Restore Catalyst SD-WAN POD from backup.")
+@cli.command(
+    name="restore",
+    short_help="Restore Catalyst SD-WAN POD from backup.",
+    no_args_is_help=True,
+)
 @manager_options
 @gateway_mask_options
 @click.option(
@@ -444,7 +464,11 @@ def cli_restore(
     )
 
 
-@cli.command(name="delete", short_help="Delete the CML lab and all the lab data.")
+@cli.command(
+    name="delete",
+    short_help="Delete the CML lab and all the lab data.",
+    no_args_is_help=True,
+)
 @click.option(
     "--lab",
     metavar="<lab_name>",
@@ -467,7 +491,9 @@ def cli_delete(ctx: click.Context, lab: str, force: bool) -> None:
 
 
 @cli.command(
-    name="sign", short_help="Sign CSR using the SD-WAN Lab Deployment Tool Root CA."
+    name="sign",
+    short_help="Sign CSR using the SD-WAN Lab Deployment Tool Root CA.",
+    no_args_is_help=True,
 )
 @click.argument(
     "csr_file",
