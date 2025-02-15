@@ -22,9 +22,9 @@ def main(csr_file_path: str, loglevel: Union[int, str]) -> None:
         csr = file.read()
 
     track_progress(log, "Signing CSR...")
-    cert = create_cert(ca_cert.encode(), ca_key.encode(), csr.encode())
+    cert = create_cert(ca_cert, ca_key, csr)
 
     track_progress(log, "Certificate signed: \n")
-    print(cert.decode())
+    print(cert)
 
     return

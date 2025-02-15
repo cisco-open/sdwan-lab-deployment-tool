@@ -1,6 +1,7 @@
 # Catalyst SD-WAN Lab 2.0.15 []
 
 - Fixed a problem where the backup task might fail with a "KeyError: 'label'"
+- Migrated CLI interface from argparse to click library
 
 # Catalyst SD-WAN Lab 2.0.14 [Aug 2, 2024]
 
@@ -103,7 +104,7 @@
 
 # Catalyst SD-WAN Lab 2.0.0 [Mar 9, 2024]
 
-#### New Features: 
+#### New Features:
 
 - Added support for configuration groups in all tasks
 - For add task, Edges deployed with software >= 17.12 are using configuration groups by default
