@@ -166,15 +166,15 @@ def configure_manager_basic_settings(
     manager_config_settings.edit_cloudx(CloudX(mode="on"))
 
 
-def create_cert(ca_cert_bytes: bytes, ca_key_bytes: bytes, csr_bytes: bytes) -> bytes:
+def create_cert(ca_cert_str: str, ca_key_str: str, csr_str: str) -> str:
     """
     Sign a CSR with the CAcert and CAkey.
     Certificate validity will be from -1 day to +2 years
     Return the resulting signed cert
     """
-    ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_cert_bytes)
-    ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_key_bytes)
-    csr = crypto.load_certificate_request(crypto.FILETYPE_PEM, csr_bytes)
+    ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_cert_str.encode())
+    ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_key_str.encode())
+    csr = crypto.load_certificate_request(crypto.FILETYPE_PEM, csr_str.encode())
 
     cert = crypto.X509()
     cert.set_serial_number(uuid.uuid4().int)
@@ -184,7 +184,7 @@ def create_cert(ca_cert_bytes: bytes, ca_key_bytes: bytes, csr_bytes: bytes) -> 
     cert.set_subject(csr.get_subject())
     cert.set_pubkey(csr.get_pubkey())
     cert.sign(ca_key, "sha256")
-    return crypto.dump_certificate(crypto.FILETYPE_PEM, cert)
+    return crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
 
 
 def get_cml_sdwan_image_definition(
@@ -465,8 +465,8 @@ def sign_certificate(
     device: DeviceDetailsResponse,
     log: Logger,
     manager_session: ManagerSession,
-    ca_cert: bytes,
-    ca_key: bytes,
+    ca_cert: str,
+    ca_key: str,
 ) -> None:
     """
     Generate CSR and sign the certificate
