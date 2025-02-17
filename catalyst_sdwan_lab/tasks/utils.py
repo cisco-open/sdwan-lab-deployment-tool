@@ -224,7 +224,8 @@ def get_cml_sdwan_image_definition(
                 return new_requested_image_definition
             else:
                 available_software_versions = [
-                    image_id.split("-")[3] for image_id in existing_image_definitions
+                    image_id.split("-")[3]
+                    for image_id in existing_image_definitions
                     if len(image_id.split("-")) > 3
                 ]
                 sys.exit(
@@ -235,7 +236,8 @@ def get_cml_sdwan_image_definition(
                 )
         else:
             available_software_versions = [
-                image_id.split("-")[3] for image_id in existing_image_definitions
+                image_id.split("-")[3]
+                for image_id in existing_image_definitions
                 if len(image_id.split("-")) > 3
             ]
             sys.exit(
