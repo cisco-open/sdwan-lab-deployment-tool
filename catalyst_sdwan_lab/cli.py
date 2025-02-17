@@ -89,8 +89,6 @@ def cli(
         return
     if "-h" in sys.argv or "--help" in sys.argv:
         return
-    if sys.argv[-1] == ctx.invoked_subcommand:
-        return
 
     ctx.ensure_object(dict)
     loglevel = max(logging.DEBUG, logging.WARNING - 10 * verbose)
@@ -121,7 +119,6 @@ def cli(
 @cli.command(
     name="setup",
     short_help="Setup on-prem CML to use Catalyst SD-WAN Lab automation.",
-    no_args_is_help=True,
 )
 @click.option(
     "--list",
@@ -345,7 +342,6 @@ def cli_add(
 @cli.command(
     name="backup",
     short_help="Backup running Catalyst SD-WAN lab pod.",
-    no_args_is_help=True,
 )
 @manager_options
 @click.option(
@@ -389,7 +385,6 @@ def cli_backup(
 @cli.command(
     name="restore",
     short_help="Restore Catalyst SD-WAN POD from backup.",
-    no_args_is_help=True,
 )
 @manager_options
 @gateway_mask_options
@@ -467,7 +462,6 @@ def cli_restore(
 @cli.command(
     name="delete",
     short_help="Delete the CML lab and all the lab data.",
-    no_args_is_help=True,
 )
 @click.option(
     "--lab",
