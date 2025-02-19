@@ -15,7 +15,7 @@ This module implements the command line top-level parser and task dispatcher
 from catalyst_sdwan_lab.cli import cli
 
 
-def main():
+def main() -> None:
     cli()
 
 
