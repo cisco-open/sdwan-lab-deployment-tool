@@ -102,9 +102,10 @@ def cli(
     pyats_logger = logging.getLogger("pyats.utils.fileutils.bases.fileutils")
     pyats_logger.addFilter(
         lambda record: not any(
-            msg in record.getMessage() for msg in [
+            msg in record.getMessage()
+            for msg in [
                 "Could not find details in testbed for server terminal_server.",
-                "No details found in testbed for hostname terminal_server."
+                "No details found in testbed for hostname terminal_server.",
             ]
         )
     )
