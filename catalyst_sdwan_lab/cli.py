@@ -95,9 +95,18 @@ def cli(
     ctx.obj["LOGLEVEL"] = loglevel
     log = logging.getLogger(__name__)
     log.setLevel(loglevel)
-    logger = logging.getLogger("virl2_client.virl2_client")
-    logger.addFilter(
+    virl2_client_logger = logging.getLogger("virl2_client.virl2_client")
+    virl2_client_logger.addFilter(
         lambda record: "SSL Verification disabled" not in record.getMessage()
+    )
+    pyats_logger = logging.getLogger("pyats.utils.fileutils.bases.fileutils")
+    pyats_logger.addFilter(
+        lambda record: not any(
+            msg in record.getMessage() for msg in [
+                "Could not find details in testbed for server terminal_server.",
+                "No details found in testbed for hostname terminal_server."
+            ]
+        )
     )
     logging.basicConfig(format="%(levelname)s - %(message)s")
     urllib3.disable_warnings(InsecureRequestWarning)
