@@ -90,6 +90,14 @@ def cli(
     if "-h" in sys.argv or "--help" in sys.argv:
         return
 
+    subcommand = ctx.command
+    if (
+        sys.argv[-1] == ctx.invoked_subcommand
+        and isinstance(subcommand, click.Group)
+        and subcommand.commands[ctx.invoked_subcommand].no_args_is_help
+    ):
+        return
+
     ctx.ensure_object(dict)
     loglevel = max(logging.DEBUG, logging.WARNING - 10 * verbose)
     ctx.obj["LOGLEVEL"] = loglevel
@@ -365,6 +373,7 @@ def cli_add(
     "--workdir",
     metavar="<directory>",
     prompt="Directory to save backup",
+    default="backup",
     help="Backup destination folder",
 )
 @click.pass_context
@@ -409,6 +418,7 @@ def cli_backup(
     "--workdir",
     metavar="<directory>",
     prompt="Directory to restore",
+    default="backup",
     help="Restore source folder",
 )
 @click.option(
