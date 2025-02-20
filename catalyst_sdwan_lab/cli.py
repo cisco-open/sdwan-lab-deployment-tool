@@ -365,6 +365,7 @@ def cli_add(
     "--workdir",
     metavar="<directory>",
     prompt="Directory to save backup",
+    default="backup",
     help="Backup destination folder",
 )
 @click.pass_context
@@ -409,6 +410,7 @@ def cli_backup(
     "--workdir",
     metavar="<directory>",
     prompt="Directory to restore",
+    default="backup",
     help="Restore source folder",
 )
 @click.option(
