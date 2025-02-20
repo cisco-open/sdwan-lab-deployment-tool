@@ -4,6 +4,7 @@
 - Migrated CLI interface from argparse to click library
 - Bump pyats version to 25.1
 - Bump minimal python version to 3.9.2 due to https://github.com/pyca/cryptography/pull/12045
+- add support for python 3.13
 
 # Catalyst SD-WAN Lab 2.0.14 [Aug 2, 2024]
 
