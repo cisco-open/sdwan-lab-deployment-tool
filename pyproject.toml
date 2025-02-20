@@ -13,7 +13,7 @@ sdwan-lab = "catalyst_sdwan_lab.cli:cli"
 csdwan = "catalyst_sdwan_lab.cli:cli"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.9.2"
 virl2-client = "^2.6.0"
 requests = "^2.28.1"
 pyopenssl = "^24.0.0"
@@ -23,7 +23,7 @@ cisco-sdwan = "^1.24"
 ruamel-yaml = "^0.17.21"
 urllib3 = "^1.26.18"
 catalystwan = "^0.33.10"
-pyats = ">=23.1,<=24.2"
+pyats = { version = ">=25.1", extras = ["full"] }
 click = "^8.1.7"
 rich-click = "^1.8.5"
 

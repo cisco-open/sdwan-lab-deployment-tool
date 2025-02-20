@@ -179,8 +179,8 @@
                 "value": false
               },
               "servicesGlobalServicesIpDomainLookup": {
-                "optionType": "default",
-                "value": false
+                "optionType": "global",
+                "value": true
               },
               "servicesGlobalServicesIpArpProxy": {
                 "optionType": "default",
