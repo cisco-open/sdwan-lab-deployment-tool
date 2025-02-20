@@ -90,6 +90,14 @@ def cli(
     if "-h" in sys.argv or "--help" in sys.argv:
         return
 
+    subcommand = ctx.command
+    if (
+        sys.argv[-1] == ctx.invoked_subcommand
+        and isinstance(subcommand, click.Group)
+        and subcommand.commands[ctx.invoked_subcommand].no_args_is_help
+    ):
+        return
+
     ctx.ensure_object(dict)
     loglevel = max(logging.DEBUG, logging.WARNING - 10 * verbose)
     ctx.obj["LOGLEVEL"] = loglevel
