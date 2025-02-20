@@ -15,17 +15,17 @@ The tool will help you automate your CML lab deployments with SD-WAN Manager, Co
 Catalyst SD-WAN Lab Deployment Tool requires Linux or macOS system. 
 To run is on Windows, please use [Linux on Windows with WSL](/README.md#appendix---wsl-installation) or set up Linux VM/container.
 
-Catalyst SD-WAN Lab Deployment Tool requires Python 3.9 or newer. This can be verified by pasting the following to a terminal window:
+Catalyst SD-WAN Lab Deployment Tool requires Python 3.9.2 or newer. This can be verified by pasting the following to a terminal window:
 
-    % python3 -c "import sys;assert sys.version_info>(3,9)" && echo "ALL GOOD"
+    python3 -c "import sys; assert sys.version_info >= (3, 9, 2)" && echo "ALL GOOD"
 
-If 'ALL GOOD' is printed it means Python requirements are met. If not, download and install the latest 3.x version at Python.org (https://www.python.org/downloads/).
+If 'ALL GOOD' is printed it means Python requirements are met. If not, download and install the supported 3.x version at Python.org (https://www.python.org/downloads/).
 
 All the Python prerequisites are automaticaly installed when you install the package. Please refer to the [Installing](#installing) section for details.
 
 This tool requires CML 2.6 or higher.
 
-Demo of the tool and guide on how to use it can be found on this [youtube video](https://www.youtube.com/watch?v=WxiZ5bxlDk8)
+Demo of the tool and guide on how to use it can be found on this [youtube video](https://www.youtube.com/watch?v=WxiZ5bxlDk8).
 
 ### Installing
 The recommended way to install is via pip.
@@ -86,31 +86,27 @@ Task-specific parameters are provided after the task argument.
 ### Base Parameters
 
       sdwan-lab -h
-      usage: sdwan-lab.py [-h] [-c <cml-ip>] [-u <cml-user>] [-p <cml-password>] [-v] [--version] {setup,deploy,add,backup,restore,delete} ...
-      
-      Catalyst SD-WAN Lab Deployment Tool - Automation Tool for managing Cisco Catalyst SD-WAN labs inside Cisco Modelling Labs
-      
-      positional arguments:
-        {setup,deploy,add,backup,restore,delete}
-                              Task to be performed.
-          setup               Setup on-prem CML to use Catalyst SD-WAN Lab automation.
-          deploy              Deploy a new Catalyst SD-WAN lab pod.
-          add                 Add Catalyst SD-WAN device to running lab pod.
-          backup              Backup running Catalyst SD-WAN lab pod.
-          restore             Restore Catalyst SD-WAN POD from backup.
-          delete              Delete the CML lab and all the lab data.
-          sign                Sign CSR using the SD-WAN Lab Deployment Tool Root CA.
-      
-      optional arguments:
-        -h, --help            show this help message and exit
-        -c <cml-ip>, --cml <cml-ip>
-                              CML IP address, can also be defined via CML_IP environment variable. If neither is provided user is prompted for CML IP.
-        -u <cml-user>, --user <cml-user>
-                              CML username, can also be defined via CML_USER environment variable. If neither is provided user is prompted for CML username.
-        -p <cml-password>, --password <cml-password>
-                              CML password, can also be defined via CML_PASSWORD environment variable. If neither is provided user is prompted for CML password.
-        -v, --verbose         Increase output verbosity.
-        --version             show program's version number and exit
+                                                                                                                                                                                                    
+       Usage: sdwan-lab [OPTIONS] COMMAND [ARGS]...                                                                                                                                                 
+                                                                                                                                                                                                    
+      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --version                          Show the version and exit.                                                                                                                              │
+      │ --verbose   -v  <verbosity level>  Verbose mode. Multiple -v options increase the verbosity.                                                                                               │
+      │ --cml       -c  <cml-ip>           CML IP address, can also be defined via CML_IP environment variable.                                                                                    │
+      │ --user      -u  <cml-user>         CML username, can also be defined via CML_USER environment variable.                                                                                    │
+      │ --password  -p  <cml-password>     CML password, can also be defined via CML_PASSWORD environment variable.                                                                                │
+      │ --help      -h                     Show this message and exit.                                                                                                                             │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      ╭─ Commands ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ add                     Add Catalyst SD-WAN device to running lab pod.                                                                                                                     │
+      │ backup                  Backup running Catalyst SD-WAN lab pod.                                                                                                                            │
+      │ delete                  Delete the CML lab and all the lab data.                                                                                                                           │
+      │ deploy                  Deploy a new Catalyst SD-WAN lab pod.                                                                                                                              │
+      │ restore                 Restore Catalyst SD-WAN POD from backup.                                                                                                                           │
+      │ setup                   Setup on-prem CML to use Catalyst SD-WAN Lab automation.                                                                                                           │
+      │ sign                    Sign CSR using the SD-WAN Lab Deployment Tool Root CA.                                                                                                             │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 
 Most of the parameters can also be provided via environment variables:
 * CML_IP
@@ -170,11 +166,13 @@ On each CML server that you want to use, you should run a setup task at least on
 This task have one task-specific argument that allows you to migrate the node and image definitions to new format if you've used SD-WAN Lab 1.x in the past. 
 
       sdwan-lab setup -h
-      usage: sdwan-lab.py setup [-h] [--migrate]
-      
-      optional arguments:
-        -h, --help  show this help message and exit
-        --migrate   Migrate node and image definitions from SD-WAN Lab v1.x to v2.x. This task should be run once if CML server was using SD-WAN LAb Tool v1.x in the past.
+                                                                                                                                                                                                    
+       Usage: sdwan-lab setup [OPTIONS]                                                                                                                                                             
+                                                                                                                                                                                                    
+      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --list  -l    After running setup task, list the available SD-WAN software per node type.                                                                                                  │
+      │ --help  -h    Show this message and exit.                                                                                                                                                  │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 ### Deploy Task
 This task:
@@ -197,31 +195,27 @@ You should run this task to deploy a new lab with control plane configured and b
 
 This task has several task-specific parameters, including software version that you want to run on the control components.
 
-      sdwan-lab deploy -h
-      usage: sdwan-lab.py deploy [-h] [--manager <manager-ip>] [--mmask <manager-mask>] [--mgateway <manager-gateway>] [--muser <manager-user>] [--mpassword <manager-password>] [--bridge <custom-bridge-name>] [--dns <dns-server-ip>]
-                                 <software-version>
-      
-      positional arguments:
-        <software-version>    Software version that will be used on SD-WAN Control Components.
-      
-      optional arguments:
-        -h, --help            show this help message and exit
-        --manager <manager-ip>
-                              SD-WAN Manager IP address, can also be defined via MANAGER_IP environment variable. If neither is provided user is prompted for SD-WAN Manager IP.
-        --mmask <manager-mask>
-                              Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK environment variable. If neither is provided user is prompted for SD-WAN Manager subnet mask.
-        --mgateway <manager-gateway>
-                              Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY environment variable. If neither is provided user is prompted for Manager gateway IP.
-        --muser <manager-user>
-                              SD-WAN Manager username, can also be defined via MANAGER_USER environment variable. If neither is provided user is prompted for SD-WAN Manager username.
-        --mpassword <manager-password>
-                              SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable. If neither is provided user is prompted for SD-WAN Manager password.
-        --lab <lab_name>      Set CML Lab name, can also be defined via LAB_NAME environment variable. If not provided, default name "sdwan<number>" will be assigned.
-        --bridge <custom-bridge-name>
-                              Set custom bridge for SD-WAN Manager external connection. Default is System Bridge
-        --dns <dns-server-ip>
-                              Set custom DNS server for Internet/VPN0 transport. Default is same as CML DNS
-        --retry               If for some reason your script lost connectivity during SD-WAN Manager boot, you can add --retry to continue onboarding the lab that is already in CML.
+      (venv) tzarski:~$sdwan-lab deploy -h
+                                                                                                                                                                                                    
+       Usage: sdwan-lab deploy [OPTIONS] <software-version>                                                                                                                                         
+                                                                                                                                                                                                    
+                                                                                                                                                                                                    
+       positional arguments:                                                                                                                                                                        
+         <software-version>    Software version that will be used on SD-WAN Control Components.                                                                                                     
+                                                                                                                                                                                                    
+      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --manager        <manager-ip>          SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                                                           │
+      │ --muser          <manager-user>        SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                                                                 │
+      │ --mpassword      <manager-password>    SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                                                             │
+      │ --mmask          <manager-mask>        Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK environment variable.                                      │
+      │ --mgateway       <manager-gateway>     Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY environment variable.                                               │
+      │ --lab            <lab_name>            Set CML Lab name, can also be defined via LAB_NAME environment variable. If not provided, default name "sdwan<number>" will be assigned.            │
+      │ --bridge         <custom-bridge-name>  Set custom bridge for SD-WAN Manager external connection. Default is System Bridge                                                                  │
+      │ --dns            <dns-server-ip>       Set custom DNS server for Internet/VPN0 transport. Default is same as CML DNS                                                                       │
+      │ --retry                                If for some reason your script lost connectivity during SD-WAN Manager boot, you can add --retry to continue onboarding the lab that is already in  │
+      │                                        CML                                                                                                                                                 │
+      │ --help       -h                        Show this message and exit.                                                                                                                         │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 Time to complete the deployment task depends on:
 * SD-WAN software version
@@ -236,23 +230,23 @@ This task adds Catalyst SD-WAN nodes (Validators/Controllers/Edges) into existin
 
 This task has several task-specific parameters.
 
-      sdwan-lab add -h
-      usage: sdwan-lab.py add [-h] [--manager <manager-ip>] [--muser <manager-user>] [--mpassword <manager-password>] [--lab <lab_name>] <number-of-devices> <device-type> <software-version>
-      
-      positional arguments:
-        <number-of-devices>   Number of devices to be added.
-        <device-type>         Type of device/s to be added (e.g. validator, controller, edge, sdrouting).
-        <software-version>    Software version that will be used.
-      
-      optional arguments:
-        -h, --help            show this help message and exit
-        --manager <manager-ip>
-                              SD-WAN Manager IP address, can also be defined via MANAGER_IP environment variable. If neither is provided user is prompted for SD-WAN Manager IP.
-        --muser <manager-user>
-                              SD-WAN Manager username, can also be defined via MANAGER_USER environment variable. If neither is provided user is prompted for SD-WAN Manager username.
-        --mpassword <manager-password>
-                              SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable. If neither is provided user is prompted for SD-WAN Manager password.
-        --lab <lab_name>      CML Lab name, can also be defined via LAB_NAME environment variable. If neither is provided user is prompted for lab name.
+      sdwan-lab add -h   
+                                                                                                                                                                                                    
+       Usage: sdwan-lab add [OPTIONS] <number-of-devices> <device-type> <software-version>                                                                                                          
+                                                                                                                                                                                                    
+                                                                                                                                                                                                    
+       positional arguments:                                                                                                                                                                        
+         <number-of-devices>   Number of devices to be added.                                                                                                                                       
+         <device-type>         Type of device/s to be added (e.g. validator, controller, edge, sdrouting).                                                                                          
+         <software-version>    Software version that will be used.                                                                                                                                  
+                                                                                                                                                                                                    
+      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --manager        <manager-ip>        SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                                                             │
+      │ --muser          <manager-user>      SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                                                                   │
+      │ --mpassword      <manager-password>  SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                                                               │
+      │ --lab            <lab_name>          CML Lab name, can also be defined via LAB_NAME environment variable.                                                                                  │
+      │ --help       -h                      Show this message and exit.                                                                                                                           │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 Below you will find few examples of add task:
 
@@ -270,20 +264,18 @@ This task creates a backup of the Catalyst SD-WAN lab running in CML. CML doesn'
 
 This task has several task-specific parameters, including working directory where backup is saved.
 
-    % sdwan-lab back -h  
-      usage: sdwan-lab.py backup [-h] [--manager <manager-ip>] [--muser <manager-user>] [--mpassword <manager-password>] [--lab <lab_name>] [--workdir <directory>]
-      
-      optional arguments:
-        -h, --help            show this help message and exit
-        --manager <manager-ip>
-                              SD-WAN Manager IP address, can also be defined via MANAGER_IP environment variable. If neither is provided user is prompted for SD-WAN Manager IP.
-        --muser <manager-user>
-                              SD-WAN Manager username, can also be defined via MANAGER_USER environment variable. If neither is provided user is prompted for SD-WAN Manager username.
-        --mpassword <manager-password>
-                              SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable. If neither is provided user is prompted for SD-WAN Manager password.
-        --lab <lab_name>      CML Lab name, can also be defined via LAB_NAME environment variable. If neither is provided user is prompted for lab name.
-        --workdir <directory>
-                              Backup destination folder
+      sdwan-lab backup -h
+                                                                                                                                                                                                    
+       Usage: sdwan-lab backup [OPTIONS]                                                                                                                                                            
+                                                                                                                                                                                                    
+      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --manager        <manager-ip>        SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                                                             │
+      │ --muser          <manager-user>      SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                                                                   │
+      │ --mpassword      <manager-password>  SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                                                               │
+      │ --lab            <lab_name>          CML Lab name, can also be defined via LAB_NAME environment variable.                                                                                  │
+      │ --workdir        <directory>         Backup destination folder                                                                                                                             │
+      │ --help       -h                      Show this message and exit.                                                                                                                           │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
     
 ### Restore Task
 This task restores Catalyst SD-WAN lab from a backup. This task will:
@@ -294,40 +286,39 @@ This task restores Catalyst SD-WAN lab from a backup. This task will:
 
 This task has several task-specific parameters, including working directory from where backup is restored.
 
-    % sdwan-lab restore -h
-      usage: sdwan-lab.py restore [-h] [--manager <manager-ip>] [--mmask <manager-mask>] [--mgateway <manager-gateway>] [--muser <manager-user>] [--mpassword <manager-password>] [--lab <lab_name>]
-                                  [--workdir <directory>] [--deleteexisting] [--retry]
-      
-      optional arguments:
-        -h, --help            show this help message and exit
-        --manager <manager-ip>
-                              SD-WAN Manager IP address, can also be defined via MANAGER_IP environment variable. If neither is provided user is prompted for SD-WAN Manager IP.
-        --mmask <manager-mask>
-                              Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK environment variable. If neither is provided user is prompted for SD-WAN Manager subnet mask.
-        --mgateway <manager-gateway>
-                              Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY environment variable. If neither is provided user is prompted for Manager gateway IP.
-        --muser <manager-user>
-                              SD-WAN Manager username, can also be defined via MANAGER_USER environment variable. If neither is provided user is prompted for SD-WAN Manager username.
-        --mpassword <manager-password>
-                              SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable. If neither is provided user is prompted for SD-WAN Manager password.
-        --lab <lab_name>      CML Lab name, can also be defined via LAB_NAME environment variable. If neither is provided user is prompted for lab name.
-        --workdir <directory>
-                              Restore source folder
-        --deleteexisting      If there is already lab running with same name and using same SD-WAN Manager IP, delete this lab before restoring. Note the all running lab data will be lost!
-        --retry               If for some reason your script lost connectivity during SD-WAN Manager boot, you can add --retry to continue restoring the lab that is already in CML
+      sdwan-lab restore -h
+                                                                                                                                                                                                    
+       Usage: sdwan-lab restore [OPTIONS]                                                                                                                                                           
+                                                                                                                                                                                                    
+      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --manager             <manager-ip>        SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                                                        │
+      │ --muser               <manager-user>      SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                                                              │
+      │ --mpassword           <manager-password>  SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                                                          │
+      │ --mmask               <manager-mask>      Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK environment variable.                                   │
+      │ --mgateway            <manager-gateway>   Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY environment variable.                                            │
+      │ --lab                 <lab_name>          CML Lab name, can also be defined via LAB_NAME environment variable.                                                                             │
+      │ --workdir             <directory>         Restore source folder                                                                                                                            │
+      │ --deleteexisting                          If there is already lab running with same name and using same SD-WAN Manager IP, delete this lab before restoring. Note the all running lab data │
+      │                                           will be lost!                                                                                                                                    │
+      │ --retry                                   If for some reason your script lost connectivity during SD-WAN Manager boot, you can add --retry to continue onboarding the lab that is already  │
+      │                                           in CML                                                                                                                                           │
+      │ --help            -h                      Show this message and exit.                                                                                                                      │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 ### Delete Task
 This task deletes the CML lab and removes all it's data. Note after this operation, all lab data is lost.
 
 This task has several task-specific parameters.
 
-      sdwan-lab delete -h
-      usage: sdwan-lab.py delete [-h] [--lab <lab_name>] [--force]
-      
-      optional arguments:
-        -h, --help        show this help message and exit
-        --lab <lab_name>  Lab name
-        --force           Delete the lab without asking for confirmation. Note the all lab data will be lost!
+      (venv) tzarski:~$sdwan-lab delete -h 
+                                                                                                                                                                                                    
+       Usage: sdwan-lab delete [OPTIONS]                                                                                                                                                            
+                                                                                                                                                                                                    
+      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --lab        <lab_name>  CML Lab name, can also be defined via LAB_NAME environment variable.                                                                                              │
+      │ --force                  Delete the lab without asking for confirmation. Note the all lab data will be lost!                                                                               │
+      │ --help   -h              Show this message and exit.                                                                                                                                       │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 ### Sign Task
 This tasks reads the Certificate Signing Request (CSR) from a file and signs it using SD-WAN Lab Deployment Tool Root CA.
@@ -335,11 +326,17 @@ At the end, the task prints the signed certificate in standard output.
 
 This task has several task-specific parameters.
 
-      sdwan-lab delete -h
-      usage: sdwan-lab.py sign [-h] <csr_file>
-      
-      positional arguments:
-        <csr_file>  Certificate Signing Request (CSR) File
+      sdwan-lab sign -h  
+                                                                                                                                                                                                    
+       Usage: sdwan-lab sign [OPTIONS] <csr_file>                                                                                                                                                   
+                                                                                                                                                                                                    
+                                                                                                                                                                                                    
+       positional arguments:                                                                                                                                                                        
+         <csr_file>  Certificate Signing Request (CSR) File                                                                                                                                         
+                                                                                                                                                                                                    
+      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --help  -h    Show this message and exit.                                                                                                                                                  │
+      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 ## Limitations and scale
 The tool supports the following scale per CML lab:
@@ -348,9 +345,7 @@ The tool supports the following scale per CML lab:
 - 8 SD-WAN Validators (Documented support from CCO)
 - 12 SD-WAN Controllers (Documented support from CCO)
 - 20 SD-WAN Edges
-- 10 SD-Routing edges
-
-
+- 10 SD-Routing Edges
 
 ## Appendix - WSL Installation
 
