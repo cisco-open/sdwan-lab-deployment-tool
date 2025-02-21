@@ -13,13 +13,14 @@ from typing import List, Union
 
 from httpx import HTTPStatusError
 from ruamel.yaml import YAML
-from virl2_client import ClientLibrary
+from virl2_client import ClientConfig, ClientLibrary
 
 from .utils import (
     CML_NODES_DEFINITION_DIR,
     SOFTWARE_IMAGES_DIR,
     setup_logging,
     track_progress,
+    verify_cml_version,
 )
 
 
@@ -49,9 +50,13 @@ def upload_image_and_create_definition(
         cml.definitions.upload_image_definition(body=json.dumps(image_def))
 
 
-def main(cml: ClientLibrary, loglevel: Union[int, str], list: bool) -> None:
+def main(cml_config: ClientConfig, loglevel: Union[int, str], list: bool) -> None:
     # Setup logging
     log = setup_logging(loglevel)
+
+    # create cml instance and check version
+    cml = cml_config.make_client()
+    verify_cml_version(cml)
 
     # Setup YAML
     yaml = YAML(typ="rt")

@@ -187,6 +187,13 @@ def create_cert(ca_cert_str: str, ca_key_str: str, csr_str: str) -> str:
     return crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
 
 
+def verify_cml_version(cml: ClientLibrary) -> None:
+    if cml.VERSION.major == 2 and cml.VERSION.minor >= 6:
+        pass
+    else:
+        exit("Upgrade CML to 2.6 or later to use the tool.")
+
+
 def get_cml_sdwan_image_definition(
     cml: ClientLibrary, node_definition: str, software_version: str
 ) -> str:

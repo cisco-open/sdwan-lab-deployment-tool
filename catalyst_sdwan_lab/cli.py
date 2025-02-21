@@ -8,20 +8,13 @@ from typing import Any
 import rich_click as click
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
-from virl2_client import ClientLibrary
+from virl2_client import ClientConfig
 
 import catalyst_sdwan_lab
 
 from .tasks import add, backup, delete, deploy, restore, setup, sign
 
 urllib3.disable_warnings(InsecureRequestWarning)
-
-
-def verify_cml_version(cml: ClientLibrary) -> None:
-    if cml.VERSION.major == 2 and cml.VERSION.minor >= 6:
-        pass
-    else:
-        exit("Upgrade CML to 2.6 or later to use the tool.")
 
 
 def set_manager_details(cml_ip: str, manager_ip: str) -> tuple[bool, str, int]:
@@ -126,12 +119,8 @@ def cli(
     cml = cml if cml else click.prompt("CML IP address")
     user = user if user else click.prompt("CML username")
     password = password if password else click.prompt("CML password", hide_input=True)
-    ctx.obj["CML_IP"] = cml
-    ctx.obj["CML_USER"] = user
-    ctx.obj["CML_PASSWORD"] = password
-    cml_instance = ClientLibrary(cml, user, password, ssl_verify=False)
-    ctx.obj["CML"] = cml_instance
-    verify_cml_version(cml_instance)
+    cml_config = ClientConfig(cml, user, password, ssl_verify=False)
+    ctx.obj["CML_CONFIG"] = cml_config
 
 
 @cli.command(
@@ -147,7 +136,7 @@ def cli(
 )
 @click.pass_context
 def cli_setup(ctx: click.Context, list_: bool) -> None:
-    setup.main(ctx.obj["CML"], ctx.obj["LOGLEVEL"], list_)
+    setup.main(ctx.obj["CML_CONFIG"], ctx.obj["LOGLEVEL"], list_)
 
 
 def manager_options(f: Callable[..., Any]) -> Callable[..., Any]:
@@ -261,8 +250,8 @@ def cli_deploy(
     positional arguments:
       <software-version>    Software version that will be used on SD-WAN Control Components.
     """
-    cml = ctx.obj["CML"]
-    cml_ip = ctx.obj["CML_IP"]
+    cml_config = ctx.obj["CML_CONFIG"]
+    cml_ip = cml_config.url
     loglevel = ctx.obj["LOGLEVEL"]
     patty_used, manager_ip, manager_port = set_manager_details(cml_ip, manager)
 
@@ -272,8 +261,7 @@ def cli_deploy(
         mgateway = click.prompt("SD-WAN Manager gateway IP")
 
     deploy.main(
-        cml,
-        cml_ip,
+        cml_config,
         manager_ip,
         manager_port,
         mmask,
@@ -334,17 +322,14 @@ def cli_add(
       <device-type>         Type of device/s to be added (e.g. validator, controller, edge, sdrouting).
       <software-version>    Software version that will be used.
     """
-    cml = ctx.obj["CML"]
-    user = ctx.obj["CML_USER"]
-    password = ctx.obj["CML_PASSWORD"]
-    cml_ip = ctx.obj["CML_IP"]
+    cml_config = ctx.obj["CML_CONFIG"]
+    cml_ip = cml_config.url
     _, manager_ip, manager_port = set_manager_details(cml_ip, manager)
     device_type = device_type.lower()
     loglevel = ctx.obj["LOGLEVEL"]
+
     add.main(
-        cml,
-        user,
-        password,
+        cml_config,
         manager_ip,
         manager_port,
         muser,
@@ -380,17 +365,13 @@ def cli_add(
 def cli_backup(
     ctx: click.Context, manager: str, muser: str, mpassword: str, lab: str, workdir: str
 ) -> None:
-    cml = ctx.obj["CML"]
-    user = ctx.obj["CML_USER"]
-    password = ctx.obj["CML_PASSWORD"]
-    cml_ip = ctx.obj["CML_IP"]
+    cml_config = ctx.obj["CML_CONFIG"]
+    cml_ip = cml_config.url
     _, manager_ip, manager_port = set_manager_details(cml_ip, manager)
     loglevel = ctx.obj["LOGLEVEL"]
 
     backup.main(
-        cml,
-        user,
-        password,
+        cml_config,
         manager_ip,
         manager_port,
         muser,
@@ -450,8 +431,8 @@ def cli_restore(
     deleteexisting: bool,
     retry: bool,
 ) -> None:
-    cml = ctx.obj["CML"]
-    cml_ip = ctx.obj["CML_IP"]
+    cml_config = ctx.obj["CML_CONFIG"]
+    cml_ip = cml_config.url
     patty_used, manager_ip, manager_port = set_manager_details(cml_ip, manager)
 
     if not patty_used and not mgateway:
@@ -462,8 +443,7 @@ def cli_restore(
     loglevel = ctx.obj["LOGLEVEL"]
 
     restore.main(
-        cml,
-        cml_ip,
+        cml_config,
         manager_ip,
         manager_port,
         mmask,
@@ -499,9 +479,9 @@ def cli_restore(
 )
 @click.pass_context
 def cli_delete(ctx: click.Context, lab: str, force: bool) -> None:
-    cml = ctx.obj["CML"]
+    cml_config = ctx.obj["CML_CONFIG"]
     loglevel = ctx.obj["LOGLEVEL"]
-    delete.main(cml, lab, force, loglevel)
+    delete.main(cml_config, lab, force, loglevel)
 
 
 @cli.command(
