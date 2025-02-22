@@ -17,7 +17,7 @@ from catalystwan.endpoints.configuration_device_inventory import SerialFilePaylo
 from cisco_sdwan.base.rest_api import Rest
 from passlib.hash import sha512_crypt
 from ruamel.yaml import YAML
-from virl2_client import ClientLibrary
+from virl2_client import ClientConfig
 
 from . import delete
 from .utils import (
@@ -30,14 +30,14 @@ from .utils import (
     restore_manager_configuration,
     setup_logging,
     track_progress,
+    verify_cml_version,
     wait_for_manager_session,
     wait_for_wan_edge_onboaring,
 )
 
 
 def main(
-    cml: ClientLibrary,
-    cml_ip: str,
+    cml_config: ClientConfig,
     manager_ip: str,
     manager_port: int,
     manager_mask: str,
@@ -56,6 +56,10 @@ def main(
 
     # Setup logging
     log = setup_logging(loglevel)
+
+    # create cml instance and check version
+    cml = cml_config.make_client()
+    verify_cml_version(cml)
 
     # Setup YAML
     yaml = YAML(typ="rt")
@@ -427,7 +431,7 @@ def main(
     print(
         f"#############################################\n"
         f"Lab is restored.\n"
-        f"CML URL: https://{cml_ip}\n"
+        f"CML URL: https://{cml_config.url}\n"
         f"SD-WAN Manager URL: https://{manager_ip}:8443\n"
         f"Use the username/password set with the script for CML and SD-WAN Manager login.\n"
         f"All other nodes use default username/password.\n"

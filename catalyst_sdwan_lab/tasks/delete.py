@@ -6,18 +6,22 @@
 
 from typing import Union
 
-from virl2_client import ClientLibrary
+from virl2_client import ClientConfig
 
-from .utils import setup_logging, track_progress
+from .utils import setup_logging, track_progress, verify_cml_version
 
 
 def main(
-    cml: ClientLibrary, lab_name: str, force: bool, loglevel: Union[str, int]
+    cml_config: ClientConfig, lab_name: str, force: bool, loglevel: Union[str, int]
 ) -> None:
 
     # Setup logging
     log = setup_logging(loglevel)
     track_progress(log, "Preparing delete task...")
+
+    # create cml instance and check version
+    cml = cml_config.make_client()
+    verify_cml_version(cml)
 
     # Find the lab
     lab = cml.find_labs_by_title(lab_name)

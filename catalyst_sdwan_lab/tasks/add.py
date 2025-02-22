@@ -20,7 +20,7 @@ from catalystwan.endpoints.configuration_group import (
 from catalystwan.endpoints.troubleshooting_tools.device_connectivity import NPingRequest
 from catalystwan.session import ManagerSession, create_manager_session
 from jinja2 import Environment, FileSystemLoader
-from virl2_client import ClientLibrary
+from virl2_client import ClientConfig
 
 from .utils import (
     CML_DEPLOY_LAB_DEFINITION_DIR,
@@ -30,6 +30,7 @@ from .utils import (
     onboard_control_components,
     setup_logging,
     track_progress,
+    verify_cml_version,
     wait_for_wan_edge_onboaring,
 )
 
@@ -56,9 +57,7 @@ def ping_node(
 
 
 def main(
-    cml: ClientLibrary,
-    cml_user: str,
-    cml_password: str,
+    cml_config: ClientConfig,
     manager_ip: str,
     manager_port: int,
     manager_user: str,
@@ -74,6 +73,10 @@ def main(
 
     # Setup logging
     log = setup_logging(loglevel)
+
+    # create cml instance and check version
+    cml = cml_config.make_client()
+    verify_cml_version(cml)
 
     track_progress(log, "Preparing add task...")
     # Load CA chain
@@ -296,6 +299,8 @@ def main(
                     log, "Updating SD-WAN Validator FQDN entry on Gateway..."
                 )
                 new_validator_ip_list = " ".join(nodes_vpn0_ips)
+                cml_user = cml_config.username
+                cml_password = cml_config.password
                 lab.pyats.sync_testbed(cml_user, cml_password)
                 gateway = lab.get_node_by_label("Gateway")
                 current_dns_maps = gateway.run_pyats_command(

@@ -19,7 +19,7 @@ from cisco_sdwan.tasks.implementation import BackupArgs, TaskBackup
 from jinja2 import Environment, FileSystemLoader
 from ruamel.yaml import YAML
 from ruamel.yaml.scalarstring import LiteralScalarString
-from virl2_client import ClientLibrary
+from virl2_client import ClientConfig
 from virl2_client.models.cl_pyats import ClPyats
 
 from .utils import (
@@ -27,6 +27,7 @@ from .utils import (
     load_certificate_details,
     setup_logging,
     track_progress,
+    verify_cml_version,
 )
 
 
@@ -138,9 +139,7 @@ def check_pyats_device_connectivity(
 
 
 def main(
-    cml: ClientLibrary,
-    cml_user: str,
-    cml_password: str,
+    cml_config: ClientConfig,
     manager_ip: str,
     manager_port: int,
     manager_user: str,
@@ -154,6 +153,12 @@ def main(
 
     # Setup logging
     log = setup_logging(loglevel)
+
+    # create cml instance and check version
+    cml = cml_config.make_client()
+    verify_cml_version(cml)
+    cml_user = cml_config.username
+    cml_password = cml_config.password
 
     track_progress(log, "Preparing for backup...")
 
