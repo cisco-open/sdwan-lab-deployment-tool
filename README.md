@@ -366,8 +366,7 @@ The tool supports the following scale per CML lab:
 - 20 SD-WAN Edges
 - 10 SD-Routing Edges
 
-- The tool requires at least 9 nodes to depoloy the topology and there it is not supported on CML Freetier. 
-
+The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free.
 
 ## Appendix - WSL Installation
 
