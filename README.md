@@ -366,6 +366,9 @@ The tool supports the following scale per CML lab:
 - 20 SD-WAN Edges
 - 10 SD-Routing Edges
 
+- The tool requires at least 9 nodes to depoloy the topology and there it is not supported on CML Freetier. 
+
+
 ## Appendix - WSL Installation
 
 To install WSL on your Windows VM or Physical machine. Ensure that the HW Virutalization is enabled in the BIOS or VM Defintion.
