@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 2.0.15 [unreleased]
+# Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 
 - Fixed a problem where the backup task might fail with a "KeyError: 'label'"
 - Migrated CLI interface from argparse to click library
