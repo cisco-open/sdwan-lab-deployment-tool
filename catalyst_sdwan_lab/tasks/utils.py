@@ -29,6 +29,7 @@ from catalystwan.endpoints.configuration_settings import (
     Device,
     Organization,
     VManageDataStream,
+    VEdgeCloud,
 )
 from catalystwan.exceptions import ManagerHTTPError, ManagerRequestException
 from catalystwan.session import ManagerSession, create_manager_session
@@ -147,6 +148,7 @@ def configure_manager_basic_settings(
     else:
         log.info("Org-name is already set")
     manager_config_settings.edit_devices(Device(domain_ip=VALIDATOR_FQDN))
+    manager_config_settings.edit_vedge_cloud(VEdgeCloud(certificateauthority="vmanage"))
     manager_session.post(
         "/dataservice/settings/configuration/certificate",
         json={"certificateSigning": "enterprise"},
