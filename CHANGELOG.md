@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.0.16 [unreleased]
+
+- In add task, add option to set custom CPUs and RAM for a device
+
 # Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 
 - Fixed a problem where the backup task might fail with a "KeyError: 'label'"

@@ -63,6 +63,8 @@ def main(
     manager_user: str,
     manager_password: str,
     lab_name: str,
+    cpus: int,
+    ram: int,
     number_of_devices: int,
     device_type: str,
     software_version: str,
@@ -235,6 +237,8 @@ def main(
                     populate_interfaces=True,
                     x=next_node_x_position,
                     y=next_node_y_position,
+                    cpus=cpus,
+                    ram=ram,
                 )
                 # Need to wait few seconds as otherwise the next step might fail
                 # as interfaces will not yet be added to the new node
@@ -558,6 +562,8 @@ def main(
                     populate_interfaces=True,
                     x=next_node_x_position,
                     y=320,
+                    cpus=cpus,
+                    ram=ram,
                 )
                 # Need to wait few seconds as otherwise the next step might fail
                 # as interfaces will not yet be added to the new node
@@ -673,6 +679,8 @@ def main(
                     populate_interfaces=True,
                     x=next_node_x_position,
                     y=320,
+                    cpus=cpus,
+                    ram=ram,
                 )
                 # Need to wait few seconds as otherwise the next step might fail
                 # as interfaces will not yet be added to the new node

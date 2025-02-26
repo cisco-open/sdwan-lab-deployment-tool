@@ -291,6 +291,18 @@ def cli_deploy(
     prompt="CML lab name",
     help="CML Lab name, can also be defined via LAB_NAME environment variable. ",
 )
+@click.option(
+    "--cpus",
+    metavar="<cpus>",
+    type=int,
+    help="Set custom number of CPUs for the device.",
+)
+@click.option(
+    "--ram",
+    metavar="<ram>",
+    type=int,
+    help="Set custom RAM size for the device in MB.",
+)
 @click.argument(
     "number_of_devices",
     metavar="<number-of-devices>",
@@ -311,6 +323,8 @@ def cli_add(
     muser: str,
     mpassword: str,
     lab: str,
+    cpus: int,
+    ram: int,
     number_of_devices: int,
     device_type: str,
     software_version: str,
@@ -335,6 +349,8 @@ def cli_add(
         muser,
         mpassword,
         lab,
+        cpus,
+        ram,
         number_of_devices,
         device_type,
         software_version,

@@ -246,25 +246,27 @@ This task has several task-specific parameters.
 
        Usage: sdwan-lab add [OPTIONS] <number-of-devices> <device-type> <software-version>
 
+      positional arguments:
+      <number-of-devices>   Number of devices to be added.
+      <device-type>         Type of device/s to be added (e.g. validator, controller, edge, sdrouting).
+      <software-version>    Software version that will be used.
 
-       positional arguments:
-         <number-of-devices>   Number of devices to be added.
-         <device-type>         Type of device/s to be added (e.g. validator, controller, edge, sdrouting).
-         <software-version>    Software version that will be used.
-
-      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      │ --manager        <manager-ip>        SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                                                             │
-      │ --muser          <manager-user>      SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                                                                   │
-      │ --mpassword      <manager-password>  SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                                                               │
-      │ --lab            <lab_name>          CML Lab name, can also be defined via LAB_NAME environment variable.                                                                                  │
-      │ --help       -h                      Show this message and exit.                                                                                                                           │
-      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --manager        <manager-ip>        SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                       │
+      │ --muser          <manager-user>      SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                             │
+      │ --mpassword      <manager-password>  SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                         │
+      │ --lab            <lab_name>          CML Lab name, can also be defined via LAB_NAME environment variable.                                            │
+      │ --cpus           <cpus>              Set custom number of CPUs for the device.                                                                       │
+      │ --ram            <ram>               Set custom RAM size for the device in MB.                                                                       │
+      │ --help       -h                      Show this message and exit.                                                                                     │
+      ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 Below you will find few examples of add task:
 
     sdwan-lab add 1 validator 20.9.4 --lab sdwan1
     sdwan-lab add 2 controllers 20.12.2 --lab sdwan2
     sdwan-lab add 5 edges 17.09.03a --lab vsdwan1
+    sdwan-lab add 1 edge 17.12.04 --cpu 8 --ram 8192
     sdwan-lab add 2 sdrouting 17.12.2 --lab vsdwan1
 
 ### Backup Task
