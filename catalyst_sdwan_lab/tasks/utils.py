@@ -28,8 +28,8 @@ from catalystwan.endpoints.configuration_settings import (
     CloudX,
     Device,
     Organization,
-    VManageDataStream,
     VEdgeCloud,
+    VManageDataStream,
 )
 from catalystwan.exceptions import ManagerHTTPError, ManagerRequestException
 from catalystwan.session import ManagerSession, create_manager_session
