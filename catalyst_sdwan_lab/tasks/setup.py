@@ -282,6 +282,7 @@ def main(
             else:
                 log.debug(f"Skipping file {filename} (not a valid image).")
 
+    if not list:
         track_progress(log, "Setup task done\n")
         if warnings:
             print("Warnings:\n" + "\n".join(f"- {warning}" for warning in warnings))
