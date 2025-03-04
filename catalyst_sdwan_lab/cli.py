@@ -125,18 +125,30 @@ def cli(
 
 @cli.command(
     name="setup",
-    short_help="Setup on-prem CML to use Catalyst SD-WAN Lab automation.",
+    short_help="Setup CML to use Catalyst SD-WAN Lab automation.",
+)
+@click.option(
+    "--delete",
+    "-d",
+    metavar="<software_versions>",
+    help="Delete all image definitions for the specified software version(s). "
+    "To specify multiple versions, separate them with a comma.",
 )
 @click.option(
     "--list",
     "-l",
     "list_",
     is_flag=True,
-    help="After running setup task, list the available SD-WAN software per node type.",
+    help="List the available SD-WAN software per node type and exit.",
 )
 @click.pass_context
-def cli_setup(ctx: click.Context, list_: bool) -> None:
-    setup.main(ctx.obj["CML_CONFIG"], ctx.obj["LOGLEVEL"], list_)
+def cli_setup(ctx: click.Context, list_: bool, delete: str = "") -> None:
+    software_versions_to_delete = []
+    if delete:
+        software_versions_to_delete = delete.split(",")
+    setup.main(
+        ctx.obj["CML_CONFIG"], ctx.obj["LOGLEVEL"], list_, software_versions_to_delete
+    )
 
 
 def manager_options(f: Callable[..., Any]) -> Callable[..., Any]:

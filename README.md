@@ -106,7 +106,7 @@ Task-specific parameters are provided after the task argument.
       │ delete                  Delete the CML lab and all the lab data.                                                                                                                           │
       │ deploy                  Deploy a new Catalyst SD-WAN lab pod.                                                                                                                              │
       │ restore                 Restore Catalyst SD-WAN POD from backup.                                                                                                                           │
-      │ setup                   Setup on-prem CML to use Catalyst SD-WAN Lab automation.                                                                                                           │
+      │ setup                   Setup CML to use Catalyst SD-WAN Lab automation.                                                                                                           │
       │ sign                    Sign CSR using the SD-WAN Lab Deployment Tool Root CA.                                                                                                             │
       ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
@@ -170,16 +170,19 @@ This task makes sure your CML is ready to run Catalyst SD-WAN labs. The task wil
 
 On each CML server that you want to use, you should run a setup task at least once to create required node and image definitions. You can rerun the setup task each time you want to add a new Catalyst SD-WAN software image to your CML server.
 
-This task have one task-specific argument that allows you to migrate the node and image definitions to new format if you've used SD-WAN Lab 1.x in the past.
+This task can also delete existing image definitions to clean up old SD-WAN releases from CML server.
 
       sdwan-lab setup -h
 
        Usage: sdwan-lab setup [OPTIONS]
 
-      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      │ --list  -l    After running setup task, list the available SD-WAN software per node type.                                                                                                  │
-      │ --help  -h    Show this message and exit.                                                                                                                                                  │
-      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --delete  -d  <software_versions>  Delete all image definitions for the specified software           │
+      │                                    version(s). To specify multiple versions, separate them with a    │
+      │                                    comma.                                                            │
+      │ --list    -l                       List the available SD-WAN software per node type and exit.        │
+      │ --help    -h                       Show this message and exit.                                       │
+      ╰──────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 ### Deploy Task
 
