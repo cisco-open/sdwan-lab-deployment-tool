@@ -66,7 +66,25 @@ def main(
     cml = cml_config.make_client()
     verify_cml_version(cml)
 
-    if software_versions_to_delete is not None:
+    if list:
+        print("Available Software Versions:")
+        for node_definition_id in [
+            "cat-sdwan-manager",
+            "cat-sdwan-controller",
+            "cat-sdwan-validator",
+            "cat-sdwan-edge",
+        ]:
+            available_software_versions = []
+            # List available SD-WAN software
+            for (
+                image_definition
+            ) in cml.definitions.image_definitions_for_node_definition(
+                node_definition_id
+            ):
+                available_software_versions.append(image_definition["id"].split("-")[3])
+            print(f"- {node_definition_id}: {available_software_versions}\n")
+
+    elif software_versions_to_delete is not None:
         track_progress(log, "Checking software versions to delete...")
         node_types = [
             "cat-sdwan-manager",
@@ -264,24 +282,6 @@ def main(
             else:
                 log.debug(f"Skipping file {filename} (not a valid image).")
 
-    track_progress(log, "Setup task done\n")
-    if warnings:
-        print("Warnings:\n" + "\n".join(f"- {warning}" for warning in warnings))
-
-    if list:
-        print("Available Software Versions:")
-        for node_definition_id in [
-            "cat-sdwan-manager",
-            "cat-sdwan-controller",
-            "cat-sdwan-validator",
-            "cat-sdwan-edge",
-        ]:
-            available_software_versions = []
-            # List available SD-WAN software
-            for (
-                image_definition
-            ) in cml.definitions.image_definitions_for_node_definition(
-                node_definition_id
-            ):
-                available_software_versions.append(image_definition["id"].split("-")[3])
-            print(f"- {node_definition_id}: {available_software_versions}")
+        track_progress(log, "Setup task done\n")
+        if warnings:
+            print("Warnings:\n" + "\n".join(f"- {warning}" for warning in warnings))

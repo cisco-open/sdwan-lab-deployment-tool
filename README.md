@@ -180,8 +180,7 @@ This task can also delete existing image definitions to clean up old SD-WAN rele
       │ --delete  -d  <software_versions>  Delete all image definitions for the specified software           │
       │                                    version(s). To specify multiple versions, separate them with a    │
       │                                    comma.                                                            │
-      │ --list    -l                       After running setup task, list the available SD-WAN software per  │
-      │                                    node type.                                                        │
+      │ --list    -l                       List the available SD-WAN software per node type and exit.        │
       │ --help    -h                       Show this message and exit.                                       │
       ╰──────────────────────────────────────────────────────────────────────────────────────────────────────╯
 

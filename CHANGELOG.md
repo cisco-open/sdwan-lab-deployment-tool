@@ -2,6 +2,7 @@
 
 - In setup task, add option to delete already defined software images
 - Fix issue where add task might fail for SD-WAN Manager 20.18 and higher
+- In setup task, change behaviour when --list is specified, print software version and exit
 
 # Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 

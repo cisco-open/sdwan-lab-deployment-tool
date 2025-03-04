@@ -139,7 +139,7 @@ def cli(
     "-l",
     "list_",
     is_flag=True,
-    help="After running setup task, list the available SD-WAN software per node type.",
+    help="List the available SD-WAN software per node type and exit.",
 )
 @click.pass_context
 def cli_setup(ctx: click.Context, list_: bool, delete: str = None) -> None:
