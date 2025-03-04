@@ -142,8 +142,8 @@ def cli(
     help="List the available SD-WAN software per node type and exit.",
 )
 @click.pass_context
-def cli_setup(ctx: click.Context, list_: bool, delete: str = None) -> None:
-    software_versions_to_delete = None
+def cli_setup(ctx: click.Context, list_: bool, delete: str = "") -> None:
+    software_versions_to_delete = []
     if delete:
         software_versions_to_delete = delete.split(",")
     setup.main(

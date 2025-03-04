@@ -84,7 +84,7 @@ def main(
                 available_software_versions.append(image_definition["id"].split("-")[3])
             print(f"- {node_definition_id}: {available_software_versions}\n")
 
-    elif software_versions_to_delete is not None:
+    elif software_versions_to_delete:
         track_progress(log, "Checking software versions to delete...")
         node_types = [
             "cat-sdwan-manager",
