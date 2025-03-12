@@ -387,6 +387,14 @@ Once the installation is finished and you have restarted Windows you are able to
 
 You can read more about [Linux on Windows with WSL here](https://learn.microsoft.com/en-us/windows/wsl/install).
 
+## FAQ
+Q1: Device Consoles has stopped working after i have created my own configuration groups.
+A1: Please always include `platform console serial` in an add-on CLI parcel to make sure you consoles are working from the CML Manager.
+
+Q2: Can I ssh to my Manager instance directly. 
+A2: Yes if you are using an external IP, if you are using PATty you cant as we only map the https port. 
+
+
 ## Authors
 
 Tomasz Zarski (tzarski@cisco.com)
