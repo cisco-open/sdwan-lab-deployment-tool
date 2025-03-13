@@ -388,12 +388,11 @@ Once the installation is finished and you have restarted Windows you are able to
 You can read more about [Linux on Windows with WSL here](https://learn.microsoft.com/en-us/windows/wsl/install).
 
 ## FAQ
-Q1: Device Consoles has stopped working after i have created my own configuration groups.
-A1: Please always include `platform console serial` in an add-on CLI parcel to make sure you consoles are working from the CML Manager.
-
-Q2: Can I ssh to my Manager instance directly. 
-A2: Yes if you are using an external IP, if you are using PATty you cant as we only map the https port. 
-
+Q1: My devices' consoles have stopped working after I created my own configuration groups. How do I recover console access?
+A1: Always include the `platform console serial` command in an CLI add-on feature parcel to ensure your consoles work from the CML UI. Note that after adding this command, a WAN Edge reboot is required.
+ 
+Q2: Can I SSH to my Manager instance directly?
+A2: Yes, you can if you are using an external IP. However, if you are using PATty, you cannot, as we only map the HTTPS port.
 
 ## Authors
 
