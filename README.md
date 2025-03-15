@@ -368,6 +368,36 @@ The tool supports the following scale per CML lab:
 
 The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free.
 
+## Appendix - Offline/Airgabbed Installation
+
+To Install the tool on an airgabbed server please follow theese instructions.
+
+Make sure that you have Pythhon3, Python3-venv and unzip installed on your server. The installation of that is not covered in this guide. 
+
+Create a directory to store the virtual environment and runtime files:
+
+      mkdir csdwan
+      cd csdwan
+
+- Download the tool from github using the code/zip file.
+- Transfer the zipfile to the airgabbed machine and put into the folder above.
+
+Unszip the file
+    ```unzip sdwan-lab-deployment-tool-main.zip```
+
+Create virtual environment:
+
+      python3 -m venv venv
+
+Activate virtual environment:
+
+     source venv/bin/activate
+
+Install the scipt with pip 
+
+```pip install catalyst-sdwan-lab --no-index --find-link file:///home/sedk/csdwan/sdwan-lab-deployment-tool-main/```
+
+
 ## Appendix - WSL Installation
 
 To install WSL on your Windows VM or Physical machine. Ensure that the HW Virutalization is enabled in the BIOS or VM Defintion.
