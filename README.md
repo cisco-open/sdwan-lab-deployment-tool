@@ -310,28 +310,28 @@ This task has several task-specific parameters, including working directory from
        Usage: sdwan-lab restore [OPTIONS]
 
       ╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────╮
-      │ --manager <manager-ip> SD-WAN Manager IP address, can also be defined via │
-      │ MANAGER_IP environment │
-      │ --muser <manager-user> SD-WAN Manager username, can also be defined via │
-      │ MANAGER_USER environment variable. │
-      │ --mpassword <manager-password> SD-WAN Manager password, can also be defined via │
-      │ MANAGER_PASSWORD environment variable. │
-      │ --mmask <manager-mask> Subnet mask for given SD-WAN Manager IP (e.g. /24), can │
-      │ also be defined via MANAGER_MASK environment variable. │
-      │ --mgateway <manager-gateway> Gateway IP for given SD-WAN Manager IP, can also be │
-      │ defined via MANAGER_GATEWAY environment variable. │
-      │ --lab <lab_name> CML Lab name, can also be defined via LAB_NAME │
-      │ environment variable. │
-      │ --workdir <directory> Restore source folder │
-      │ --deleteexisting If there is already lab running with same name and │
-      │ using same SD-WAN Manager IP, delete this lab before │
-      │ restoring. Note the all running lab data will be lost! │
-      │ --retry If for some reason your script lost connectivity during │
-      │ SD-WAN Manager boot, you can add --retry to continue │
-      │ onboarding the lab that is already in CML │
-      │ --contr_version <contr_version> Change the controller version when restoring the lab. │
-      │ --edge_version <edge_version> Change the SD-WAN edge version when restoring the lab. │
-      │ --help -h Show this message and exit. │
+      │ --manager             <manager-ip>        SD-WAN Manager IP address, can also be defined via      │
+      │                                           MANAGER_IP environment                                  │
+      │ --muser               <manager-user>      SD-WAN Manager username, can also be defined via        │
+      │                                           MANAGER_USER environment variable.                      │
+      │ --mpassword           <manager-password>  SD-WAN Manager password, can also be defined via        │
+      │                                           MANAGER_PASSWORD environment variable.                  │
+      │ --mmask               <manager-mask>      Subnet mask for given SD-WAN Manager IP (e.g. /24), can │
+      │                                           also be defined via MANAGER_MASK environment variable.  │
+      │ --mgateway            <manager-gateway>   Gateway IP for given SD-WAN Manager IP, can also be     │
+      │                                           defined via MANAGER_GATEWAY environment variable.       │
+      │ --lab                 <lab_name>          CML Lab name, can also be defined via LAB_NAME          │
+      │                                           environment variable.                                   │
+      │ --workdir             <directory>         Restore source folder                                   │
+      │ --deleteexisting                          If there is already lab running with same name and      │
+      │                                           using same SD-WAN Manager IP, delete this lab before    │
+      │                                           restoring. Note the all running lab data will be lost!  │
+      │ --retry                                   If for some reason your script lost connectivity during │
+      │                                           SD-WAN Manager boot, you can add --retry to continue    │
+      │                                           onboarding the lab that is already in CML               │
+      │ --contr_version       <contr_version>     Change the controller version when restoring the lab.   │
+      │ --edge_version        <edge_version>      Change the SD-WAN edge version when restoring the lab.  │
+      │ --help            -h                      Show this message and exit.                             │
       ╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 Below you will find few examples of restore task:
