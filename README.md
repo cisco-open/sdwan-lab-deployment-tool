@@ -303,26 +303,43 @@ This task restores Catalyst SD-WAN lab from a backup. This task will:
 3. Restore SD-WAN Manager templates, policies and configuration groups using [Sastre](https://github.com/CiscoDevNet/sastre).
 4. Verify if there are any WAN Edges in the topology (SD-WAN and SD-Routing). If yes, then generate the new OTP and automatically reonboard them to SD-WAN Manager.
 
-This task has several task-specific parameters, including working directory from where backup is restored.
+This task has several task-specific parameters, including working directory from where backup is restored. You can also overwrite the software version for control components and SD-WAN/SD-Routing Edges (note that specifying version lower than the one in the backup is not supported).
 
       sdwan-lab restore -h
 
        Usage: sdwan-lab restore [OPTIONS]
 
-      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      │ --manager             <manager-ip>        SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                                                        │
-      │ --muser               <manager-user>      SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                                                              │
-      │ --mpassword           <manager-password>  SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                                                          │
-      │ --mmask               <manager-mask>      Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK environment variable.                                   │
-      │ --mgateway            <manager-gateway>   Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY environment variable.                                            │
-      │ --lab                 <lab_name>          CML Lab name, can also be defined via LAB_NAME environment variable.                                                                             │
-      │ --workdir             <directory>         Restore source folder                                                                                                                            │
-      │ --deleteexisting                          If there is already lab running with same name and using same SD-WAN Manager IP, delete this lab before restoring. Note the all running lab data │
-      │                                           will be lost!                                                                                                                                    │
-      │ --retry                                   If for some reason your script lost connectivity during SD-WAN Manager boot, you can add --retry to continue onboarding the lab that is already  │
-      │                                           in CML                                                                                                                                           │
-      │ --help            -h                      Show this message and exit.                                                                                                                      │
-      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      ╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --manager <manager-ip> SD-WAN Manager IP address, can also be defined via │
+      │ MANAGER_IP environment │
+      │ --muser <manager-user> SD-WAN Manager username, can also be defined via │
+      │ MANAGER_USER environment variable. │
+      │ --mpassword <manager-password> SD-WAN Manager password, can also be defined via │
+      │ MANAGER_PASSWORD environment variable. │
+      │ --mmask <manager-mask> Subnet mask for given SD-WAN Manager IP (e.g. /24), can │
+      │ also be defined via MANAGER_MASK environment variable. │
+      │ --mgateway <manager-gateway> Gateway IP for given SD-WAN Manager IP, can also be │
+      │ defined via MANAGER_GATEWAY environment variable. │
+      │ --lab <lab_name> CML Lab name, can also be defined via LAB_NAME │
+      │ environment variable. │
+      │ --workdir <directory> Restore source folder │
+      │ --deleteexisting If there is already lab running with same name and │
+      │ using same SD-WAN Manager IP, delete this lab before │
+      │ restoring. Note the all running lab data will be lost! │
+      │ --retry If for some reason your script lost connectivity during │
+      │ SD-WAN Manager boot, you can add --retry to continue │
+      │ onboarding the lab that is already in CML │
+      │ --contr_version <contr_version> Change the controller version when restoring the lab. │
+      │ --edge_version <edge_version> Change the SD-WAN edge version when restoring the lab. │
+      │ --help -h Show this message and exit. │
+      ╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Below you will find few examples of restore task:
+
+    sdwan-lab restore --workdir backup
+    sdwan-lab restore --workdir backup --deleteexisting
+    sdwan-lab restore --workdir backup --contr_version 20.16.1
+    sdwan-lab restore --workdir backup --contr_version 20.16.1 --edge_version 17.16.01a
 
 ### Delete Task
 
@@ -391,10 +408,11 @@ Once the installation is finished and you have restarted Windows you are able to
 You can read more about [Linux on Windows with WSL here](https://learn.microsoft.com/en-us/windows/wsl/install).
 
 ## FAQ
+
 Q1: My devices' consoles have stopped working after I created my own configuration groups. How do I recover console access?
 
 A1: Always include the `platform console serial` command in an CLI add-on feature parcel to ensure your consoles work from the CML UI. Note that after adding this command, a WAN Edge reboot is required.
- 
+
 Q2: Can I SSH to my Manager instance directly?
 
 A2: Yes, you can if you are using an external IP. However, if you are using PATty, you cannot, as we only map the HTTPS port.
