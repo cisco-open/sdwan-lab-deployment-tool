@@ -70,7 +70,7 @@ boot:
     - ': System Ready'
 sim:
   linux_native:
-    cpus: 8
+    cpus: 10
     disk_driver: ide
     driver: server
     libvirt_domain_driver: kvm
