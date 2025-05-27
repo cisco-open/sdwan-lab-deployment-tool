@@ -1,8 +1,6 @@
 import os
 import subprocess
-import pytest
 
-@pytest.mark.order(1)
 def test_csdwan():
     commands = [
         ['csdwan', '--version'],
