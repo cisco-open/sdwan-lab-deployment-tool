@@ -50,6 +50,8 @@ def main(
     deleteexisitng: bool,
     retry: bool,
     loglevel: Union[int, str],
+    contr_version: str,
+    edge_version: str,
 ) -> None:
     # Time the script execution
     begin_time = datetime.datetime.now()
@@ -71,14 +73,69 @@ def main(
 
     cml_topology_dict = yaml.load(cml_topology)
 
-    # Verify if requested software version is defined in CML
     track_progress(log, "Preparing for restore...")
     log.info("Checking software version...")
+    if contr_version:
+        # Check if the software version requested by user is compatible with the backup
+        # In particular, check if the requested version is not older than the backup version
+        backup_version = next(
+            node["image_definition"].split("-")[-1]
+            for node in cml_topology_dict["nodes"]
+            if node["node_definition"] == "cat-sdwan-manager"
+        )
+        backup_version_split = backup_version.split(".")
+        contr_version_split = contr_version.split(".")
+        if int(contr_version_split[0]) < int(backup_version_split[0]) or (
+            int(contr_version_split[0]) == int(backup_version_split[0])
+            and int(contr_version_split[1]) < int(backup_version_split[1])
+        ):
+            exit(
+                f"\nDowngrade of image version from {backup_version} to {contr_version} is not supported."
+            )
+    if edge_version:
+        # Check if the software version requested by user is compatible with the backup
+        # In particular, check if the requested version is not older than the backup version
+        backup_version = next(
+            node["image_definition"].split("-")[-1]
+            for node in cml_topology_dict["nodes"]
+            if node["node_definition"] == "cat-sdwan-edge"
+        )
+        backup_version_split = backup_version.split(".")
+        edge_version_split = edge_version.split(".")
+        if int(edge_version_split[0]) < int(backup_version_split[0]) or (
+            int(edge_version_split[0]) == int(backup_version_split[0])
+            and int(edge_version_split[1]) < int(backup_version_split[1])
+        ):
+            exit(
+                f"\nDowngrade of image version from {backup_version} to {edge_version} is not supported."
+            )
+
+    # Verify if requested software version is defined in CML
     cml_image_definitions = cml.definitions.image_definitions()
     defined_images = set(image["id"] for image in cml_image_definitions)
     missing_images = []
     for node in cml_topology_dict["nodes"]:
-        if node["image_definition"] and node["image_definition"] not in defined_images:
+        if (
+            node["node_definition"]
+            in ["cat-sdwan-controller", "cat-sdwan-manager", "cat-sdwan-validator"]
+            and contr_version
+        ):
+            if (
+                f'{node["node_definition"]}-{contr_version}' not in defined_images
+                and f'{node["node_definition"]}-{contr_version}' not in missing_images
+            ):
+                missing_images.append(f'{node["node_definition"]}-{contr_version}')
+        elif node["node_definition"] == "cat-sdwan-edge" and edge_version:
+            if (
+                f'{node["node_definition"]}-{edge_version}' not in defined_images
+                and f'{node["node_definition"]}-{edge_version}' not in missing_images
+            ):
+                missing_images.append(f'{node["node_definition"]}-{edge_version}')
+        elif (
+            node["image_definition"]
+            and node["image_definition"] not in defined_images
+            and node["image_definition"] not in missing_images
+        ):
             missing_images.append(node["image_definition"])
     if missing_images:
         sys.exit(
@@ -178,6 +235,24 @@ def main(
         if patty_used:
             manager_node["tags"] = [f"pat:{manager_port}:443"]
 
+        if contr_version:
+            # Overwrite the image definition for control components
+            for node in cml_topology_dict["nodes"]:
+                if node["node_definition"] in [
+                    "cat-sdwan-controller",
+                    "cat-sdwan-manager",
+                    "cat-sdwan-validator",
+                ]:
+                    node["image_definition"] = (
+                        f'{node["node_definition"]}-{contr_version}'
+                    )
+        if edge_version:
+            # Overwrite the image definition for control components
+            for node in cml_topology_dict["nodes"]:
+                if node["node_definition"] == "cat-sdwan-edge":
+                    node["image_definition"] = (
+                        f'{node["node_definition"]}-{edge_version}'
+                    )
         stream = io.StringIO()
         yaml.dump(cml_topology_dict, stream)
         track_progress(log, "Importing the lab...")

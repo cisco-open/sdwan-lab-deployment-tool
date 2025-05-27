@@ -430,6 +430,20 @@ def cli_backup(
     "during SD-WAN Manager boot, you can add --retry to continue "
     "onboarding the lab that is already in CML",
 )
+@click.option(
+    "--contr_version",
+    metavar="<contr_version>",
+    default=None,
+    help="Change the controller version when restoring the lab. Note the specified "
+    "version cannot be older than the one used in the backup.",
+)
+@click.option(
+    "--edge_version",
+    metavar="<edge_version>",
+    default=None,
+    help="Change the SD-WAN/SD-Routing edge version when restoring the lab. Note the specified "
+    "version cannot be older than the one used in the backup.",
+)
 @click.pass_context
 def cli_restore(
     ctx: click.Context,
@@ -442,6 +456,8 @@ def cli_restore(
     workdir: str,
     deleteexisting: bool,
     retry: bool,
+    contr_version: str,
+    edge_version: str,
 ) -> None:
     cml_config = ctx.obj["CML_CONFIG"]
     cml_ip = cml_config.url
@@ -468,6 +484,8 @@ def cli_restore(
         deleteexisting,
         retry,
         loglevel,
+        contr_version,
+        edge_version,
     )
 
 

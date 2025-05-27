@@ -196,3 +196,5 @@ cython_debug/
 
 catalyst_sdwan_lab/data/certs/rootCA.key
 vsdwan.sh
+lab.env
+backup/

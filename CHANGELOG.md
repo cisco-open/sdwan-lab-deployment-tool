@@ -4,6 +4,8 @@
 - Fix issue where add task might fail for SD-WAN Manager 20.18 and higher
 - In setup task, change behaviour when --list is specified, print software version and exit
 - Update validator cloud-init to support 20.18 release
+- In restore task, add option to change the software version of control components and SD-WAN/SD-Routing edges during restore
+- Increase SD-WAN Manager CPU count from 8 to 10
 
 # Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 
