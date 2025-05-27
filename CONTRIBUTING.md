@@ -59,4 +59,4 @@ Before opening a pull request, please ensure all tests pass:
    pytest -s test_csdwan.py
    ```
 
-   This will run all tasks and display real-time output. Make sure to resolve any test failures before submitting your PR.
+   This will run all tasks and display real-time output. Make sure to resolve any test failures before submitting your PR. If needed, you can modify the control components and edge versions in the test_csdwan.py file.
