@@ -63,10 +63,19 @@ def attach_basic_controller_template(
     device_templates = manager_session.get("dataservice/template/device").json()["data"]
     # Find the template ID for basic template
     template_id = next(
-        dev_tmpl["templateId"]
-        for dev_tmpl in device_templates
-        if dev_tmpl["templateName"] == "controller_basic"
+        (
+            dev_tmpl["templateId"]
+            for dev_tmpl in device_templates
+            if dev_tmpl["templateName"] == "controller_basic"
+        ),
+        None,
     )
+    if not template_id:
+        sys.exit(
+            "controller_basic device template is not found. "
+            "If you want to recreate it, please run "
+            "csdwan deploy <controller_version> --retry"
+        )
 
     # Create dict with new SD-WAN Controllers that have no template attached
     # {uuid}: {last digit of IP}
