@@ -57,14 +57,22 @@ def main(
     # Setup logging
     log = setup_logging(loglevel)
 
+    # Verify if the SD-WAN Manager password is not using default credentials
+    if manager_password == "admin":
+        print(
+            "Cannot use default credentials. Please update SD-WAN Manager password and run the tool again."
+        )
+        exit(1)
+
     # create cml instance and check version
     cml = cml_config.make_client()
     verify_cml_version(cml)
 
     # Verify if requested software version is defined in CML
     track_progress(log, "Preparing the lab...")
-    log.info("Checking software version...")
+
     # Verify if requested SD-WAN Manager/Controller/Validator version is present in CML
+    log.info("Checking software version...")
     manager_image = get_cml_sdwan_image_definition(
         cml, "cat-sdwan-manager", software_version
     )
