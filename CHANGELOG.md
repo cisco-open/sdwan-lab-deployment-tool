@@ -8,6 +8,7 @@
 - In restore task, add option to change the software version of control components and SD-WAN/SD-Routing edges during restore
 - Increase SD-WAN Manager CPU count from 8 to 10
 - In setup and restore tasks, and check to make sure user is not using default credentials for SD-WAN Manager
+- Fix issue where add task fails with traceback if user removed default device templates/configuration groups
 
 # Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 

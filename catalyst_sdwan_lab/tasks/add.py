@@ -386,10 +386,19 @@ def main(
                 ).json()["data"]
                 # Find the template ID for basic template
                 template_id = next(
-                    dev_tmpl["templateId"]
-                    for dev_tmpl in device_templates
-                    if dev_tmpl["templateName"] == "edge_basic"
+                    (
+                        dev_tmpl["templateId"]
+                        for dev_tmpl in device_templates
+                        if dev_tmpl["templateName"] == "edge_basic"
+                    ),
+                    None,
                 )
+                if not template_id:
+                    sys.exit(
+                        "edge_basic device template not found. "
+                        "If you want to recreate it, please run "
+                        "csdwan deploy <controller_version> --retry"
+                    )
                 attach_payload = {
                     "deviceTemplateList": [
                         {
@@ -448,13 +457,22 @@ def main(
                 configuration_group = manager_session.endpoints.configuration_group
                 # Find the configuration group ID for basic configuration group
                 # Find the template ID for basic template
-                config_group_id = [
-                    cfg_gr["id"]
-                    for cfg_gr in manager_session.get(
-                        "dataservice/v1/config-group"
-                    ).json()
-                    if cfg_gr["name"] == "edge_basic"
-                ][0]
+                config_group_id = next(
+                    (
+                        cfg_gr["id"]
+                        for cfg_gr in manager_session.get(
+                            "dataservice/v1/config-group"
+                        ).json()
+                        if cfg_gr["name"] == "edge_basic"
+                    ),
+                    None,
+                )
+                if not config_group_id:
+                    sys.exit(
+                        "edge_basic configuration group not found. "
+                        "If you want to recreate it, please run "
+                        "csdwan deploy <controller_version> --retry"
+                    )
 
                 increment_chassis = 0
                 new_routers_uuids = {}
