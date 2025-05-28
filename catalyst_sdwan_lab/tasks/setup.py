@@ -67,9 +67,11 @@ def main(
     verify_cml_version(cml)
 
     # Check CML license status
-    license_status = cml.licensing.status()
-    if license_status["authorization"]["status"] == "INIT":
-        print("The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free.")
+    license_status = cml.licensing.status()["authorization"]["status"]
+    if license_status == "INIT":
+        print(
+            "The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free."
+        )
         exit(1)
 
     if list:
