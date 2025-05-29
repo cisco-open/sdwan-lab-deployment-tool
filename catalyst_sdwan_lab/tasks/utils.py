@@ -39,6 +39,7 @@ from cisco_sdwan.tasks.implementation import RestoreArgs, TaskRestore
 from OpenSSL import crypto
 from requests.exceptions import ConnectionError
 from virl2_client import ClientLibrary
+from virl2_client.models import Lab, Node
 
 # Base directory where utils.py is located
 BASE_DIR = dirname(dirname(abspath(__file__)))
@@ -613,3 +614,20 @@ def wait_for_wan_edge_onboaring(
                     wan_edges_onboarded.append(dev_uuid)
         else:
             break
+
+
+def find_node_by_label(lab: Lab, node_labels: List[str]) -> Node:
+    """
+    Find a node in the lab by its label.
+    If multiple nodes have the same label, return the first one found.
+    If no node with the label is found, return None.
+    :param lab: The Lab object to search in.
+    :param node_labels: A list of labels to search for.
+    :return: The first Node object with the matching label
+    """
+    for label in node_labels:
+        for node in lab.nodes():
+            if node.label == label:
+                return node
+    print(f"No node with label {' or '.join(node_labels)} found in the lab.")
+    exit(1)

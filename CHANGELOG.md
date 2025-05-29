@@ -7,8 +7,10 @@
 - Update validator cloud-init to support 20.18 release
 - In restore task, add option to change the software version of control components and SD-WAN/SD-Routing edges during restore
 - Increase SD-WAN Manager CPU count from 8 to 10
-- In setup and restore tasks, and check to make sure user is not using default credentials for SD-WAN Manager
+- In setup and restore tasks, add check to make sure user is not using default credentials for SD-WAN Manager
 - Fix issue where add task fails with traceback if user removed default device templates/configuration groups
+- Change Gateway node type from c8000v to IOL XE
+- Change transports node type from unmanaged_switch to IOL L2 XE
 
 # Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 

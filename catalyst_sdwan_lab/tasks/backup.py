@@ -344,6 +344,7 @@ def main(
                     "VPN0-172.16.0.0/24",
                     "INET-172.16.1.0/24",
                     "MPLS-172.16.2.0/24",
+                    "VPN0",
                     "Internet",
                     "External",
                 ]:

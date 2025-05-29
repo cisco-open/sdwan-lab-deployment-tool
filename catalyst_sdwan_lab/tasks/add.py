@@ -25,6 +25,7 @@ from virl2_client import ClientConfig
 from .utils import (
     CML_DEPLOY_LAB_DEFINITION_DIR,
     attach_basic_controller_template,
+    find_node_by_label,
     get_cml_sdwan_image_definition,
     load_certificate_details,
     onboard_control_components,
@@ -151,9 +152,9 @@ def main(
             lab = lab[0]
 
         # Find the transport nodes
-        vpn0_switch = lab.get_node_by_label("VPN0-172.16.0.0/24")
-        inet_switch = lab.get_node_by_label("INET-172.16.1.0/24")
-        mpls_switch = lab.get_node_by_label("MPLS-172.16.2.0/24")
+        vpn0_switch = find_node_by_label(lab, ["VPN0", "VPN0-172.16.0.0/24"])
+        inet_switch = find_node_by_label(lab, ["INET", "INET-172.16.1.0/24"])
+        mpls_switch = find_node_by_label(lab, ["MPLS", "MPLS-172.16.2.0/24"])
 
         device_inventory = manager_session.endpoints.configuration_device_inventory
         if cml_node_type in ["cat-sdwan-validator", "cat-sdwan-controller"]:
@@ -575,7 +576,7 @@ def main(
                     configuration=bootstrap_configs[next_num_str],
                     populate_interfaces=True,
                     x=next_node_x_position,
-                    y=320,
+                    y=400,
                 )
                 # Need to wait few seconds as otherwise the next step might fail
                 # as interfaces will not yet be added to the new node
@@ -690,7 +691,7 @@ def main(
                     configuration=bootstrap_configs[next_num_str],
                     populate_interfaces=True,
                     x=next_node_x_position,
-                    y=320,
+                    y=400,
                 )
                 # Need to wait few seconds as otherwise the next step might fail
                 # as interfaces will not yet be added to the new node
