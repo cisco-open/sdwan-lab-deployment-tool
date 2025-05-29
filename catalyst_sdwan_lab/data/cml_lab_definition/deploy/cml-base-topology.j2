@@ -5,18 +5,18 @@ annotations:
     rotation: 0
     text_bold: false
     text_content: |-
-      Addressing:
-      VPN0: 172.16.0.0/24
-      INET: 172.16.1.0/24
-      MPLS: 172.16.2.0/24
+      IP Addressing:
+      VPN0: 172.16.0.0/24 | fc00:172:16::/64
+      INET: 172.16.1.0/24 | fc00:172:16:1::/64
+      MPLS: 172.16.2.0/24 | fc00:172:16:2::/64
     text_font: monospace
     text_italic: false
     text_size: 12
     text_unit: pt
     thickness: 1
     type: text
-    x1: -640.0
-    y1: 0.0
+    x1: -720.0
+    y1: -40.0
     z_index: 0
 nodes:
   - boot_disk_size: null
@@ -260,6 +260,7 @@ nodes:
     configuration: |-
       hostname Gateway
       !
+      ipv6 unicast-routing
       vrf definition inet
        rd 1:20
        route-target export 1:20
@@ -267,6 +268,9 @@ nodes:
        route-target import 1:20
        !
        address-family ipv4
+       exit-address-family
+       !
+       address-family ipv6
        exit-address-family
       !
       vrf definition mpls
@@ -276,6 +280,9 @@ nodes:
        route-target import 1:30
        !
        address-family ipv4
+       exit-address-family
+       !
+       address-family ipv6
        exit-address-family
       !
       vrf definition vpn0
@@ -287,10 +294,13 @@ nodes:
        !
        address-family ipv4
        exit-address-family
+       !
+       address-family ipv6
+       exit-address-family
       !
-      ip host vrf inet {{ validator_fqdn }} 172.16.0.201
-      ip host vrf mpls {{ validator_fqdn }} 172.16.0.201
-      ip host vrf vpn0 {{ validator_fqdn }} 172.16.0.201
+      ip host vrf inet {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
+      ip host vrf mpls {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
+      ip host vrf vpn0 {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
       no ip domain lookup
       !
       ip dhcp pool inet
@@ -305,21 +315,37 @@ nodes:
        default-router 172.16.2.254
        dns-server 172.16.2.254
       !
+      ipv6 dhcp pool inet
+       vrf inet
+       dns-server fc00:172:16:1::254
+      !
+      ipv6 dhcp pool mpls
+       vrf mpls
+       dns-server fc00:172:16:2::254
+      !
+      ipv6 dhcp server vrf enable
       interface Ethernet0/0
        vrf forwarding vpn0
        ip address 172.16.0.254 255.255.255.0
        ip nat inside
+       ipv6 address fc00:172:16::254/64
        no shutdown
       !
       interface Ethernet0/1
        vrf forwarding inet
        ip address 172.16.1.254 255.255.255.0
        ip nat inside
+       ipv6 address fc00:172:16:1::254/64
+       ipv6 dhcp server inet
+       ipv6 nd other-config-flag
        no shutdown
       !
       interface Ethernet0/2
        vrf forwarding mpls
        ip address 172.16.2.254 255.255.255.0
+       ipv6 address fc00:172:16:2::254/64
+       ipv6 dhcp server mpls
+       ipv6 nd other-config-flag
        no shutdown
       !
       interface Ethernet7/3
@@ -337,12 +363,24 @@ nodes:
         network 0.0.0.0 mask 0.0.0.0
        exit-address-family
        !
+       address-family ipv6 vrf inet
+        network 2001:172:16:1::/64
+       exit-address-family
+       !
        address-family ipv4 vrf mpls
         network 172.16.2.0 mask 255.255.255.0
        exit-address-family
        !
+       address-family ipv6 vrf mpls
+        network 2001:172:16:2::/64
+       exit-address-family
+       !
        address-family ipv4 vrf vpn0
         network 172.16.0.0 mask 255.255.255.0
+       exit-address-family
+       !
+       address-family ipv6 vrf vpn0
+        network 2001:172:16::/64
        exit-address-family
       !
       ip nat inside source list 1 interface Ethernet7/3 vrf inet overload
