@@ -411,15 +411,15 @@ nodes:
 {% endif %}
 {% if ip_type in ['v6', 'dual'] %}
        address-family ipv6 vrf inet
-        network 2001:172:16:1::/64
+        network fc00:172:16:1::/64
        exit-address-family
        !
        address-family ipv6 vrf mpls
-        network 2001:172:16:2::/64
+        network fc00:172:16:2::/64
        exit-address-family
        !
        address-family ipv6 vrf vpn0
-        network 2001:172:16::/64
+        network fc00:172:16::/64
        exit-address-family
       !
 {% endif %}
