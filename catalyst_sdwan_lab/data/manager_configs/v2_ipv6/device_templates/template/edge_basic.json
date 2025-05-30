@@ -61,13 +61,7 @@
       "subTemplates": [
         {
           "templateId": "92eec996-eb7d-4399-b0b6-1bc9ced28bdb",
-          "templateType": "cisco_vpn_interface",
-          "subTemplates": [
-            {
-              "templateId": "c030ff60-2607-4079-927d-994eab189879",
-              "templateType": "cisco_dhcp_server"
-            }
-          ]
+          "templateType": "cisco_vpn_interface"
         }
       ]
     },

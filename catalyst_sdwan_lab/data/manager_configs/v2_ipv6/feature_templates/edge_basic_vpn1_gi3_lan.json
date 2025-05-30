@@ -1,7 +1,5 @@
 {
-  "deviceType": [
-    "vedge-C8000V"
-  ],
+  "deviceType": ["vedge-C8000V"],
   "templateType": "cisco_vpn_interface",
   "templateMinVersion": "15.0.0",
   "lastUpdatedBy": "vsdwan",
@@ -21,7 +19,7 @@
     "ip": {
       "address": {
         "vipObjectType": "object",
-        "vipType": "variableName",
+        "vipType": "ignore",
         "vipValue": "",
         "vipVariableName": "vpn1_gi3_lan_ip(192.168.X.1/24)"
       },
@@ -29,9 +27,7 @@
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "address"
-        ]
+        "vipPrimaryKey": ["address"]
       }
     },
     "dhcp-helper": {
@@ -160,9 +156,7 @@
       "vipType": "ignore",
       "vipValue": [],
       "vipObjectType": "tree",
-      "vipPrimaryKey": [
-        "direction"
-      ]
+      "vipPrimaryKey": ["direction"]
     },
     "ip-directed-broadcast": {
       "vipObjectType": "object",
@@ -215,31 +209,25 @@
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "direction"
-        ]
+        "vipPrimaryKey": ["direction"]
       },
       "address": {
         "vipObjectType": "object",
-        "vipType": "ignore",
+        "vipType": "variableName",
         "vipValue": "",
-        "vipVariableName": "vpn_if_ipv6_ipv6_address"
+        "vipVariableName": "vpn1_gi3_lan_ipv6(fc00:192:168:X::1/24)"
       },
       "dhcp-helper-v6": {
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "address"
-        ]
+        "vipPrimaryKey": ["address"]
       },
       "secondary-address": {
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "address"
-        ]
+        "vipPrimaryKey": ["address"]
       }
     },
     "arp": {
@@ -247,26 +235,20 @@
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "addr"
-        ]
+        "vipPrimaryKey": ["addr"]
       }
     },
     "vrrp": {
       "vipType": "ignore",
       "vipValue": [],
       "vipObjectType": "tree",
-      "vipPrimaryKey": [
-        "grp-id"
-      ]
+      "vipPrimaryKey": ["grp-id"]
     },
     "ipv6-vrrp": {
       "vipType": "ignore",
       "vipValue": [],
       "vipObjectType": "tree",
-      "vipPrimaryKey": [
-        "grp-id"
-      ]
+      "vipPrimaryKey": ["grp-id"]
     }
   },
   "gTemplateClass": "cedge",
@@ -286,7 +268,7 @@
     "ip": {
       "address": {
         "vipObjectType": "object",
-        "vipType": "variableName",
+        "vipType": "ignore",
         "vipValue": "",
         "vipVariableName": "vpn1_gi3_lan_ip(192.168.X.1/24)"
       },
@@ -294,9 +276,7 @@
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "address"
-        ]
+        "vipPrimaryKey": ["address"]
       }
     },
     "dhcp-helper": {
@@ -425,9 +405,7 @@
       "vipType": "ignore",
       "vipValue": [],
       "vipObjectType": "tree",
-      "vipPrimaryKey": [
-        "direction"
-      ]
+      "vipPrimaryKey": ["direction"]
     },
     "ip-directed-broadcast": {
       "vipObjectType": "object",
@@ -480,31 +458,25 @@
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "direction"
-        ]
+        "vipPrimaryKey": ["direction"]
       },
       "address": {
         "vipObjectType": "object",
-        "vipType": "ignore",
+        "vipType": "variableName",
         "vipValue": "",
-        "vipVariableName": "vpn_if_ipv6_ipv6_address"
+        "vipVariableName": "vpn1_gi3_lan_ipv6(fc00:192:168:X::1/24)"
       },
       "dhcp-helper-v6": {
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "address"
-        ]
+        "vipPrimaryKey": ["address"]
       },
       "secondary-address": {
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "address"
-        ]
+        "vipPrimaryKey": ["address"]
       }
     },
     "arp": {
@@ -512,26 +484,20 @@
         "vipType": "ignore",
         "vipValue": [],
         "vipObjectType": "tree",
-        "vipPrimaryKey": [
-          "addr"
-        ]
+        "vipPrimaryKey": ["addr"]
       }
     },
     "vrrp": {
       "vipType": "ignore",
       "vipValue": [],
       "vipObjectType": "tree",
-      "vipPrimaryKey": [
-        "grp-id"
-      ]
+      "vipPrimaryKey": ["grp-id"]
     },
     "ipv6-vrrp": {
       "vipType": "ignore",
       "vipValue": [],
       "vipObjectType": "tree",
-      "vipPrimaryKey": [
-        "grp-id"
-      ]
+      "vipPrimaryKey": ["grp-id"]
     }
   },
   "configType": "xml",

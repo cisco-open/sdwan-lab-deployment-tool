@@ -320,7 +320,7 @@ def main(
                 gateway.run_pyats_command("write mem")
 
             if cml_node_type == "cat-sdwan-controller":
-                attach_basic_controller_template(manager_session, log)
+                attach_basic_controller_template(manager_session, ip_type, log)
 
         elif cml_node_type == "cat-sdwan-edge" and device_type == "sdwan":
             # Onboarding WAN Edges
