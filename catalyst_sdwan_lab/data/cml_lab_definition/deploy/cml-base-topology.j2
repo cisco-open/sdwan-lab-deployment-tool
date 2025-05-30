@@ -6,9 +6,19 @@ annotations:
     text_bold: false
     text_content: |-
       IP Addressing:
+{% if ip_type == 'v4' %}
+      VPN0: 172.16.0.0/24
+      INET: 172.16.1.0/24
+      MPLS: 172.16.2.0/24
+{% elif ip_type == 'v6' %}
+      VPN0: fc00:172:16::/64
+      INET: fc00:172:16:1::/64
+      MPLS: fc00:172:16:2::/64
+{% elif ip_type == 'dual' %}
       VPN0: 172.16.0.0/24 | fc00:172:16::/64
       INET: 172.16.1.0/24 | fc00:172:16:1::/64
       MPLS: 172.16.2.0/24 | fc00:172:16:2::/64
+{% endif %}
     text_font: monospace
     text_italic: false
     text_size: 12
@@ -260,7 +270,9 @@ nodes:
     configuration: |-
       hostname Gateway
       !
+{% if ip_type in ['v6', 'dual'] %}
       ipv6 unicast-routing
+{% endif %}
       vrf definition inet
        rd 1:20
        route-target export 1:20
@@ -298,11 +310,22 @@ nodes:
        address-family ipv6
        exit-address-family
       !
+{% if ip_type == 'v4' %}
+      ip host vrf inet {{ validator_fqdn }} 172.16.0.201
+      ip host vrf mpls {{ validator_fqdn }} 172.16.0.201
+      ip host vrf vpn0 {{ validator_fqdn }} 172.16.0.201
+{% elif ip_type == 'v6' %}
+      ip host vrf inet {{ validator_fqdn }} fc00:172:16::201
+      ip host vrf mpls {{ validator_fqdn }} fc00:172:16::201
+      ip host vrf vpn0 {{ validator_fqdn }} fc00:172:16::201
+{% elif ip_type == 'dual' %}
       ip host vrf inet {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
       ip host vrf mpls {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
       ip host vrf vpn0 {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
+{% endif %}
       no ip domain lookup
       !
+{% if ip_type in ['v4', 'dual'] %}
       ip dhcp pool inet
        vrf inet
        network 172.16.1.0 255.255.255.0
@@ -315,6 +338,8 @@ nodes:
        default-router 172.16.2.254
        dns-server 172.16.2.254
       !
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
       ipv6 dhcp pool inet
        vrf inet
        dns-server fc00:172:16:1::254
@@ -324,28 +349,39 @@ nodes:
        dns-server fc00:172:16:2::254
       !
       ipv6 dhcp server vrf enable
+{% endif %}
       interface Ethernet0/0
        vrf forwarding vpn0
        ip address 172.16.0.254 255.255.255.0
        ip nat inside
+{% if ip_type in ['v6', 'dual'] %}
        ipv6 address fc00:172:16::254/64
+{% endif %}
        no shutdown
       !
       interface Ethernet0/1
        vrf forwarding inet
+{% if ip_type in ['v4', 'dual'] %}
        ip address 172.16.1.254 255.255.255.0
        ip nat inside
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
        ipv6 address fc00:172:16:1::254/64
        ipv6 dhcp server inet
        ipv6 nd other-config-flag
+{% endif %}
        no shutdown
       !
       interface Ethernet0/2
        vrf forwarding mpls
+{% if ip_type in ['v4', 'dual'] %}
        ip address 172.16.2.254 255.255.255.0
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
        ipv6 address fc00:172:16:2::254/64
        ipv6 dhcp server mpls
        ipv6 nd other-config-flag
+{% endif %}
        no shutdown
       !
       interface Ethernet7/3
@@ -358,31 +394,35 @@ nodes:
        bgp router-id 172.16.0.254
        bgp log-neighbor-changes
        !
+{% if ip_type in ['v4', 'dual'] %}
        address-family ipv4 vrf inet
         network 172.16.1.0 mask 255.255.255.0
         network 0.0.0.0 mask 0.0.0.0
-       exit-address-family
-       !
-       address-family ipv6 vrf inet
-        network 2001:172:16:1::/64
        exit-address-family
        !
        address-family ipv4 vrf mpls
         network 172.16.2.0 mask 255.255.255.0
        exit-address-family
        !
-       address-family ipv6 vrf mpls
-        network 2001:172:16:2::/64
-       exit-address-family
-       !
        address-family ipv4 vrf vpn0
         network 172.16.0.0 mask 255.255.255.0
+       exit-address-family
+       !
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
+       address-family ipv6 vrf inet
+        network 2001:172:16:1::/64
+       exit-address-family
+       !
+       address-family ipv6 vrf mpls
+        network 2001:172:16:2::/64
        exit-address-family
        !
        address-family ipv6 vrf vpn0
         network 2001:172:16::/64
        exit-address-family
       !
+{% endif %}
       ip nat inside source list 1 interface Ethernet7/3 vrf inet overload
       ip nat inside source list 1 interface Ethernet7/3 vrf vpn0 overload
       ip dns view vrf vpn0 default

@@ -1,0 +1,105 @@
+{
+  "templateName": "Factory_Default_DC1_HUB",
+  "templateDescription": "Factory Default DC1 HUB for CSR C8000V",
+  "deviceType": "vedge-C8000V",
+  "configType": "template",
+  "factoryDefault": true,
+  "policyId": "",
+  "featureTemplateUidRange": [],
+  "connectionPreferenceRequired": true,
+  "connectionPreference": true,
+  "generalTemplates": [
+    {
+      "templateId": "f7b28678-9df8-4277-9528-00c75cbdc7ac",
+      "templateType": "cedge_aaa"
+    },
+    {
+      "templateId": "735b7899-6520-43db-b94f-a08a29681761",
+      "templateType": "cisco_bfd"
+    },
+    {
+      "templateId": "6d52ec0a-8393-4f66-be1f-518b8d88c0b5",
+      "templateType": "cisco_omp"
+    },
+    {
+      "templateId": "81073152-069c-4366-9871-2b0bb3ad5a53",
+      "templateType": "cisco_security"
+    },
+    {
+      "templateId": "3d6017dc-229f-487c-b3ea-6d889987ea22",
+      "templateType": "cisco_system",
+      "subTemplates": [
+        {
+          "templateId": "b8a29843-2ab3-463f-83c1-ffd1681e3c30",
+          "templateType": "cisco_logging"
+        }
+      ]
+    },
+    {
+      "templateId": "6cac8c26-6f2d-4512-8444-d7244119fc5a",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "f4584ce0-ba9b-4939-8c3a-a87e73fc95eb",
+          "templateType": "cisco_vpn_interface"
+        },
+        {
+          "templateId": "779ff6f2-6a68-4fb7-8b96-fce2c81a5a54",
+          "templateType": "cisco_vpn_interface"
+        }
+      ]
+    },
+    {
+      "templateId": "aadd70c2-805f-44cc-8ed0-e1914b3072ac",
+      "templateType": "cisco_vpn"
+    },
+    {
+      "templateId": "f441a359-783a-4f0c-b79e-b0a3ce4bc9dc",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "8d21c872-818d-4ce1-a72e-e1da521965d9",
+          "templateType": "cisco_vpn_interface",
+          "subTemplates": [
+            {
+              "templateId": "57d3a356-d1bc-401d-bb3a-615408056a7d",
+              "templateType": "cisco_dhcp_server"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "templateId": "38ad38c1-779e-4cc1-b363-35f0c13bb88d",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "fb91af40-cad9-4a21-b01b-3c57b4f0ac00",
+          "templateType": "cisco_vpn_interface"
+        }
+      ]
+    },
+    {
+      "templateId": "c25ca8b2-40e7-4753-abfd-816c1a67ef38",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "b7e9f675-bc4e-4eae-bb49-ecd0db523f38",
+          "templateType": "cisco_vpn_interface"
+        }
+      ]
+    },
+    {
+      "templateId": "8eec8947-dbdd-426e-bb9b-2b6e06c0426e",
+      "templateType": "cedge_global"
+    },
+    {
+      "templateId": "16f4fac5-6209-425c-80c4-fe2c4b84a5bd",
+      "templateType": "cisco_banner"
+    }
+  ],
+  "templateClass": "cedge",
+  "deviceRole": "sdwan-edge",
+  "templateId": "eda0329d-6fdb-484c-b8d4-3377eb86e8b9",
+  "draftMode": false
+}

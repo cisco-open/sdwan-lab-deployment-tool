@@ -1,0 +1,19 @@
+{
+  "listId": "4952fe0e-7360-44f4-bc08-2cb40983e1e2",
+  "name": "salesforce_apps",
+  "type": "app",
+  "description": "SaaS App List for Salesforce",
+  "entries": [
+    {
+      "app": "salesforce"
+    }
+  ],
+  "lastUpdated": 1706313441148,
+  "owner": "system",
+  "readOnly": true,
+  "version": "2.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

@@ -47,6 +47,7 @@ def main(
     lab_name: str,
     bridge: str,
     dns_server: str,
+    ip_type: str,
     patty_used: bool,
     retry: bool,
     loglevel: Union[int, str],
@@ -138,6 +139,7 @@ def main(
         external_gateway=manager_gateway,
         bridge=bridge,
         dns_server=dns_server,
+        ip_type=ip_type,
         manager_port=manager_port,
         patty_used=patty_used,
     )
@@ -181,10 +183,14 @@ def main(
     configure_manager_basic_settings(manager_session, ca_chain, log)
 
     # Add controllers to SD-WAN Manager and sing certificates
+    if ip_type == "v6":
+        control_components = {"fc00:172:16::201": "validator", "fc00:172:16::101": "controller"}
+    else:
+        control_components = {"172.16.0.201": "validator", "172.16.0.101": "controller"}
     onboard_control_components(
         manager_session,
         manager_password,
-        {"172.16.0.201": "validator", "172.16.0.101": "controller"},
+        control_components,
         log,
     )
 
@@ -211,12 +217,12 @@ def main(
         manager_user,
         manager_password,
         config_version,
-        join(MANAGER_CONFIGS_DIR, f"v{config_version}"),
+        join(MANAGER_CONFIGS_DIR, f"v{config_version}_ip{ip_type}"),
         False,
     )
 
     # If device is SD-WAN Controller we should attach it to the SD-WAN Controller device template
-    attach_basic_controller_template(manager_session, log)
+    attach_basic_controller_template(manager_session, ip_type, log)
 
     manager_session.close()
     track_progress(log, "Deploy task done\n")

@@ -55,7 +55,7 @@ VALIDATOR_FQDN = "validator.sdwan.local"
 
 
 def attach_basic_controller_template(
-    manager_session: ManagerSession, log: Logger
+    manager_session: ManagerSession, ip_type: str,log: Logger
 ) -> None:
     """
     Attach basic template to all SD-WAN controllers that have no template yet
@@ -107,13 +107,20 @@ def attach_basic_controller_template(
                     "csv-deviceId": dev_uuid,
                     "csv-deviceIP": f"100.0.0.{ip_4th_oct}",
                     "csv-host-name": f"Controller{ip_4th_oct[-2:]}",
-                    "/0/eth1/interface/ip/address": f"172.16.0.{ip_4th_oct}/24",
                     "//system/host-name": f"Controller{ip_4th_oct[-2:]}",
                     "//system/system-ip": f"100.0.0.{ip_4th_oct}",
                     "//system/site-id": "100",
                     "csv-templateId": template_id,
                 }
             )
+            if ip_type in ["v4", "dual"]:
+                attach_payload["deviceTemplateList"][0]["device"][-1][
+                    "/0/eth1/interface/ip/address"
+                ] = f"172.16.0.{ip_4th_oct}/24"
+            elif ip_type in ["v6", "dual"]:
+                attach_payload["deviceTemplateList"][0]["device"][-1][
+                    "/0/eth1/interface/ipv6/address"
+                ] = f"fc00:172:16::{ip_4th_oct}/64"
 
         task_id = manager_session.post(
             "dataservice/template/device/config/attachfeature", json=attach_payload
@@ -631,3 +638,24 @@ def find_node_by_label(lab: Lab, node_labels: List[str]) -> Node:
                 return node
     print(f"No node with label {' or '.join(node_labels)} found in the lab.")
     exit(1)
+
+def get_ip_type(manager_session: ManagerSession) -> str:
+    """
+    Determine the IP type used by the SD-WAN overlay.
+    Checks the IP address on the vpn0 interface of the Manager.
+    Returns:
+        - "dual" if both IPv4 and IPv6 addresses are present
+        - "v6" if only IPv6 address is present
+        - "v4" if only IPv4 address is present
+    """
+    manager_system_ip = manager_session.get("/dataservice/device/vmanage").json()["data"]["ipAddress"]
+    manager_interfaces = manager_session.get(f"/dataservice/device/interface/synced?deviceId={manager_system_ip}").json()["data"]
+    manager_eth1 = next(
+        (iface for iface in manager_interfaces if iface["ifname"] == "eth1"), None
+    )
+    if manager_eth1["ip-address"] != "-" and manager_eth1["ipv6-address"] != "-":
+        return "dual"
+    elif manager_eth1["ip-address"] == "-" and manager_eth1["ipv6-address"] != "-":
+        return "v6"
+    else:
+        return "v4"

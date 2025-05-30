@@ -1,0 +1,192 @@
+{
+  "deviceType": [
+    "vsmart",
+    "vmanage"
+  ],
+  "templateMinVersion": "15.0.0",
+  "templateType": "system-vsmart",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "clock": {
+      "timezone": {
+        "vipObjectType": "object",
+        "vipValue": "America/Los_Angeles",
+        "vipType": "ignore"
+      }
+    },
+    "gps-location": {
+      "latitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "longitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "timer": {
+      "dns-cache-timeout": {
+        "vipObjectType": "object",
+        "vipValue": 30,
+        "vipType": "ignore"
+      }
+    },
+    "location": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "system-tunnel-mtu": {
+      "vipObjectType": "object",
+      "vipValue": 1024,
+      "vipType": "ignore"
+    },
+    "track-transport": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "port-offset": {
+      "vipObjectType": "object",
+      "vipValue": 0,
+      "vipType": "ignore"
+    },
+    "port-hop": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "control-session-pps": {
+      "vipObjectType": "object",
+      "vipValue": 300,
+      "vipType": "ignore"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "device-groups": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "site-id": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "system-ip": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "host-name": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "track-default-gateway": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "host-policer-pps": {},
+    "icmp-error-pps": {}
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "clock": {
+      "timezone": {
+        "vipObjectType": "object",
+        "vipValue": "America/Los_Angeles",
+        "vipType": "ignore"
+      }
+    },
+    "gps-location": {
+      "latitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "longitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "timer": {
+      "dns-cache-timeout": {
+        "vipObjectType": "object",
+        "vipValue": 30,
+        "vipType": "ignore"
+      }
+    },
+    "location": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "system-tunnel-mtu": {
+      "vipObjectType": "object",
+      "vipValue": 1024,
+      "vipType": "ignore"
+    },
+    "track-transport": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "port-offset": {
+      "vipObjectType": "object",
+      "vipValue": 0,
+      "vipType": "ignore"
+    },
+    "port-hop": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "control-session-pps": {
+      "vipObjectType": "object",
+      "vipValue": 300,
+      "vipType": "ignore"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "device-groups": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "site-id": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "system-ip": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "host-name": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "track-default-gateway": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "host-policer-pps": {},
+    "icmp-error-pps": {}
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "963cb3f2-9483-46b1-be4b-1013952d085c",
+  "createdOn": 1706357770458,
+  "@rid": 1413,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_vSmart_vManage_System_Template",
+  "createdBy": "system",
+  "devicesAttached": 1,
+  "templateDescription": "Default System template settings for vSmart and vManage",
+  "lastUpdatedOn": 1706357770458
+}

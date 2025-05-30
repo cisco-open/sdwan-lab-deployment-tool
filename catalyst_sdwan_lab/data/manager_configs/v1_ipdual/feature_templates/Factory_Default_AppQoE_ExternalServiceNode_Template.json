@@ -1,0 +1,116 @@
+{
+  "deviceType": [
+    "vedge-C8000V",
+    "vedge-C8500L-8S4X",
+    "vedge-CSR-1000v",
+    "vedge-ISRv"
+  ],
+  "templateType": "appqoe",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "service-node-group": {
+      "vipType": "constant",
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "name"
+      ],
+      "vipValue": [
+        {
+          "name": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": "SNG-APPQOE"
+          },
+          "external-node": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": "true"
+          },
+          "service-node": {
+            "vipObjectType": "tree",
+            "vipType": "constant",
+            "vipPrimaryKey": [
+              "address"
+            ],
+            "vipValue": [
+              {
+                "address": {
+                  "vipObjectType": "object",
+                  "vipType": "constant",
+                  "vipValue": "192.168.2.2",
+                  "vipVariableName": "appqoe_service_node_address"
+                },
+                "vpg-ip": {
+                  "vipObjectType": "object",
+                  "vipType": "constant",
+                  "vipValue": "192.168.2.1/24",
+                  "vipVariableName": "appqoe_virtual_port_group_address"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "service-node-group": {
+      "vipType": "constant",
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "name"
+      ],
+      "vipValue": [
+        {
+          "name": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": "SNG-APPQOE"
+          },
+          "external-node": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": "true"
+          },
+          "service-node": {
+            "vipObjectType": "tree",
+            "vipType": "constant",
+            "vipPrimaryKey": [
+              "address"
+            ],
+            "vipValue": [
+              {
+                "address": {
+                  "vipObjectType": "object",
+                  "vipType": "constant",
+                  "vipValue": "192.168.2.2",
+                  "vipVariableName": "appqoe_service_node_address"
+                },
+                "vpg-ip": {
+                  "vipObjectType": "object",
+                  "vipType": "constant",
+                  "vipValue": "192.168.2.1/24",
+                  "vipVariableName": "appqoe_virtual_port_group_address"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "attachedMastersCount": 0,
+  "configType": "xml",
+  "templateId": "f2436dc0-dc4e-4603-a6ac-f8137f28dabc",
+  "createdOn": 1706313417074,
+  "@rid": 289,
+  "feature": "vmanage-default",
+  "factoryDefault": true,
+  "createdBy": "system",
+  "templateName": "Factory_Default_AppQoE_ExternalServiceNode_Template",
+  "devicesAttached": 0,
+  "templateDescription": "Default AppQoE External Service Node template settings",
+  "lastUpdatedOn": 1706313417074
+}

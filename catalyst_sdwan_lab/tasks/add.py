@@ -27,6 +27,7 @@ from .utils import (
     attach_basic_controller_template,
     find_node_by_label,
     get_cml_sdwan_image_definition,
+    get_ip_type,
     load_certificate_details,
     onboard_control_components,
     setup_logging,
@@ -138,6 +139,8 @@ def main(
     org_name = manager_config_settings.get_organizations()[0].org
     validator_fqdn = manager_config_settings.get_devices()[0].domain_ip
 
+    ip_type = get_ip_type(manager_session)
+
     # Find the lab
     lab = cml.find_labs_by_title(lab_name)
     if lab:
@@ -224,6 +227,7 @@ def main(
                     manager_num=next_num_str,
                     controller_num=next_num_str,
                     validator_num=next_num_str,
+                    ip_type=ip_type,
                 )
                 label = f'{cml_node_type.split("-")[2].capitalize()}{next_num_str}'
                 next_node_x_position += 120

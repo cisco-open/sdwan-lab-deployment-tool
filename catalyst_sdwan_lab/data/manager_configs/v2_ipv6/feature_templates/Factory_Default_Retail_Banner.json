@@ -1,0 +1,49 @@
+{
+  "deviceType": [
+    "vedge-C8000V"
+  ],
+  "templateType": "cisco_banner",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "login": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "Un authorised Logins tracked",
+      "vipVariableName": "banner_login"
+    },
+    "motd": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "Restricted Use",
+      "vipVariableName": "banner_motd"
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "login": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "Un authorised Logins tracked",
+      "vipVariableName": "banner_login"
+    },
+    "motd": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "Restricted Use",
+      "vipVariableName": "banner_motd"
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 4,
+  "templateId": "3c705ea9-3742-4eb1-a94b-3ffd4f5c8512",
+  "createdOn": 1706357778499,
+  "@rid": 1429,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_Retail_Banner",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Factory Default Retail Banner",
+  "lastUpdatedOn": 1706357778499
+}

@@ -1,0 +1,87 @@
+{
+  "templateType": "cellular-cedge-controller",
+  "templateMinVersion": "15.0.0",
+  "deviceType": [
+    "vedge-C1111-8PLTELA"
+  ],
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "0/2/0",
+      "vipVariableName": "cellular_id"
+    },
+    "lte": {
+      "failovertimer": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "cellular_failover_timeout"
+      },
+      "firmware": {
+        "auto-sim": {}
+      },
+      "sim": {
+        "primary": {
+          "slot": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": 0,
+            "vipVariableName": "cellular_primary_slot"
+          }
+        },
+        "max-retry": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipVariableName": "cellular_failover_retries"
+        }
+      }
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "0/2/0",
+      "vipVariableName": "cellular_id"
+    },
+    "lte": {
+      "failovertimer": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "cellular_failover_timeout"
+      },
+      "firmware": {
+        "auto-sim": {}
+      },
+      "sim": {
+        "primary": {
+          "slot": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": 0,
+            "vipVariableName": "cellular_primary_slot"
+          }
+        },
+        "max-retry": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipVariableName": "cellular_failover_retries"
+        }
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "c0c24fe8-c494-4ab3-9269-63cb4ddfc207",
+  "createdOn": 1706313398828,
+  "@rid": 205,
+  "feature": "vmanage-default",
+  "factoryDefault": true,
+  "templateName": "Default_C1111_Cellular_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Factory Default template for C1111 cellular",
+  "lastUpdatedOn": 1706313398828
+}

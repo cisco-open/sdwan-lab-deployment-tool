@@ -1,0 +1,21 @@
+{
+  "listId": "8ad75598-9a07-4cfb-8fbf-737802ef4237",
+  "name": "Default",
+  "type": "sla",
+  "description": "ACI Default SLA",
+  "entries": [
+    {
+      "jitter": "100",
+      "latency": "300",
+      "loss": "25"
+    }
+  ],
+  "lastUpdated": 1706313440068,
+  "owner": "system",
+  "readOnly": false,
+  "version": "1.0",
+  "infoTag": "aci",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}
