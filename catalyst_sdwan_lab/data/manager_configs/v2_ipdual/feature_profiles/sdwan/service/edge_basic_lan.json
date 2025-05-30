@@ -35,14 +35,14 @@
             }
           ],
           "dnsIpv4": {
-              "primaryDnsAddressIpv4": {
-                  "optionType": "global",
-                  "value": "172.16.1.254"
-              },
-              "secondaryDnsAddressIpv4": {
-                  "optionType": "global",
-                  "value": "1.1.1.1"
-              }
+            "primaryDnsAddressIpv4": {
+              "optionType": "global",
+              "value": "172.16.1.254"
+            },
+            "secondaryDnsAddressIpv4": {
+              "optionType": "global",
+              "value": "1.1.1.1"
+            }
           },
           "enableSdra": { "optionType": "global", "value": false }
         }
@@ -77,6 +77,17 @@
                       "value": "255.255.255.0"
                     }
                   }
+                }
+              },
+              "intfIpV6Address": {
+                "static": {
+                  "primaryIpV6Address": {
+                    "address": {
+                      "optionType": "variable",
+                      "value": "{{vpn1_gi3_lan_ipv6}}"
+                    }
+                  },
+                  "secondaryIpV6Address": []
                 }
               },
               "nat": { "optionType": "default", "value": false },

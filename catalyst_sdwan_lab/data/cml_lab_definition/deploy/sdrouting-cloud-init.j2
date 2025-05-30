@@ -43,10 +43,23 @@ config
   !
   hostname SD-Edge{{ next_num_str }}
   username admin privilege 15 secret 9 $9$AgTQlMtscARkok$iVH3WejQXauZgaObxFgBQlLjdz9sNSeBGQE1AAw/6j2
+{% if ip_type in ['ipv6', 'dual'] %}
+  ipv6 unicast-routing
+{% endif %}
+{% if ip_type in ['ipv4', 'dual'] %}
   ip route 0.0.0.0 0.0.0.0 172.16.1.254
   ip name-server 172.16.1.254
+{% endif %}
+{% if ip_type in ['ipv6', 'dual'] %}
+  ipv6 route ::/0 fc00:172:16:1::254
+{% endif %}
   interface GigabitEthernet1
+{% if ip_type in ['ipv4', 'dual'] %}
    ip address 172.16.1.{{ next_num_str }} 255.255.255.0
+{% endif %}
+{% if ip_type in ['ipv6', 'dual'] %}
+    ipv6 address fc00:172:16:1::{{ next_num_str }}/64
+{% endif %}
    no shutdown
   !
  !

@@ -510,46 +510,78 @@ def main(
                     uuid = free_uuids[increment_chassis]
                     new_routers_uuids[next_num_str] = uuid
                     associate_payload.devices.append(DeviceId(id=uuid))
-                    devices_variables.append(
-                        {
-                            "device-id": uuid,
-                            "variables": [
-                                {
-                                    "name": "system_ip",
-                                    "value": f"10.0.0.{next_num_str}",
-                                },
-                                {"name": "host_name", "value": f"Edge{next_num_str}"},
-                                {"name": "site_id", "value": int(next_num_str)},
-                                {"name": "pseudo_commit_timer", "value": 300},
-                                {"name": "ipv6_strict_control", "value": False},
-                                {
-                                    "name": "vpn1_gi3_lan_ip",
-                                    "value": f"192.168.{next_num_str}.1",
-                                },
-                                {
-                                    "name": "vpn1_gi3_dhcp_network",
-                                    "value": f"192.168.{next_num_str}.0",
-                                },
-                                {
-                                    "name": "vpn1_gi3_dhcp_address_exclude",
-                                    "value": [f"192.168.{next_num_str}.1"],
-                                },
-                                {
-                                    "name": "vpn1_gi3_dhcp_default_gateway",
-                                    "value": f"192.168.{next_num_str}.1",
-                                },
-                                {
-                                    "name": "vpn0_gi1_inet_ip",
-                                    "value": f"172.16.1.{next_num_str}",
-                                },
-                                {
-                                    "name": "vpn0_gi2_mpls_ip",
-                                    "value": f"172.16.2.{next_num_str}",
-                                },
-                                {"name": "aaa_password", "value": "admin"},
-                            ],
-                        }
-                    )
+                    variables = [
+                            {
+                                "name": "system_ip",
+                                "value": f"10.0.0.{next_num_str}",
+                            },
+                            {"name": "host_name", "value": f"Edge{next_num_str}"},
+                            {"name": "site_id", "value": int(next_num_str)},
+                            {"name": "pseudo_commit_timer", "value": 300},
+                            {"name": "ipv6_strict_control", "value": False},
+                            {"name": "aaa_password", "value": "admin"},
+                        ]
+                    if ip_type in ["v4", "dual"]:
+                        variables.append(
+                            {
+                                "name": "vpn1_gi3_lan_ip",
+                                "value": f"192.168.{next_num_str}.1",
+                            }
+                        )
+                        variables.append(
+                            {
+                                "name": "vpn1_gi3_dhcp_network",
+                                "value": f"192.168.{next_num_str}.0",
+                            }
+                        )
+                        variables.append(
+                            {
+                                "name": "vpn1_gi3_dhcp_address_exclude",
+                                "value": [f"192.168.{next_num_str}.1"],
+                            }
+                        )
+                        variables.append(
+                            {
+                                "name": "vpn1_gi3_dhcp_default_gateway",
+                                "value": f"192.168.{next_num_str}.1",
+                            }
+                        )
+                        variables.append(
+                            {
+                                "name": "vpn0_gi1_inet_ip",
+                                "value": f"172.16.1.{next_num_str}",
+                            }
+                        )
+                        variables.append(
+                            {
+                                "name": "vpn0_gi2_mpls_ip",
+                                "value": f"172.16.2.{next_num_str}",
+                            }
+                        )
+                    if ip_type in ["v6", "dual"]:
+                        variables.append(
+                            {
+                                "name": "vpn1_gi3_lan_ipv6",
+                                "value": f"fc00:192:168:{next_num_str}::1/64",
+                            }
+                        )
+                        variables.append(
+                            {
+                                "name": "vpn0_gi1_inet_ipv6",
+                                "value": f"fc00:172:16:1::{next_num_str}/64",
+                            }
+                        )
+                        variables.append(
+                            {
+                                "name": "vpn0_gi2_mpls_ipv6",
+                                "value": f"fc00:172:16:2::{next_num_str}/64",
+                            }
+                        )
+                    device_variables = {
+                        "device-id": uuid,
+                        "variables": variables,
+                    }
+                    devices_variables.append(device_variables)
                     increment_chassis += 1
 
                 variables_payload = {"solution": "sdwan", "devices": devices_variables}
@@ -697,6 +729,7 @@ def main(
                     next_num_str=next_num_str,
                     uuid=uuid,
                     token=token,
+                    ip_type=ip_type,
                 )
                 bootstrap_configs[next_num_str] = bootstrap_config
                 increment_chassis += 1

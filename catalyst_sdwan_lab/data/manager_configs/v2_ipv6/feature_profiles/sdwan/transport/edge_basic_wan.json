@@ -23,39 +23,48 @@
         "data": {
           "vpnId": { "optionType": "global", "value": 0 },
           "enhanceEcmpKeying": { "optionType": "global", "value": true },
-          "dnsIpv4": {
-            "primaryDnsAddressIpv4": {
+          "dnsIpv6": {
+            "primaryDnsAddressIpv6": {
               "optionType": "global",
-              "value": "172.16.1.254"
+              "value": "fc00:172:16:1::254"
             },
-            "secondaryDnsAddressIpv4": {
+            "secondaryDnsAddressIpv6": {
               "optionType": "global",
-              "value": "172.16.2.254"
+              "value": "fc00:172:16:2::254"
             }
           },
-          "ipv4Route": [
+          "ipv6Route": [
             {
               "prefix": {
-                "ipAddress": { "optionType": "global", "value": "0.0.0.0" },
-                "subnetMask": { "optionType": "global", "value": "0.0.0.0" }
+                "optionType": "global",
+                "value": "::/0"
               },
-              "gateway": { "optionType": "global", "value": "nextHop" },
-              "nextHop": [
-                {
-                  "address": {
-                    "optionType": "global",
-                    "value": "172.16.1.254"
-                  },
-                  "distance": { "optionType": "default", "value": 1 }
-                },
-                {
-                  "address": {
-                    "optionType": "global",
-                    "value": "172.16.2.254"
-                  },
-                  "distance": { "optionType": "default", "value": 1 }
+              "oneOfIpRoute": {
+                "nextHopContainer": {
+                  "nextHop": [
+                    {
+                      "address": {
+                        "optionType": "global",
+                        "value": "fc00:172:16:1::254"
+                      },
+                      "distance": {
+                        "optionType": "default",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "address": {
+                        "optionType": "global",
+                        "value": "fc00:172:16:2::254"
+                      },
+                      "distance": {
+                        "optionType": "default",
+                        "value": 1
+                      }
+                    }
+                  ]
                 }
-              ]
+              }
             }
           ]
         }
@@ -130,18 +139,15 @@
                 "bfd": { "optionType": "default", "value": false }
               },
               "nat": { "optionType": "default", "value": false },
-              "intfIpAddress": {
+              "intfIpV6Address": {
                 "static": {
-                  "staticIpV4AddressPrimary": {
-                    "ipAddress": {
+                  "primaryIpV6Address": {
+                    "address": {
                       "optionType": "variable",
-                      "value": "{{vpn0_gi2_mpls_ip}}"
-                    },
-                    "subnetMask": {
-                      "optionType": "global",
-                      "value": "255.255.255.0"
+                      "value": "{{vpn0_gi2_mpls_ipv6}}"
                     }
-                  }
+                  },
+                  "secondaryIpV6Address": []
                 }
               },
               "advanced": {
@@ -250,19 +256,15 @@
                 "bfd": { "optionType": "default", "value": false }
               },
               "nat": { "optionType": "global", "value": true },
-              "intfIpAddress": {
+              "intfIpV6Address": {
                 "static": {
-                  "staticIpV4AddressPrimary": {
-                    "ipAddress": {
+                  "primaryIpV6Address": {
+                    "address": {
                       "optionType": "variable",
-                      "value": "{{vpn0_gi1_inet_ip}}"
-                    },
-                    "subnetMask": {
-                      "optionType": "global",
-                      "value": "255.255.255.0"
+                      "value": "{{vpn0_gi1_inet_ipv6}}"
                     }
                   },
-                  "staticIpV4AddressSecondary": []
+                  "secondaryIpV6Address": []
                 }
               },
               "advanced": {

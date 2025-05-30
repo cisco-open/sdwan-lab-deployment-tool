@@ -33,6 +33,16 @@
               "value": "172.16.2.254"
             }
           },
+          "dnsIpv6": {
+            "primaryDnsAddressIpv6": {
+              "optionType": "global",
+              "value": "fc00:172:16:1::254"
+            },
+            "secondaryDnsAddressIpv6": {
+              "optionType": "global",
+              "value": "fc00:172:16:2::254"
+            }
+          },
           "ipv4Route": [
             {
               "prefix": {
@@ -56,6 +66,40 @@
                   "distance": { "optionType": "default", "value": 1 }
                 }
               ]
+            }
+          ],
+          "ipv6Route": [
+            {
+              "prefix": {
+                "optionType": "global",
+                "value": "::/0"
+              },
+              "oneOfIpRoute": {
+                "nextHopContainer": {
+                  "nextHop": [
+                    {
+                      "address": {
+                        "optionType": "global",
+                        "value": "fc00:172:16:1::254"
+                      },
+                      "distance": {
+                        "optionType": "default",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "address": {
+                        "optionType": "global",
+                        "value": "fc00:172:16:2::254"
+                      },
+                      "distance": {
+                        "optionType": "default",
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              }
             }
           ]
         }
@@ -142,6 +186,17 @@
                       "value": "255.255.255.0"
                     }
                   }
+                }
+              },
+              "intfIpV6Address": {
+                "static": {
+                  "primaryIpV6Address": {
+                    "address": {
+                      "optionType": "variable",
+                      "value": "{{vpn0_gi2_mpls_ipv6}}"
+                    }
+                  },
+                  "secondaryIpV6Address": []
                 }
               },
               "advanced": {
@@ -263,6 +318,17 @@
                     }
                   },
                   "staticIpV4AddressSecondary": []
+                }
+              },
+              "intfIpV6Address": {
+                "static": {
+                  "primaryIpV6Address": {
+                    "address": {
+                      "optionType": "variable",
+                      "value": "{{vpn0_gi1_inet_ipv6}}"
+                    }
+                  },
+                  "secondaryIpV6Address": []
                 }
               },
               "advanced": {
