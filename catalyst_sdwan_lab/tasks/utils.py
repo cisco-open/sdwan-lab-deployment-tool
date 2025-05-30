@@ -55,7 +55,7 @@ VALIDATOR_FQDN = "validator.sdwan.local"
 
 
 def attach_basic_controller_template(
-    manager_session: ManagerSession, ip_type: str,log: Logger
+    manager_session: ManagerSession, ip_type: str, log: Logger
 ) -> None:
     """
     Attach basic template to all SD-WAN controllers that have no template yet
@@ -102,19 +102,21 @@ def attach_basic_controller_template(
         for dev_uuid, ip_4th_oct in new_controllers_uuids.items():
             # For every SD-WAN Controller, create a payload to attach template
             variables = {
-                    "csv-status": "complete",
-                    "csv-deviceId": dev_uuid,
-                    "csv-deviceIP": f"100.0.0.{ip_4th_oct}",
-                    "csv-host-name": f"Controller{ip_4th_oct[-2:]}",
-                    "//system/host-name": f"Controller{ip_4th_oct[-2:]}",
-                    "//system/system-ip": f"100.0.0.{ip_4th_oct}",
-                    "//system/site-id": "100",
-                    "csv-templateId": template_id,
-                }
+                "csv-status": "complete",
+                "csv-deviceId": dev_uuid,
+                "csv-deviceIP": f"100.0.0.{ip_4th_oct}",
+                "csv-host-name": f"Controller{ip_4th_oct[-2:]}",
+                "//system/host-name": f"Controller{ip_4th_oct[-2:]}",
+                "//system/system-ip": f"100.0.0.{ip_4th_oct}",
+                "//system/site-id": "100",
+                "csv-templateId": template_id,
+            }
             if ip_type in ["v4", "dual"]:
                 variables["/0/eth1/interface/ip/address"] = f"172.16.0.{ip_4th_oct}/24"
             if ip_type in ["v6", "dual"]:
-                variables["/0/eth1/interface/ipv6/address"] = f"fc00:172:16::{ip_4th_oct}/64"
+                variables["/0/eth1/interface/ipv6/address"] = (
+                    f"fc00:172:16::{ip_4th_oct}/64"
+                )
             attach_payload["deviceTemplateList"][0]["device"].append(variables)
 
         task_id = manager_session.post(
@@ -634,6 +636,7 @@ def find_node_by_label(lab: Lab, node_labels: List[str]) -> Node:
     print(f"No node with label {' or '.join(node_labels)} found in the lab.")
     exit(1)
 
+
 def get_ip_type(manager_session: ManagerSession) -> str:
     """
     Determine the IP type used by the SD-WAN overlay.
@@ -643,14 +646,24 @@ def get_ip_type(manager_session: ManagerSession) -> str:
         - "v6" if only IPv6 address is present
         - "v4" if only IPv4 address is present
     """
-    manager_system_ip = manager_session.get("/dataservice/device/vmanage").json()["data"]["ipAddress"]
-    manager_interfaces = manager_session.get(f"/dataservice/device/interface/synced?deviceId={manager_system_ip}").json()["data"]
-    manager_eth1 = next(
-        (iface for iface in manager_interfaces if iface["ifname"] == "eth1"), None
+    manager_system_ip = manager_session.get("/dataservice/device/vmanage").json()[
+        "data"
+    ]["ipAddress"]
+    manager_interfaces = manager_session.get(
+        f"/dataservice/device/interface/synced?deviceId={manager_system_ip}"
+    ).json()["data"]
+    manager_eth1_data = [
+        iface for iface in manager_interfaces if iface["ifname"] == "eth1"
+    ]
+    ipv4_enabled = any(
+        iface.get("ip-address", "-") != "-" for iface in manager_eth1_data
     )
-    if manager_eth1["ip-address"] != "-" and manager_eth1["ipv6-address"] != "-":
+    ipv6_enabled = any(
+        iface.get("ipv6-address", "-") != "-" for iface in manager_eth1_data
+    )
+    if ipv4_enabled and ipv6_enabled:
         return "dual"
-    elif manager_eth1["ip-address"] == "-" and manager_eth1["ipv6-address"] != "-":
+    elif ipv6_enabled:
         return "v6"
     else:
         return "v4"

@@ -184,7 +184,10 @@ def main(
 
     # Add controllers to SD-WAN Manager and sing certificates
     if ip_type == "v6":
-        control_components = {"fc00:172:16::201": "validator", "fc00:172:16::101": "controller"}
+        control_components = {
+            "fc00:172:16::201": "validator",
+            "fc00:172:16::101": "controller",
+        }
     else:
         control_components = {"172.16.0.201": "validator", "172.16.0.101": "controller"}
     onboard_control_components(

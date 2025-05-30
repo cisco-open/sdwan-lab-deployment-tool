@@ -421,24 +421,46 @@ def main(
                     new_routers_uuids[next_num_str] = uuid
                     dhcp_exlude = f"192.168.{next_num_str}.1-192.168.{next_num_str}.99"
                     # For every SD-WAN Controller, create a payload to attach template
-                    attach_payload["deviceTemplateList"][0]["device"].append(
-                        {
-                            "csv-status": "complete",
-                            "csv-deviceId": uuid,
-                            "csv-deviceIP": f"10.0.0.{next_num_str}",
-                            "csv-host-name": f"Edge{next_num_str}",
-                            "/1/GigabitEthernet3/interface/ip/address": f"192.168.{next_num_str}.1/24",
-                            "/1/GigabitEthernet3//dhcp-server/address-pool": f"192.168.{next_num_str}.0/24",
-                            "/1/GigabitEthernet3//dhcp-server/exclude": dhcp_exlude,
-                            "/1/GigabitEthernet3//dhcp-server/options/default-gateway": f"192.168.{next_num_str}.1",
-                            "/0/GigabitEthernet2/interface/ip/address": f"172.16.2.{next_num_str}/24",
-                            "/0/GigabitEthernet1/interface/ip/address": f"172.16.1.{next_num_str}/24",
-                            "//system/host-name": f"Edge{next_num_str}",
-                            "//system/system-ip": f"10.0.0.{next_num_str}",
-                            "//system/site-id": next_num_str,
-                            "csv-templateId": template_id,
-                        }
-                    )
+                    variables = {
+                        "csv-status": "complete",
+                        "csv-deviceId": uuid,
+                        "csv-deviceIP": f"10.0.0.{next_num_str}",
+                        "csv-host-name": f"Edge{next_num_str}",
+                        "//system/host-name": f"Edge{next_num_str}",
+                        "//system/system-ip": f"10.0.0.{next_num_str}",
+                        "//system/site-id": next_num_str,
+                        "csv-templateId": template_id,
+                    }
+                    if ip_type in ["v4", "dual"]:
+                        variables["/0/GigabitEthernet1/interface/ip/address"] = (
+                            f"172.16.1.{next_num_str}/24"
+                        )
+                        variables["/0/GigabitEthernet2/interface/ip/address"] = (
+                            f"172.16.2.{next_num_str}/24"
+                        )
+                        variables["/1/GigabitEthernet3/interface/ip/address"] = (
+                            f"192.168.{next_num_str}.1/24"
+                        )
+                        variables["/1/GigabitEthernet3//dhcp-server/address-pool"] = (
+                            f"192.168.{next_num_str}.0/24"
+                        )
+                        variables["/1/GigabitEthernet3//dhcp-server/exclude"] = (
+                            dhcp_exlude
+                        )
+                        variables[
+                            "/1/GigabitEthernet3//dhcp-server/options/default-gateway"
+                        ] = f"192.168.{next_num_str}.1"
+                    if ip_type in ["v6", "dual"]:
+                        variables["/0/GigabitEthernet1/interface/ipv6/address"] = (
+                            f"fc00:172:16:1::{next_num_str}/64"
+                        )
+                        variables["/0/GigabitEthernet2/interface/ipv6/address"] = (
+                            f"fc00:172:16:2::{next_num_str}/64"
+                        )
+                        variables["/1/GigabitEthernet3/interface/ipv6/address"] = (
+                            f"fc00:192:168:{next_num_str}::1/64"
+                        )
+                    attach_payload["deviceTemplateList"][0]["device"].append(variables)
                     increment_chassis += 1
 
                 task_id = manager_session.post(
