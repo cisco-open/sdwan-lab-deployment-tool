@@ -101,8 +101,7 @@ def attach_basic_controller_template(
         }
         for dev_uuid, ip_4th_oct in new_controllers_uuids.items():
             # For every SD-WAN Controller, create a payload to attach template
-            attach_payload["deviceTemplateList"][0]["device"].append(
-                {
+            variables = {
                     "csv-status": "complete",
                     "csv-deviceId": dev_uuid,
                     "csv-deviceIP": f"100.0.0.{ip_4th_oct}",
@@ -112,15 +111,11 @@ def attach_basic_controller_template(
                     "//system/site-id": "100",
                     "csv-templateId": template_id,
                 }
-            )
             if ip_type in ["v4", "dual"]:
-                attach_payload["deviceTemplateList"][0]["device"][-1][
-                    "/0/eth1/interface/ip/address"
-                ] = f"172.16.0.{ip_4th_oct}/24"
-            elif ip_type in ["v6", "dual"]:
-                attach_payload["deviceTemplateList"][0]["device"][-1][
-                    "/0/eth1/interface/ipv6/address"
-                ] = f"fc00:172:16::{ip_4th_oct}/64"
+                variables["/0/eth1/interface/ip/address"] = f"172.16.0.{ip_4th_oct}/24"
+            if ip_type in ["v6", "dual"]:
+                variables["/0/eth1/interface/ipv6/address"] = f"fc00:172:16::{ip_4th_oct}/64"
+            attach_payload["deviceTemplateList"][0]["device"].append(variables)
 
         task_id = manager_session.post(
             "dataservice/template/device/config/attachfeature", json=attach_payload
