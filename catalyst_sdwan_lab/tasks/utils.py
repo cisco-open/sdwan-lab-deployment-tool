@@ -83,7 +83,7 @@ def attach_basic_controller_template(
     device_inventory = manager_session.endpoints.configuration_device_inventory
     control_components = device_inventory.get_device_details("controllers")
     new_controllers_uuids = {
-        device.uuid: device.device_ip.split(".")[3]
+        device.uuid: (device.device_ip.split(".")[-1] if "." in device.device_ip else device.device_ip.split(":")[-1])
         for device in control_components
         if device.device_type == "vsmart" and not device.template
     }
@@ -327,6 +327,7 @@ def onboard_control_components(
         config = manager_session.get(
             f"dataservice/template/config/attached/{device.uuid}"
         ).json()["config"]
+        # Match IPv4 address on vpn 0 interface
         match = re.search(
             r"vpn 0[\s\S]+?ip\saddress\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", config
         )
@@ -334,9 +335,16 @@ def onboard_control_components(
             already_added_vpn0_ips.append(match.group(1))
         else:
             already_added_vpn0_ips.append(device.device_ip)
+        # Match IPv6 address on vpn 0 interface
+        match = re.search(
+            r"vpn 0[\s\S]+?ipv6\saddress\s([0-9a-fA-F:]+)", config
+        )
+        if match:
+            already_added_vpn0_ips.append(match.group(1))
     i = 0
     log.info("Adding control components...")
     for ip, node_type in new_control_components.items():
+        i += 1
         track_progress(
             log,
             f"Adding control components ({i}/{len(new_control_components.keys())})...",

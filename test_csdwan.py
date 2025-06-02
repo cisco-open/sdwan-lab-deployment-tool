@@ -6,7 +6,7 @@ def test_csdwan():
     commands = [
         ["csdwan", "--version"],
         ["csdwan", "setup"],
-        ["csdwan", "deploy", "20.16.1"],
+        ["csdwan", "deploy", "20.16.1", "--ip_type", "v6"],
         ["csdwan", "add", "2", "edges", "17.16.01a"],
         ["csdwan", "add", "1", "validator", "20.16.1"],
         ["csdwan", "add", "1", "controller", "20.16.1"],

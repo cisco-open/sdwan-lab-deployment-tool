@@ -176,8 +176,9 @@ def main(
     if retry:
         # If retry flag is set, skip the lab bringup and move directly to SD-WAN Manager steps
         track_progress(log, "Retry flag set, checking if lab already exists in CML...")
+        manager_details = f"{manager_ip}:{manager_port}" if patty_used else manager_ip
         labs = [lab for lab in cml.all_labs(show_all=True)]
-        lab = next((lab for lab in labs if manager_ip in lab.notes), None)
+        lab = next((lab for lab in labs if manager_details in lab.notes), None)
         if not lab:
             exit(
                 "\nRetry option is set, but script cloud not find the "
@@ -284,11 +285,12 @@ def main(
             manager_node = node
         elif node.node_definition == "cat-sdwan-controller":
             # Add Controller VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"(172.16.0.1\d+)/24", node.configuration)
+            vpn0_ip_search = re.search(r"<address>((?:172\.16\.0\.1\d+)|(?:fc00:172:16::1\d+))", node.configuration)
             system_ip_search = re.search(
                 r"<system-ip>([\d.]+)</system-ip>", node.configuration
             )
             if vpn0_ip_search and system_ip_search:
+                test = vpn0_ip_search.groups()
                 vpn0_ip = vpn0_ip_search.group(1)
                 system_ip = system_ip_search.group(1)
                 device_ip_to_system_ip[vpn0_ip] = system_ip
@@ -298,7 +300,7 @@ def main(
             node.start()
         elif node.node_definition == "cat-sdwan-validator":
             # Add Validator VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"(172.16.0.2\d+)/24", node.configuration)
+            vpn0_ip_search = re.search(r"<address>((?:172\.16\.0\.2\d+)|(?:fc00:172:16::2\d+))", node.configuration)
             if vpn0_ip_search:
                 vpn0_ip = vpn0_ip_search.group(1)
                 control_components[vpn0_ip] = "validator"

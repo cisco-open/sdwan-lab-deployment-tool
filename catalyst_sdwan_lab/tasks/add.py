@@ -273,10 +273,21 @@ def main(
                 "vsmart": "172.16.0.1",
                 "vbond": "172.16.0.2",
             }
-            nodes_vpn0_ips = [
-                vpn0_ip_prefix[device_type] + next_num_str
-                for next_num_str in new_nodes_nums
-            ]
+            vpn0_ipv6_prefix = {
+                "vmanage": "fc00:172:16:0::",
+                "vsmart": "fc00:172:16::1",
+                "vbond": "fc00:172:16::2",
+            }
+            if ip_type == "v6":
+                nodes_vpn0_ips = [
+                    vpn0_ipv6_prefix[device_type] + next_num_str
+                    for next_num_str in new_nodes_nums
+                ]
+            else:
+                nodes_vpn0_ips = [
+                    vpn0_ip_prefix[device_type] + next_num_str
+                    for next_num_str in new_nodes_nums
+                ]
             with ThreadPoolExecutor() as executor:
                 # Make sure you can ping the devices before attemping to add to the SD-WAN Manager
                 ping_node_partial = partial(
