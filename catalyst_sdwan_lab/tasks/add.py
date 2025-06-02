@@ -522,16 +522,16 @@ def main(
                     new_routers_uuids[next_num_str] = uuid
                     associate_payload.devices.append(DeviceId(id=uuid))
                     variables = [
-                            {
-                                "name": "system_ip",
-                                "value": f"10.0.0.{next_num_str}",
-                            },
-                            {"name": "host_name", "value": f"Edge{next_num_str}"},
-                            {"name": "site_id", "value": int(next_num_str)},
-                            {"name": "pseudo_commit_timer", "value": 300},
-                            {"name": "ipv6_strict_control", "value": False},
-                            {"name": "aaa_password", "value": "admin"},
-                        ]
+                        {
+                            "name": "system_ip",
+                            "value": f"10.0.0.{next_num_str}",
+                        },
+                        {"name": "host_name", "value": f"Edge{next_num_str}"},
+                        {"name": "site_id", "value": int(next_num_str)},
+                        {"name": "pseudo_commit_timer", "value": 300},
+                        {"name": "ipv6_strict_control", "value": False},
+                        {"name": "aaa_password", "value": "admin"},
+                    ]
                     if ip_type in ["v4", "dual"]:
                         variables.append(
                             {

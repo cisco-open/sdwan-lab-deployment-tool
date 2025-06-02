@@ -285,7 +285,10 @@ def main(
             manager_node = node
         elif node.node_definition == "cat-sdwan-controller":
             # Add Controller VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"<address>((?:172\.16\.0\.1\d+)|(?:fc00:172:16::1\d+))", node.configuration)
+            vpn0_ip_search = re.search(
+                r"<address>((?:172\.16\.0\.1\d+)|(?:fc00:172:16::1\d+))",
+                node.configuration,
+            )
             system_ip_search = re.search(
                 r"<system-ip>([\d.]+)</system-ip>", node.configuration
             )
@@ -300,7 +303,10 @@ def main(
             node.start()
         elif node.node_definition == "cat-sdwan-validator":
             # Add Validator VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"<address>((?:172\.16\.0\.2\d+)|(?:fc00:172:16::2\d+))", node.configuration)
+            vpn0_ip_search = re.search(
+                r"<address>((?:172\.16\.0\.2\d+)|(?:fc00:172:16::2\d+))",
+                node.configuration,
+            )
             if vpn0_ip_search:
                 vpn0_ip = vpn0_ip_search.group(1)
                 control_components[vpn0_ip] = "validator"

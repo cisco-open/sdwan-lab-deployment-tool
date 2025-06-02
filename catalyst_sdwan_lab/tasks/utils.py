@@ -83,7 +83,11 @@ def attach_basic_controller_template(
     device_inventory = manager_session.endpoints.configuration_device_inventory
     control_components = device_inventory.get_device_details("controllers")
     new_controllers_uuids = {
-        device.uuid: (device.device_ip.split(".")[-1] if "." in device.device_ip else device.device_ip.split(":")[-1])
+        device.uuid: (
+            device.device_ip.split(".")[-1]
+            if "." in device.device_ip
+            else device.device_ip.split(":")[-1]
+        )
         for device in control_components
         if device.device_type == "vsmart" and not device.template
     }
@@ -336,9 +340,7 @@ def onboard_control_components(
         else:
             already_added_vpn0_ips.append(device.device_ip)
         # Match IPv6 address on vpn 0 interface
-        match = re.search(
-            r"vpn 0[\s\S]+?ipv6\saddress\s([0-9a-fA-F:]+)", config
-        )
+        match = re.search(r"vpn 0[\s\S]+?ipv6\saddress\s([0-9a-fA-F:]+)", config)
         if match:
             already_added_vpn0_ips.append(match.group(1))
     i = 0
