@@ -25,7 +25,8 @@
     "ipv6": {
       "address": {
         "vipObjectType": "object",
-        "vipType": "ignore",
+        "vipType": "variableName",
+        "vipValue": "",
         "vipVariableName": "vpn0_eth1_ipv6"
       },
       "dhcp-rapid-commit": {}
@@ -206,16 +207,16 @@
     "ip": {
       "address": {
         "vipObjectType": "object",
-        "vipType": "variableName",
-        "vipValue": "",
+        "vipType": "ignore",
         "vipVariableName": "vpn0_eth1_ip"
       }
     },
     "ipv6": {
       "address": {
         "vipObjectType": "object",
-        "vipType": "ignore",
-        "vipVariableName": "vpn_if_ipv6_address"
+        "vipType": "variableName",
+        "vipValue": "",
+        "vipVariableName": "vpn0_eth1_ipv6"
       },
       "dhcp-rapid-commit": {}
     },
