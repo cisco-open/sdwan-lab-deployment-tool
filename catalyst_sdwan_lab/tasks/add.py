@@ -431,7 +431,7 @@ def main(
                     uuid = free_uuids[increment_chassis]
                     new_routers_uuids[next_num_str] = uuid
                     dhcp_exlude = f"192.168.{next_num_str}.1-192.168.{next_num_str}.99"
-                    # For every SD-WAN Controller, create a payload to attach template
+                    # For every SD-WAN Edge, create a payload to attach template
                     variables = {
                         "csv-status": "complete",
                         "csv-deviceId": uuid,
