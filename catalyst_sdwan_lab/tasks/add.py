@@ -440,7 +440,7 @@ def main(
                     new_routers_uuids[next_num_str] = uuid
                     dhcp_exlude = f"192.168.{next_num_str}.1-192.168.{next_num_str}.99"
                     # For every SD-WAN Edge, create a payload to attach template
-                    variables = {
+                    variables_dict = {
                         "csv-status": "complete",
                         "csv-deviceId": uuid,
                         "csv-deviceIP": f"10.0.0.{next_num_str}",
@@ -451,35 +451,35 @@ def main(
                         "csv-templateId": template_id,
                     }
                     if ip_type in ["v4", "dual"]:
-                        variables["/0/GigabitEthernet1/interface/ip/address"] = (
+                        variables_dict["/0/GigabitEthernet1/interface/ip/address"] = (
                             f"172.16.1.{next_num_str}/24"
                         )
-                        variables["/0/GigabitEthernet2/interface/ip/address"] = (
+                        variables_dict["/0/GigabitEthernet2/interface/ip/address"] = (
                             f"172.16.2.{next_num_str}/24"
                         )
-                        variables["/1/GigabitEthernet3/interface/ip/address"] = (
+                        variables_dict["/1/GigabitEthernet3/interface/ip/address"] = (
                             f"192.168.{next_num_str}.1/24"
                         )
-                        variables["/1/GigabitEthernet3//dhcp-server/address-pool"] = (
+                        variables_dict["/1/GigabitEthernet3//dhcp-server/address-pool"] = (
                             f"192.168.{next_num_str}.0/24"
                         )
-                        variables["/1/GigabitEthernet3//dhcp-server/exclude"] = (
+                        variables_dict["/1/GigabitEthernet3//dhcp-server/exclude"] = (
                             dhcp_exlude
                         )
-                        variables[
+                        variables_dict[
                             "/1/GigabitEthernet3//dhcp-server/options/default-gateway"
                         ] = f"192.168.{next_num_str}.1"
                     if ip_type in ["v6", "dual"]:
-                        variables["/0/GigabitEthernet1/interface/ipv6/address"] = (
+                        variables_dict["/0/GigabitEthernet1/interface/ipv6/address"] = (
                             f"fc00:172:16:1::{next_num_str}/64"
                         )
-                        variables["/0/GigabitEthernet2/interface/ipv6/address"] = (
+                        variables_dict["/0/GigabitEthernet2/interface/ipv6/address"] = (
                             f"fc00:172:16:2::{next_num_str}/64"
                         )
-                        variables["/1/GigabitEthernet3/interface/ipv6/address"] = (
+                        variables_dict["/1/GigabitEthernet3/interface/ipv6/address"] = (
                             f"fc00:192:168:{next_num_str}::1/64"
                         )
-                    attach_payload["deviceTemplateList"][0]["device"].append(variables)
+                    attach_payload["deviceTemplateList"][0]["device"].append(variables_dict)
                     increment_chassis += 1
 
                 task_id = manager_session.post(
@@ -529,7 +529,7 @@ def main(
                     uuid = free_uuids[increment_chassis]
                     new_routers_uuids[next_num_str] = uuid
                     associate_payload.devices.append(DeviceId(id=uuid))
-                    variables = [
+                    variables_list = [
                         {
                             "name": "system_ip",
                             "value": f"10.0.0.{next_num_str}",
@@ -541,56 +541,56 @@ def main(
                         {"name": "aaa_password", "value": "admin"},
                     ]
                     if ip_type in ["v4", "dual"]:
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn1_gi3_lan_ip",
                                 "value": f"192.168.{next_num_str}.1",
                             }
                         )
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn1_gi3_dhcp_network",
                                 "value": f"192.168.{next_num_str}.0",
                             }
                         )
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn1_gi3_dhcp_address_exclude",
                                 "value": [f"192.168.{next_num_str}.1"],
                             }
                         )
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn1_gi3_dhcp_default_gateway",
                                 "value": f"192.168.{next_num_str}.1",
                             }
                         )
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn0_gi1_inet_ip",
                                 "value": f"172.16.1.{next_num_str}",
                             }
                         )
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn0_gi2_mpls_ip",
                                 "value": f"172.16.2.{next_num_str}",
                             }
                         )
                     if ip_type in ["v6", "dual"]:
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn1_gi3_lan_ipv6",
                                 "value": f"fc00:192:168:{next_num_str}::1/64",
                             }
                         )
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn0_gi1_inet_ipv6",
                                 "value": f"fc00:172:16:1::{next_num_str}/64",
                             }
                         )
-                        variables.append(
+                        variables_list.append(
                             {
                                 "name": "vpn0_gi2_mpls_ipv6",
                                 "value": f"fc00:172:16:2::{next_num_str}/64",
@@ -598,7 +598,7 @@ def main(
                         )
                     device_variables = {
                         "device-id": uuid,
-                        "variables": variables,
+                        "variables": variables_list,
                     }
                     devices_variables.append(device_variables)
                     increment_chassis += 1
