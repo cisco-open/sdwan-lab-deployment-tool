@@ -1,0 +1,22 @@
+{
+  "listId": "deccbff3-bc05-48cb-b6f0-bc30d4e23a63",
+  "name": "gotomeeting_apps",
+  "type": "app",
+  "description": "SaaS App List for Gotomeeting",
+  "entries": [
+    {
+      "app": "citrix"
+    },
+    {
+      "app": "gotomeeting"
+    }
+  ],
+  "lastUpdated": 1706313442104,
+  "owner": "system",
+  "readOnly": true,
+  "version": "3.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

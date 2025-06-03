@@ -1,0 +1,190 @@
+{
+  "listId": "771e409b-b1b2-428b-9494-88bc842d5800",
+  "name": "Google_Apps",
+  "type": "app",
+  "description": "Google Applications List",
+  "entries": [
+    {
+      "app": "android-updates"
+    },
+    {
+      "app": "blogger"
+    },
+    {
+      "app": "chrome_update"
+    },
+    {
+      "app": "gcs"
+    },
+    {
+      "app": "gmail"
+    },
+    {
+      "app": "gmail_basic"
+    },
+    {
+      "app": "gmail_chat"
+    },
+    {
+      "app": "gmail_drive"
+    },
+    {
+      "app": "gmail_mobile"
+    },
+    {
+      "app": "google-services"
+    },
+    {
+      "app": "google-services-audio"
+    },
+    {
+      "app": "google-services-media"
+    },
+    {
+      "app": "google-services-video"
+    },
+    {
+      "app": "google_accounts"
+    },
+    {
+      "app": "google_ads"
+    },
+    {
+      "app": "google_analytics"
+    },
+    {
+      "app": "google_appengine"
+    },
+    {
+      "app": "google_cache"
+    },
+    {
+      "app": "google_calendar"
+    },
+    {
+      "app": "google_code"
+    },
+    {
+      "app": "google_desktop"
+    },
+    {
+      "app": "google_docs"
+    },
+    {
+      "app": "google-docs"
+    },
+    {
+      "app": "google-downloads"
+    },
+    {
+      "app": "google_earth"
+    },
+    {
+      "app": "google-earth"
+    },
+    {
+      "app": "google_groups"
+    },
+    {
+      "app": "google_maps"
+    },
+    {
+      "app": "google_photos"
+    },
+    {
+      "app": "google_picasa"
+    },
+    {
+      "app": "picasa"
+    },
+    {
+      "app": "google-photos"
+    },
+    {
+      "app": "google-play"
+    },
+    {
+      "app": "google_plus"
+    },
+    {
+      "app": "google-plus"
+    },
+    {
+      "app": "google_safebrowsing"
+    },
+    {
+      "app": "google_skymap"
+    },
+    {
+      "app": "google_spaces"
+    },
+    {
+      "app": "google_tags"
+    },
+    {
+      "app": "google_toolbar"
+    },
+    {
+      "app": "google_translate"
+    },
+    {
+      "app": "google_trusted_store"
+    },
+    {
+      "app": "google_weblight"
+    },
+    {
+      "app": "googlebot"
+    },
+    {
+      "app": "gstatic"
+    },
+    {
+      "app": "gtalk"
+    },
+    {
+      "app": "gtalk-chat"
+    },
+    {
+      "app": "gtalk-ft"
+    },
+    {
+      "app": "gtalk-video"
+    },
+    {
+      "app": "gtalk-voip"
+    },
+    {
+      "app": "hangouts"
+    },
+    {
+      "app": "hangouts-audio"
+    },
+    {
+      "app": "hangouts-chat"
+    },
+    {
+      "app": "hangouts-file-transfer"
+    },
+    {
+      "app": "hangouts-media"
+    },
+    {
+      "app": "hangouts-video"
+    },
+    {
+      "app": "youtube"
+    },
+    {
+      "app": "youtube_hd"
+    }
+  ],
+  "lastUpdated": 1706313440710,
+  "owner": "system",
+  "readOnly": true,
+  "version": "4.3",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

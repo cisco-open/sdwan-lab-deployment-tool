@@ -1,0 +1,201 @@
+{
+  "deviceType": [
+    "vedge-C8000V",
+    "vedge-C1111-8PLTELA",
+    "vedge-nfvis-C8200-UCPE",
+    "vedge-nfvis-ENCS5400",
+    "vedge-CSR-1000v",
+    "vedge-ISR-4331",
+    "vedge-nfvis-C8200-UCPEVM"
+  ],
+  "templateType": "cisco_ntp",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "server": {
+      "vipValue": [
+        {
+          "name": {
+            "vipValue": "10.1.1.2",
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "key": {
+            "vipValue": 1,
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "version": {
+            "vipValue": 4,
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "source-interface": {
+            "vipValue": "GigabitEthernet1",
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "prefer": {
+            "vipValue": "true",
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "priority-order": [
+            "name",
+            "key",
+            "vpn",
+            "version",
+            "source-interface",
+            "prefer"
+          ]
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipType": "constant",
+      "vipPrimaryKey": [
+        "name"
+      ]
+    },
+    "keys": {
+      "authentication": {
+        "vipValue": [
+          {
+            "number": {
+              "vipValue": 1,
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipVariableName": ""
+            },
+            "md5": {
+              "vipValue": "admin",
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipVariableName": ""
+            },
+            "priority-order": [
+              "number",
+              "md5"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipType": "constant",
+        "vipPrimaryKey": [
+          "number"
+        ]
+      },
+      "trusted": {
+        "vipValue": [
+          1
+        ],
+        "vipObjectType": "list",
+        "vipType": "constant"
+      }
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "server": {
+      "vipValue": [
+        {
+          "name": {
+            "vipValue": "10.1.1.2",
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "key": {
+            "vipValue": 1,
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "version": {
+            "vipValue": 4,
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "source-interface": {
+            "vipValue": "GigabitEthernet1",
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "prefer": {
+            "vipValue": "true",
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipVariableName": ""
+          },
+          "priority-order": [
+            "name",
+            "key",
+            "vpn",
+            "version",
+            "source-interface",
+            "prefer"
+          ]
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipType": "constant",
+      "vipPrimaryKey": [
+        "name"
+      ]
+    },
+    "keys": {
+      "authentication": {
+        "vipValue": [
+          {
+            "number": {
+              "vipValue": 1,
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipVariableName": ""
+            },
+            "md5": {
+              "vipValue": "admin",
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipVariableName": ""
+            },
+            "priority-order": [
+              "number",
+              "md5"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipType": "constant",
+        "vipPrimaryKey": [
+          "number"
+        ]
+      },
+      "trusted": {
+        "vipValue": [
+          1
+        ],
+        "vipObjectType": "list",
+        "vipType": "constant"
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "0884ef0b-a107-4c04-87f0-d7aaadfeb154",
+  "createdOn": 1706357759771,
+  "@rid": 1378,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_NTP_Cisco_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Factory Default template for NTP Cisco",
+  "lastUpdatedOn": 1706357759771
+}

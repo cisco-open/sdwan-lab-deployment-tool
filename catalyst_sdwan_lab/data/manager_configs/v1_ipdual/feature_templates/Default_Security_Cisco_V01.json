@@ -1,0 +1,94 @@
+{
+  "templateType": "cisco_security",
+  "templateMinVersion": "15.0.0",
+  "deviceType": [
+    "vedge-C8000V",
+    "vedge-C1111-8PLTELA",
+    "vedge-CSR-1000v",
+    "vedge-ISR-4331"
+  ],
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "ipsec": {
+      "rekey": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "replay-window": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "authentication-type": {
+        "vipValue": [
+          "ah-sha1-hmac",
+          "sha1-hmac"
+        ],
+        "vipObjectType": "list",
+        "vipType": "constant"
+      },
+      "integrity-type": {
+        "vipValue": [
+          "ip-udp-esp",
+          "esp"
+        ],
+        "vipObjectType": "list",
+        "vipType": "constant"
+      },
+      "pairwise-keying": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "ipsec": {
+      "rekey": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "replay-window": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "authentication-type": {
+        "vipValue": [
+          "ah-sha1-hmac",
+          "sha1-hmac"
+        ],
+        "vipObjectType": "list",
+        "vipType": "constant"
+      },
+      "integrity-type": {
+        "vipValue": [
+          "ip-udp-esp",
+          "esp"
+        ],
+        "vipObjectType": "list",
+        "vipType": "constant"
+      },
+      "pairwise-keying": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 15,
+  "templateId": "81073152-069c-4366-9871-2b0bb3ad5a53",
+  "createdOn": 1706313425809,
+  "@rid": 317,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_Security_Cisco_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Factory Default template for Security Cisco",
+  "lastUpdatedOn": 1706313425809
+}

@@ -1,0 +1,319 @@
+{
+  "profileName": "edge_basic_wan",
+  "lastUpdatedBy": "admin",
+  "description": "Do not modify!",
+  "createdOn": 1706358540076,
+  "@rid": 3177,
+  "profileType": "transport",
+  "solution": "sdwan",
+  "createdBy": "admin",
+  "profileId": "98f74019-ab7b-41e2-85da-0ff7dd5e6a4d",
+  "lastUpdatedOn": 1706358818823,
+  "associatedProfileParcels": [
+    {
+      "parcelId": "aeb765e6-3f3e-4403-bca1-961e161384c3",
+      "parcelType": "wan/vpn",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706358540590,
+      "lastUpdatedOn": 1706358818823,
+      "payload": {
+        "name": "edge_basic_vpn0",
+        "description": "Do not modify!",
+        "data": {
+          "vpnId": { "optionType": "global", "value": 0 },
+          "enhanceEcmpKeying": { "optionType": "global", "value": true },
+          "dnsIpv6": {
+            "primaryDnsAddressIpv6": {
+              "optionType": "global",
+              "value": "fc00:172:16:1::254"
+            },
+            "secondaryDnsAddressIpv6": {
+              "optionType": "global",
+              "value": "fc00:172:16:2::254"
+            }
+          },
+          "ipv6Route": [
+            {
+              "prefix": {
+                "optionType": "global",
+                "value": "::/0"
+              },
+              "oneOfIpRoute": {
+                "nextHopContainer": {
+                  "nextHop": [
+                    {
+                      "address": {
+                        "optionType": "global",
+                        "value": "fc00:172:16:1::254"
+                      },
+                      "distance": {
+                        "optionType": "default",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "address": {
+                        "optionType": "global",
+                        "value": "fc00:172:16:2::254"
+                      },
+                      "distance": {
+                        "optionType": "default",
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "subparcels": [
+        {
+          "parcelId": "ed215778-e4d1-4c72-8c1f-3b6541480e89",
+          "parcelType": "wan/vpn/interface/ethernet",
+          "createdBy": "admin",
+          "lastUpdatedBy": "admin",
+          "createdOn": 1706385232142,
+          "lastUpdatedOn": 1706385232510,
+          "payload": {
+            "data": {
+              "shutdown": { "optionType": "global", "value": false },
+              "interfaceName": {
+                "optionType": "global",
+                "value": "GigabitEthernet2"
+              },
+              "description": {
+                "optionType": "global",
+                "value": "MPLS"
+              },
+              "blockNonSourceIp": { "optionType": "default", "value": false },
+              "autoDetectBandwidth": {
+                "optionType": "default",
+                "value": false
+              },
+              "tunnelInterface": { "optionType": "global", "value": true },
+              "tunnel": {
+                "perTunnelQos": { "optionType": "default", "value": false },
+                "color": { "optionType": "global", "value": "mpls" },
+                "restrict": { "optionType": "global", "value": true },
+                "group": { "optionType": "default" },
+                "border": { "optionType": "default", "value": false },
+                "maxControlConnections": { "optionType": "default" },
+                "vBondAsStunServer": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "excludeControllerGroupList": { "optionType": "default" },
+                "vManageConnectionPreference": {
+                  "optionType": "default",
+                  "value": 5
+                },
+                "portHop": { "optionType": "default", "value": true },
+                "lowBandwidthLink": { "optionType": "default", "value": false },
+                "tunnelTcpMss": { "optionType": "default" },
+                "clearDontFragment": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "ctsSgtPropagation": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "networkBroadcast": { "optionType": "default", "value": false }
+              },
+              "allowService": {
+                "all": { "optionType": "default", "value": false },
+                "bgp": { "optionType": "default", "value": false },
+                "dhcp": { "optionType": "default", "value": true },
+                "ntp": { "optionType": "global", "value": false },
+                "ssh": { "optionType": "global", "value": false },
+                "dns": { "optionType": "default", "value": true },
+                "icmp": { "optionType": "default", "value": true },
+                "https": { "optionType": "default", "value": true },
+                "ospf": { "optionType": "default", "value": false },
+                "stun": { "optionType": "default", "value": false },
+                "snmp": { "optionType": "default", "value": false },
+                "netconf": { "optionType": "default", "value": false },
+                "bfd": { "optionType": "default", "value": false }
+              },
+              "nat": { "optionType": "default", "value": false },
+              "intfIpV6Address": {
+                "static": {
+                  "primaryIpV6Address": {
+                    "address": {
+                      "optionType": "variable",
+                      "value": "{{vpn0_gi2_mpls_ipv6}}"
+                    }
+                  },
+                  "secondaryIpV6Address": []
+                }
+              },
+              "advanced": {
+                "ipMtu": { "optionType": "default", "value": 1500 },
+                "arpTimeout": { "optionType": "default", "value": 1200 },
+                "loadInterval": { "optionType": "default", "value": 30 },
+                "ipDirectedBroadcast": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "icmpRedirectDisable": {
+                  "optionType": "default",
+                  "value": true
+                }
+              },
+              "encapsulation": [
+                {
+                  "encap": { "optionType": "global", "value": "ipsec" },
+                  "weight": { "optionType": "default", "value": 1 },
+                  "preference": { "optionType": "default" }
+                }
+              ],
+              "aclQos": {
+                "adaptiveQoS": { "optionType": "default", "value": false },
+                "shapingRate": { "optionType": "default" }
+              }
+            },
+            "name": "edge_basic_vpn0_mpls",
+            "description": "Do not modify!"
+          },
+          "subparcels": []
+        },
+        {
+          "parcelId": "ed215778-e4d1-4c72-8c1f-3b6541480e89",
+          "parcelType": "wan/vpn/interface/ethernet",
+          "createdBy": "admin",
+          "lastUpdatedBy": "admin",
+          "createdOn": 1706385232142,
+          "lastUpdatedOn": 1706385232510,
+          "payload": {
+            "data": {
+              "shutdown": { "optionType": "global", "value": false },
+              "interfaceName": {
+                "optionType": "global",
+                "value": "GigabitEthernet1"
+              },
+              "description": { "optionType": "global", "value": "INET" },
+              "blockNonSourceIp": { "optionType": "default", "value": false },
+              "autoDetectBandwidth": {
+                "optionType": "default",
+                "value": false
+              },
+              "tunnelInterface": { "optionType": "global", "value": true },
+              "tunnel": {
+                "perTunnelQos": { "optionType": "default", "value": false },
+                "color": { "optionType": "global", "value": "biz-internet" },
+                "restrict": { "optionType": "global", "value": true },
+                "group": { "optionType": "default" },
+                "border": { "optionType": "default", "value": false },
+                "maxControlConnections": { "optionType": "default" },
+                "vBondAsStunServer": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "excludeControllerGroupList": { "optionType": "default" },
+                "vManageConnectionPreference": {
+                  "optionType": "default",
+                  "value": 5
+                },
+                "portHop": { "optionType": "default", "value": true },
+                "lowBandwidthLink": { "optionType": "default", "value": false },
+                "tunnelTcpMss": { "optionType": "default" },
+                "clearDontFragment": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "ctsSgtPropagation": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "networkBroadcast": { "optionType": "default", "value": false },
+                "carrier": { "optionType": "default", "value": "default" },
+                "bind": { "optionType": "default" },
+                "lastResortCircuit": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "natRefreshInterval": { "optionType": "default", "value": 5 },
+                "helloInterval": { "optionType": "default", "value": 1000 },
+                "helloTolerance": { "optionType": "default", "value": 12 },
+                "tlocExtensionGreTo": { "optionType": "default" }
+              },
+              "allowService": {
+                "all": { "optionType": "default", "value": false },
+                "bgp": { "optionType": "default", "value": false },
+                "dhcp": { "optionType": "default", "value": true },
+                "ntp": { "optionType": "global", "value": false },
+                "ssh": { "optionType": "global", "value": false },
+                "dns": { "optionType": "default", "value": true },
+                "icmp": { "optionType": "default", "value": true },
+                "https": { "optionType": "default", "value": true },
+                "ospf": { "optionType": "default", "value": false },
+                "stun": { "optionType": "default", "value": false },
+                "snmp": { "optionType": "default", "value": false },
+                "netconf": { "optionType": "default", "value": false },
+                "bfd": { "optionType": "default", "value": false }
+              },
+              "nat": { "optionType": "global", "value": true },
+              "intfIpV6Address": {
+                "static": {
+                  "primaryIpV6Address": {
+                    "address": {
+                      "optionType": "variable",
+                      "value": "{{vpn0_gi1_inet_ipv6}}"
+                    }
+                  },
+                  "secondaryIpV6Address": []
+                }
+              },
+              "advanced": {
+                "ipMtu": { "optionType": "default", "value": 1500 },
+                "arpTimeout": { "optionType": "default", "value": 1200 },
+                "loadInterval": { "optionType": "default", "value": 30 },
+                "ipDirectedBroadcast": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "icmpRedirectDisable": {
+                  "optionType": "default",
+                  "value": true
+                },
+                "tlocExtensionGreFrom": {
+                  "sourceIp": { "optionType": "default" },
+                  "xconnect": { "optionType": "default" }
+                }
+              },
+              "encapsulation": [
+                {
+                  "encap": { "optionType": "global", "value": "ipsec" },
+                  "weight": { "optionType": "default", "value": 1 },
+                  "preference": { "optionType": "default" }
+                }
+              ],
+              "aclQos": {
+                "adaptiveQoS": { "optionType": "default", "value": false },
+                "shapingRate": { "optionType": "default" }
+              },
+              "dhcpHelper": { "optionType": "default" },
+              "serviceProvider": { "optionType": "default" },
+              "bandwidthUpstream": { "optionType": "default" },
+              "bandwidthDownstream": { "optionType": "default" },
+              "natIpv6": { "optionType": "default", "value": false },
+              "arp": [],
+              "natAttributesIpv4": {
+                "natType": { "optionType": "default", "value": "interface" },
+                "udpTimeout": { "optionType": "default", "value": 1 },
+                "tcpTimeout": { "optionType": "default", "value": 60 },
+                "newStaticNat": []
+              }
+            },
+            "name": "edge_basic_vpn0_inet",
+            "description": "Do not modify!"
+          },
+          "subparcels": []
+        }
+      ]
+    }
+  ]
+}

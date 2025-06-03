@@ -1,0 +1,198 @@
+{
+  "profileName": "edge_basic_lan",
+  "lastUpdatedBy": "admin",
+  "description": "Do not modify!",
+  "createdOn": 1706358541838,
+  "@rid": 3181,
+  "profileType": "service",
+  "solution": "sdwan",
+  "createdBy": "admin",
+  "profileId": "cf1c239f-2166-4d06-a9af-6c86aa168566",
+  "lastUpdatedOn": 1706359090589,
+  "associatedProfileParcels": [
+    {
+      "parcelId": "29d0e285-cda4-4817-b3c1-4eff69e9c699",
+      "parcelType": "lan/vpn",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706358542365,
+      "lastUpdatedOn": 1706358943326,
+      "payload": {
+        "name": "edge_basic_vpn1",
+        "description": "Do not modify!",
+        "data": {
+          "vpnId": { "optionType": "global", "value": 1 },
+          "name": { "optionType": "global", "value": "VPN 1" },
+          "ipv4Route": [
+            {
+              "prefix": {
+                "ipAddress": { "optionType": "global", "value": "0.0.0.0" },
+                "subnetMask": { "optionType": "global", "value": "0.0.0.0" }
+              },
+              "oneOfIpRoute": {
+                "vpn": { "optionType": "default", "value": true }
+              }
+            }
+          ],
+          "dnsIpv4": {
+            "primaryDnsAddressIpv4": {
+              "optionType": "global",
+              "value": "172.16.1.254"
+            },
+            "secondaryDnsAddressIpv4": {
+              "optionType": "global",
+              "value": "1.1.1.1"
+            }
+          },
+          "enableSdra": { "optionType": "global", "value": false }
+        }
+      },
+      "subparcels": [
+        {
+          "parcelId": "9de90280-d718-4c51-880e-7acc1fe38b57",
+          "parcelType": "lan/vpn/interface/ethernet",
+          "createdBy": "admin",
+          "lastUpdatedBy": "admin",
+          "createdOn": 1706358542982,
+          "lastUpdatedOn": 1706359090589,
+          "payload": {
+            "name": "edge_basic_vpn1_int",
+            "description": "Do not modify!",
+            "data": {
+              "shutdown": { "optionType": "global", "value": false },
+              "interfaceName": {
+                "optionType": "global",
+                "value": "GigabitEthernet3"
+              },
+              "description": { "optionType": "global", "value": "LAN" },
+              "intfIpAddress": {
+                "static": {
+                  "staticIpV4AddressPrimary": {
+                    "ipAddress": {
+                      "optionType": "variable",
+                      "value": "{{vpn1_gi3_lan_ip}}"
+                    },
+                    "subnetMask": {
+                      "optionType": "global",
+                      "value": "255.255.255.0"
+                    }
+                  }
+                }
+              },
+              "intfIpV6Address": {
+                "static": {
+                  "primaryIpV6Address": {
+                    "address": {
+                      "optionType": "variable",
+                      "value": "{{vpn1_gi3_lan_ipv6}}"
+                    }
+                  },
+                  "secondaryIpV6Address": []
+                }
+              },
+              "nat": { "optionType": "default", "value": false },
+              "advanced": {
+                "ipMtu": { "optionType": "default", "value": 1500 },
+                "arpTimeout": { "optionType": "default", "value": 1200 },
+                "loadInterval": { "optionType": "default", "value": 30 },
+                "ipDirectedBroadcast": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "icmpRedirectDisable": {
+                  "optionType": "default",
+                  "value": true
+                }
+              }
+            }
+          },
+          "subparcels": [
+            {
+              "parcelId": "396125b5-9313-41f0-9a6f-dcaaea7afdf0",
+              "parcelType": "dhcp-server",
+              "createdBy": "admin",
+              "lastUpdatedBy": "admin",
+              "createdOn": 1706359089966,
+              "lastUpdatedOn": 1706359089966,
+              "payload": {
+                "name": "edge_basic_vpn1_int_dhcp",
+                "description": "Do not modify!",
+                "data": {
+                  "addressPool": {
+                    "networkAddress": {
+                      "optionType": "variable",
+                      "value": "{{vpn1_gi3_dhcp_network}}"
+                    },
+                    "subnetMask": {
+                      "optionType": "global",
+                      "value": "255.255.255.0"
+                    }
+                  },
+                  "exclude": {
+                    "optionType": "variable",
+                    "value": "{{vpn1_gi3_dhcp_address_exclude}}"
+                  },
+                  "leaseTime": { "optionType": "default", "value": 86400 },
+                  "interfaceMtu": { "optionType": "default" },
+                  "domainName": { "optionType": "default" },
+                  "defaultGateway": {
+                    "optionType": "variable",
+                    "value": "{{vpn1_gi3_dhcp_default_gateway}}"
+                  },
+                  "dnsServers": {
+                    "optionType": "global",
+                    "value": ["172.16.1.254", "1.1.1.1"]
+                  },
+                  "tftpServers": { "optionType": "default" },
+                  "optionCode": [],
+                  "staticLease": []
+                }
+              },
+              "subparcels": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parcelId": "396125b5-9313-41f0-9a6f-dcaaea7afdf0",
+      "parcelType": "dhcp-server",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706359089966,
+      "lastUpdatedOn": 1706359089966,
+      "payload": {
+        "name": "edge_basic_vpn1_int_dhcp",
+        "description": "Do not modify!",
+        "data": {
+          "addressPool": {
+            "networkAddress": {
+              "optionType": "variable",
+              "value": "{{vpn1_gi3_dhcp_network}}"
+            },
+            "subnetMask": { "optionType": "global", "value": "255.255.255.0" }
+          },
+          "exclude": {
+            "optionType": "variable",
+            "value": "{{vpn1_gi3_dhcp_address_exclude}}"
+          },
+          "leaseTime": { "optionType": "default", "value": 86400 },
+          "interfaceMtu": { "optionType": "default" },
+          "domainName": { "optionType": "default" },
+          "defaultGateway": {
+            "optionType": "variable",
+            "value": "{{vpn1_gi3_dhcp_default_gateway}}"
+          },
+          "dnsServers": {
+            "optionType": "global",
+            "value": ["172.16.1.254", "1.1.1.1"]
+          },
+          "tftpServers": { "optionType": "default" },
+          "optionCode": [],
+          "staticLease": []
+        }
+      },
+      "subparcels": []
+    }
+  ]
+}

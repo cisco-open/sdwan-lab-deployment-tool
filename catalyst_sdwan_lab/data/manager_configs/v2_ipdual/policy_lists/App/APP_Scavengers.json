@@ -1,0 +1,34 @@
+{
+  "listId": "671ff3d7-ec16-4945-a55b-5b5065bd631c",
+  "name": "APP_Scavengers",
+  "type": "app",
+  "description": "Scavengers Applications List",
+  "entries": [
+    {
+      "app": "apple-updates"
+    },
+    {
+      "app": "apple-services"
+    },
+    {
+      "app": "twitter"
+    },
+    {
+      "app": "instagram"
+    },
+    {
+      "app": "youtube"
+    },
+    {
+      "app": "amazon-instant-video"
+    }
+  ],
+  "lastUpdated": 1706357791787,
+  "owner": "system",
+  "readOnly": true,
+  "version": "1.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

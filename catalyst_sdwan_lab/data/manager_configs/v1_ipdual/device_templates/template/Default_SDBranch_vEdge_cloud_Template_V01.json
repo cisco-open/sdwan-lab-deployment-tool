@@ -1,0 +1,83 @@
+{
+  "templateName": "Default_SDBranch_vEdge_cloud_Template_V01",
+  "templateDescription": "Default device template for SD Branch vedge cloud",
+  "deviceType": "vedge-cloud",
+  "configType": "template",
+  "factoryDefault": true,
+  "policyId": "",
+  "featureTemplateUidRange": [],
+  "connectionPreference": true,
+  "connectionPreferenceRequired": true,
+  "generalTemplates": [
+    {
+      "templateId": "78aa89f4-09a0-464a-9bb3-8cefb2cd4e33",
+      "templateType": "aaa"
+    },
+    {
+      "templateId": "0dd38db7-ee49-47e1-824d-0556bac0d399",
+      "templateType": "bfd-vedge"
+    },
+    {
+      "templateId": "3935b585-11fd-45cc-9824-7571c52f9a86",
+      "templateType": "omp-vedge"
+    },
+    {
+      "templateId": "a620262b-c50f-4a22-ad51-c7377dc3d818",
+      "templateType": "security-vedge"
+    },
+    {
+      "templateId": "9140a5ea-d27c-4aae-bfce-6430b30e927f",
+      "templateType": "system-vedge",
+      "subTemplates": [
+        {
+          "templateId": "29d0a283-14f0-4bac-b897-0ae9f62eedad",
+          "templateType": "logging"
+        }
+      ]
+    },
+    {
+      "templateId": "0bf4d7a0-865f-4ac0-b064-061203322dcc",
+      "templateType": "vpn-vedge",
+      "subTemplates": [
+        {
+          "templateId": "72d333d7-dace-4af6-aaa3-0c46b5fc4ae7",
+          "templateType": "vpn-vedge-interface"
+        }
+      ]
+    },
+    {
+      "templateId": "513b074f-7aaa-471f-98b4-16a8ace6273e",
+      "templateType": "vpn-vedge",
+      "subTemplates": [
+        {
+          "templateId": "0dc1f2d8-c4cc-4f51-ad21-65b9eb9e0e26",
+          "templateType": "vpn-vedge-interface"
+        }
+      ]
+    },
+    {
+      "templateId": "d458865c-9054-4cf1-9fad-12e9692d33c5",
+      "templateType": "vpn-vedge",
+      "subTemplates": [
+        {
+          "templateId": "575ab38e-5dbc-4132-bc8f-c85a6c8937f7",
+          "templateType": "vpn-vedge-interface"
+        }
+      ]
+    },
+    {
+      "templateId": "d20666c7-2d8c-4b7a-a4bb-2b51151d2471",
+      "templateType": "vpn-vedge",
+      "subTemplates": [
+        {
+          "templateId": "19582c1b-2477-40f9-a255-66bf8f274f6a",
+          "templateType": "vpn-vedge-interface"
+        }
+      ]
+    }
+  ],
+  "templateClass": "vedge",
+  "templateId": "20bd3bf4-a54f-41a0-aa76-8512a4492b38",
+  "deviceRole": "sdwan-edge",
+  "draftMode": false
+}

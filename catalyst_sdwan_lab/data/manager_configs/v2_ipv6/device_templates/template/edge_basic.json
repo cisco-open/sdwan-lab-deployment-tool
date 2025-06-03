@@ -1,0 +1,83 @@
+{
+  "templateName": "edge_basic",
+  "templateDescription": "Do not modify!",
+  "deviceType": "vedge-C8000V",
+  "deviceRole": "sdwan-edge",
+  "configType": "template",
+  "factoryDefault": false,
+  "policyId": "",
+  "featureTemplateUidRange": [],
+  "draftMode": false,
+  "connectionPreferenceRequired": true,
+  "connectionPreference": true,
+  "generalTemplates": [
+    {
+      "templateId": "113cd4f5-cee3-4f3d-aae2-4356833d786c",
+      "templateType": "cedge_aaa"
+    },
+    {
+      "templateId": "e2a3626d-1fab-409f-bfe5-55fb9cdf67ea",
+      "templateType": "cisco_bfd"
+    },
+    {
+      "templateId": "94e9e8ea-1935-414f-8ee5-f724fd6fc6f4",
+      "templateType": "cisco_omp"
+    },
+    {
+      "templateId": "a05f90fd-9f34-4217-9af6-2c6dce167636",
+      "templateType": "cisco_security"
+    },
+    {
+      "templateId": "f8844253-3ec2-4f6d-9fb1-db2e8df8eaf2",
+      "templateType": "cisco_system",
+      "subTemplates": [
+        {
+          "templateId": "45ee3eb0-c0c4-4105-a210-b1449cf9f9fa",
+          "templateType": "cisco_logging"
+        }
+      ]
+    },
+    {
+      "templateId": "04552bf1-657c-49e4-a3ee-d196389b199c",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "fc585752-59b2-4dd4-8e05-3e6240493323",
+          "templateType": "cisco_vpn_interface"
+        },
+        {
+          "templateId": "6b1a49e1-6124-4936-8c4f-672d7b770d88",
+          "templateType": "cisco_vpn_interface"
+        }
+      ]
+    },
+    {
+      "templateId": "09816d06-5a2e-44a0-bf3e-1060726e1cce",
+      "templateType": "cisco_vpn"
+    },
+    {
+      "templateId": "edc8c7ec-e744-450f-9f77-a9e3e5d0a24e",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "92eec996-eb7d-4399-b0b6-1bc9ced28bdb",
+          "templateType": "cisco_vpn_interface"
+        }
+      ]
+    },
+    {
+      "templateId": "3a3b665a-2905-4493-b012-b48e1647cab0",
+      "templateType": "cedge_global"
+    },
+    {
+      "templateId": "3c705ea9-3742-4eb1-a94b-3ffd4f5c8512",
+      "templateType": "cisco_banner"
+    },
+    {
+      "templateId": "b0fea335-2c87-48a9-8d44-cf9dc4cfd435",
+      "templateType": "cli-template"
+    }
+  ],
+  "templateClass": "cedge",
+  "templateId": "f7f040f9-05b2-4532-a0a9-ce7fc01d5191"
+}

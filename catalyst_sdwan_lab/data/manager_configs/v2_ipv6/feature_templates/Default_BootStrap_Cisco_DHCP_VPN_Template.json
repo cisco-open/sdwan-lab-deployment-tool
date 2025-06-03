@@ -1,0 +1,449 @@
+{
+  "deviceType": [
+    "cellular-gateway-CG113-W6E",
+    "vedge-C1111-4PLTEEA",
+    "vedge-C1161-8P",
+    "vedge-C1117-4PLTEEAW",
+    "cellular-gateway-CG113-W6H",
+    "vedge-C8500-12X4QC",
+    "cellular-gateway-CG113-W6B",
+    "vedge-C8200-1N-4T",
+    "vedge-C1121X-8P",
+    "cellular-gateway-CG113-W6A",
+    "vedge-ISR-4331",
+    "vedge-ISRv",
+    "cellular-gateway-CG522-E",
+    "vedge-C1127X-8PMLTEP",
+    "vedge-C1117-4PMLTEEAWE",
+    "vedge-ESR-6300-LIC",
+    "vedge-ISR-4451-X",
+    "vedge-C8200L-1N-4T",
+    "vedge-C1113-8PLTEEA",
+    "vedge-IR-1821",
+    "vedge-ASR-1001-X",
+    "cellular-gateway-CG113-W6Z",
+    "vedge-ISR-4321",
+    "vedge-ESR-6300-NCP",
+    "vedge-C1116-4PLTEEAWE",
+    "vedge-C1109-4PLTE2P",
+    "cellular-gateway-CG113-W6Q",
+    "vedge-C1121-8P",
+    "vedge-ASR-1002-HX",
+    "cellular-gateway-CG418-E",
+    "vedge-C1111-8PLTEEAW",
+    "vedge-C1112-8PWE",
+    "vedge-C1101-4PLTEP",
+    "vedge-ISR1100-4GLTENA-XE",
+    "vedge-C1111-8PLTELA",
+    "vedge-IR-1835",
+    "vedge-C1121X-8PLTEP",
+    "vedge-IR-1833",
+    "vedge-C8300-1N1S-4T2X",
+    "vedge-C1121-4P",
+    "vedge-ISR-4351",
+    "vedge-C1117-4PLTELA",
+    "vedge-C1116-4PWE",
+    "vedge-nfvis-C8200-UCPE",
+    "vedge-C1113-8PM",
+    "vedge-IR-1831",
+    "vedge-C1127-8PLTEP",
+    "vedge-C1121-8PLTEPW",
+    "vedge-C1113-8PW",
+    "vedge-C1128-8PLTEP",
+    "vedge-ASR-1001-HX",
+    "vedge-IR-8340",
+    "vedge-C1113-8PLTEEAW",
+    "vedge-C1117-4PW",
+    "vedge-C1116-4P",
+    "vedge-C1113-8PMLTEEA",
+    "vedge-C1112-8P",
+    "vedge-ISR-4461",
+    "vedge-C1116-4PLTEEA",
+    "vedge-ISR-4221",
+    "vedge-C1117-4PM",
+    "vedge-C1113-8PLTELAWZ",
+    "vedge-C1117-4PMWE",
+    "vedge-C1131-8PLTEPW",
+    "vedge-C1109-2PLTEVZ",
+    "vedge-C1113-8P",
+    "vedge-C1117-4P",
+    "vedge-nfvis-ENCS5400",
+    "vedge-C8300-2N2S-6T",
+    "vedge-C1127-8PMLTEP",
+    "vedge-ESR-6300",
+    "vedge-ISR1100-4GLTEGB-XE",
+    "vedge-ISR-4221X",
+    "vedge-C1109-2PLTEGB",
+    "vedge-C8500-12X",
+    "vedge-CSR-1000v",
+    "vedge-C1113-8PLTEW",
+    "vedge-C1121X-8PLTEPW",
+    "vedge-ISR1100-6G-XE",
+    "vedge-C1121-4PLTEP",
+    "cellular-gateway-CG113-4GW6Z",
+    "vedge-C1111-8PLTEEA",
+    "vedge-C1117-4PLTEEA",
+    "vedge-C1127X-8PLTEP",
+    "vedge-C1109-2PLTEUS",
+    "vedge-C1112-8PLTEEAWE",
+    "cellular-gateway-CG113-4GW6Q",
+    "vedge-C1161X-8P",
+    "vedge-C1111-8PW",
+    "cellular-gateway-CG113-4GW6E",
+    "vedge-C8500L-8S4X",
+    "vedge-C1161X-8PLTEP",
+    "cellular-gateway-CG113-4GW6H",
+    "vedge-C1101-4PLTEPW",
+    "vedge-ISR1100X-4G-XE",
+    "vedge-IR-1101",
+    "cellular-gateway-CG113-4GW6B",
+    "vedge-C1111-4P",
+    "cellular-gateway-CG113-4GW6A",
+    "vedge-C1111-4PW",
+    "vedge-C1111-8P",
+    "vedge-C1117-4PMLTEEA",
+    "vedge-C1113-8PLTELA",
+    "vedge-C1131X-8PW",
+    "vedge-C1111-8PLTELAW",
+    "vedge-C1131-8PW",
+    "vedge-C1161-8PLTEP",
+    "vedge-ISR1100X-6G-XE",
+    "vedge-ISR-4431",
+    "vedge-nfvis-C8200-UCPEVM",
+    "vedge-C1101-4P",
+    "vedge-C8500-20X6C",
+    "vedge-C1109-4PLTE2PW",
+    "vedge-C1113-8PMWE",
+    "vedge-C1118-8P",
+    "vedge-C8300-1N1S-6T",
+    "vedge-C1126-8PLTEP",
+    "vedge-C1121-8PLTEP",
+    "vedge-C8300-2N2S-4T2X",
+    "vedge-C1131X-8PLTEPW",
+    "vedge-C1112-8PLTEEA",
+    "vedge-C1111-4PLTELA",
+    "vedge-ASR-1002-X",
+    "vedge-C1111X-8P",
+    "vedge-C1126X-8PLTEP",
+    "vedge-ASR-1006-X",
+    "vedge-C8000V",
+    "vedge-ISR1100-4G-XE",
+    "vedge-C1117-4PLTELAWZ"
+  ],
+  "templateMinVersion": "15.0.0",
+  "templateType": "cisco_vpn",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 0
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipVariableName": "vpn_name"
+    },
+    "ecmp-hash-key": {
+      "layer4": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false",
+        "vipVariableName": "vpn_layer4"
+      }
+    },
+    "nat64-global": {
+      "prefix": {
+        "stateful": {}
+      }
+    },
+    "nat64": {
+      "v4": {
+        "pool": {
+          "vipType": "ignore",
+          "vipValue": [],
+          "vipObjectType": "tree",
+          "vipPrimaryKey": [
+            "name"
+          ]
+        }
+      }
+    },
+    "nat": {
+      "natpool": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "name"
+        ]
+      },
+      "port-forward": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-port",
+          "translate-port",
+          "source-ip",
+          "translate-ip",
+          "proto"
+        ]
+      },
+      "static": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-ip",
+          "translate-ip"
+        ]
+      }
+    },
+    "route-import": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "route-export": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "service": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "svc-type"
+      ]
+    },
+    "ip": {
+      "gre-route": {},
+      "ipsec-route": {},
+      "service-route": {}
+    },
+    "ipv6": {},
+    "omp": {
+      "advertise": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      },
+      "ipv6-advertise": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      }
+    },
+    "dns": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "role": {
+            "vipType": "constant",
+            "vipValue": "primary",
+            "vipObjectType": "object"
+          },
+          "dns-addr": {
+            "vipType": "variableName",
+            "vipValue": "",
+            "vipObjectType": "object",
+            "vipVariableName": "vpn_dns_primary"
+          },
+          "priority-order": [
+            "dns-addr",
+            "role"
+          ]
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "dns-addr"
+      ]
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 0
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipVariableName": "vpn_name"
+    },
+    "ecmp-hash-key": {
+      "layer4": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false",
+        "vipVariableName": "vpn_layer4"
+      }
+    },
+    "nat64-global": {
+      "prefix": {
+        "stateful": {}
+      }
+    },
+    "nat64": {
+      "v4": {
+        "pool": {
+          "vipType": "ignore",
+          "vipValue": [],
+          "vipObjectType": "tree",
+          "vipPrimaryKey": [
+            "name"
+          ]
+        }
+      }
+    },
+    "nat": {
+      "natpool": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "name"
+        ]
+      },
+      "port-forward": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-port",
+          "translate-port",
+          "source-ip",
+          "translate-ip",
+          "proto"
+        ]
+      },
+      "static": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "source-ip",
+          "translate-ip"
+        ]
+      }
+    },
+    "route-import": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "route-export": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "protocol"
+      ]
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "service": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "svc-type"
+      ]
+    },
+    "ip": {
+      "gre-route": {},
+      "ipsec-route": {},
+      "service-route": {}
+    },
+    "ipv6": {},
+    "omp": {
+      "advertise": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      },
+      "ipv6-advertise": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "protocol"
+        ]
+      }
+    },
+    "dns": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "role": {
+            "vipType": "constant",
+            "vipValue": "primary",
+            "vipObjectType": "object"
+          },
+          "dns-addr": {
+            "vipType": "variableName",
+            "vipValue": "",
+            "vipObjectType": "object",
+            "vipVariableName": "vpn_dns_primary"
+          },
+          "priority-order": [
+            "dns-addr",
+            "role"
+          ]
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "dns-addr"
+      ]
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "2f500583-0564-4139-90e4-fc63cc9d7911",
+  "createdOn": 1706357737823,
+  "@rid": 694,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_BootStrap_Cisco_DHCP_VPN_Template",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "vpn0_dhcp",
+  "lastUpdatedOn": 1706357737823
+}

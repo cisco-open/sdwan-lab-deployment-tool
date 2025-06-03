@@ -1,0 +1,19 @@
+{
+  "listId": "28cf35cf-73cc-4dc4-9cab-9739e932c5d5",
+  "name": "concur_apps",
+  "type": "app",
+  "description": "SaaS App List for Concur",
+  "entries": [
+    {
+      "app": "concur"
+    }
+  ],
+  "lastUpdated": 1706357792377,
+  "owner": "system",
+  "readOnly": true,
+  "version": "3.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

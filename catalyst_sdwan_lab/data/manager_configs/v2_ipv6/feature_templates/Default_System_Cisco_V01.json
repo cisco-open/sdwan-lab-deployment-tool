@@ -1,0 +1,256 @@
+{
+  "deviceType": [
+    "vedge-C8000V",
+    "vedge-C1111-8PLTELA",
+    "vedge-CSR-1000v",
+    "vedge-ISR-4331"
+  ],
+  "templateType": "cisco_system",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "clock": {
+      "timezone": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "host-name": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipVariableName": "host-name"
+    },
+    "description": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "location": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "gps-location": {
+      "latitude": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "longitude": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "device-groups": {
+      "vipValue": "",
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "controller-group-list": {
+      "vipValue": "",
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "system-ip": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipVariableName": "system-ip"
+    },
+    "overlay-id": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "site-id": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipVariableName": "site-id"
+    },
+    "port-offset": {
+      "vipValue": 1,
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "port-hop": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "control-session-pps": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "track-transport": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "track-interface-tag": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "console-baud-rate": {
+      "vipValue": "19200",
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "max-omp-sessions": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "track-default-gateway": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "admin-tech-on-failure": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "idle-timeout": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "clock": {
+      "timezone": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "host-name": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipVariableName": "host-name"
+    },
+    "description": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "location": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "gps-location": {
+      "latitude": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "longitude": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "device-groups": {
+      "vipValue": "",
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "controller-group-list": {
+      "vipValue": "",
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "system-ip": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipVariableName": "system-ip"
+    },
+    "overlay-id": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "site-id": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipVariableName": "site-id"
+    },
+    "port-offset": {
+      "vipValue": 1,
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "port-hop": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "control-session-pps": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "track-transport": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "track-interface-tag": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "console-baud-rate": {
+      "vipValue": "19200",
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "max-omp-sessions": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "track-default-gateway": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "admin-tech-on-failure": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "idle-timeout": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 11,
+  "templateId": "f8844253-3ec2-4f6d-9fb1-db2e8df8eaf2",
+  "createdOn": 1706357754960,
+  "@rid": 1365,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_System_Cisco_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Factory Default template for System Cisco",
+  "lastUpdatedOn": 1706357754960
+}

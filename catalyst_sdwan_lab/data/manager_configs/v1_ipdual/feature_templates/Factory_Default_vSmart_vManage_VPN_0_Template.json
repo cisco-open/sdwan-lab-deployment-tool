@@ -1,0 +1,132 @@
+{
+  "deviceType": [
+    "vsmart",
+    "vmanage"
+  ],
+  "templateType": "vpn-vsmart",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "0"
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "ip": {
+      "route": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "prefix": {
+              "vipObjectType": "object",
+              "vipVariableName": "route_prefix_0",
+              "vipType": "constant",
+              "vipValue": "0.0.0.0/0"
+            },
+            "next-hop": {
+              "address": {
+                "vipObjectType": "object",
+                "vipType": "variable",
+                "vipValue": ""
+              },
+              "distance": {
+                "vipObjectType": "object",
+                "vipValue": 1,
+                "vipType": "ignore"
+              }
+            },
+            "priority-order": [
+              "prefix",
+              "next-hop"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "prefix"
+        ]
+      }
+    },
+    "ipv6": {}
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "0"
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "ip": {
+      "route": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "prefix": {
+              "vipObjectType": "object",
+              "vipVariableName": "route_prefix_0",
+              "vipType": "constant",
+              "vipValue": "0.0.0.0/0"
+            },
+            "next-hop": {
+              "address": {
+                "vipObjectType": "object",
+                "vipType": "variable",
+                "vipValue": ""
+              },
+              "distance": {
+                "vipObjectType": "object",
+                "vipValue": 1,
+                "vipType": "ignore"
+              }
+            },
+            "priority-order": [
+              "prefix",
+              "next-hop"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "prefix"
+        ]
+      }
+    },
+    "ipv6": {}
+  },
+  "attachedMastersCount": 0,
+  "configType": "xml",
+  "templateId": "3483c0fa-dfd8-4a60-8bac-8ce9afcb313f",
+  "createdOn": 1706313409587,
+  "@rid": 265,
+  "feature": "vmanage-default",
+  "factoryDefault": true,
+  "createdBy": "system",
+  "templateName": "Factory_Default_vSmart_vManage_VPN_0_Template",
+  "devicesAttached": 0,
+  "templateDescription": "Default Transport VPN template settings for vSmart and vManage",
+  "lastUpdatedOn": 1706313409587
+}

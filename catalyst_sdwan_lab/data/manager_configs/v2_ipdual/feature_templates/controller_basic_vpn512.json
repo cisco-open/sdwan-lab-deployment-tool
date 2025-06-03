@@ -1,0 +1,63 @@
+{
+  "deviceType": [
+    "vsmart"
+  ],
+  "templateType": "vpn-vsmart",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "admin",
+  "editedTemplateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "512"
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "ip": {},
+    "ipv6": {}
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "512"
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "ip": {},
+    "ipv6": {}
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "1a7a69e8-49b1-4054-a6da-6ceb18af4fb3",
+  "createdOn": 1720174203066,
+  "@rid": 2382,
+  "factoryDefault": false,
+  "feature": "vmanage-default",
+  "createdBy": "admin",
+  "templateName": "controller_basic_vpn512",
+  "devicesAttached": 2,
+  "templateDescription": "Do not modify!",
+  "lastUpdatedOn": 1720174291692
+}

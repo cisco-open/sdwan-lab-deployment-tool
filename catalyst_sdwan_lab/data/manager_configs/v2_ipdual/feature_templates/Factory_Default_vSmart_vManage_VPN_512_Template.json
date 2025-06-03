@@ -1,0 +1,64 @@
+{
+  "deviceType": [
+    "vsmart",
+    "vmanage"
+  ],
+  "templateMinVersion": "15.0.0",
+  "templateType": "vpn-vsmart",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "512"
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "ip": {},
+    "ipv6": {}
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "512"
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "hostname"
+      ]
+    },
+    "ip": {},
+    "ipv6": {}
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "bd122069-2039-42fb-80c3-a9f9ba4f11a1",
+  "createdOn": 1706357757599,
+  "@rid": 1372,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_vSmart_vManage_VPN_512_Template",
+  "createdBy": "system",
+  "devicesAttached": 1,
+  "templateDescription": "Default Management VPN template settings for vSmart and vManage",
+  "lastUpdatedOn": 1706357757599
+}

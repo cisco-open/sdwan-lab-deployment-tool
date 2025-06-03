@@ -1,0 +1,67 @@
+{
+  "listId": "f20a920b-fac2-4a96-ae90-eb487d0cbf92",
+  "name": "office365_apps",
+  "type": "app",
+  "description": "SaaS App List for Office365",
+  "entries": [
+    {
+      "app": "ms-live-accounts"
+    },
+    {
+      "app": "ms-lync"
+    },
+    {
+      "app": "ms-lync-audio"
+    },
+    {
+      "app": "ms-lync-control"
+    },
+    {
+      "app": "ms-lync-video"
+    },
+    {
+      "app": "ms-office-365"
+    },
+    {
+      "app": "ms-office-web-apps"
+    },
+    {
+      "app": "ms-services"
+    },
+    {
+      "app": "ms-teams"
+    },
+    {
+      "app": "ms-teams-audio"
+    },
+    {
+      "app": "ms-teams-media"
+    },
+    {
+      "app": "ms-teams-video"
+    },
+    {
+      "app": "ms-update"
+    },
+    {
+      "app": "outlook-web-service"
+    },
+    {
+      "app": "share-point"
+    },
+    {
+      "app": "skydrive"
+    },
+    {
+      "app": "skype"
+    }
+  ],
+  "lastUpdated": 1706313441610,
+  "owner": "system",
+  "readOnly": true,
+  "version": "3.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

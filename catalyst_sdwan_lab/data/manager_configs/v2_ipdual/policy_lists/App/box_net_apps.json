@@ -1,0 +1,19 @@
+{
+  "listId": "85180554-73d0-45cf-a545-52ea4ce19dd2",
+  "name": "box_net_apps",
+  "type": "app",
+  "description": "SaaS App List for Box Net",
+  "entries": [
+    {
+      "app": "box"
+    }
+  ],
+  "lastUpdated": 1706357790936,
+  "owner": "system",
+  "readOnly": true,
+  "version": "2.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

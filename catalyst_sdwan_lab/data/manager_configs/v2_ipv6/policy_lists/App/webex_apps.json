@@ -1,0 +1,58 @@
+{
+  "listId": "f2bf0d50-b9d3-4c30-8b22-3a796ab9f114",
+  "name": "webex_apps",
+  "type": "app",
+  "description": "SaaS App List for Webex",
+  "entries": [
+    {
+      "app": "cisco-collab-audio"
+    },
+    {
+      "app": "cisco-collab-video"
+    },
+    {
+      "app": "cisco-collaboration"
+    },
+    {
+      "app": "cisco-collab-control"
+    },
+    {
+      "app": "cisco-spark"
+    },
+    {
+      "app": "cisco-spark-audio"
+    },
+    {
+      "app": "cisco-spark-media"
+    },
+    {
+      "app": "cisco-spark-video"
+    },
+    {
+      "app": "webex-app-sharing"
+    },
+    {
+      "app": "webex-audio"
+    },
+    {
+      "app": "webex-control"
+    },
+    {
+      "app": "webex-media"
+    },
+    {
+      "app": "webex-meeting"
+    },
+    {
+      "app": "webex-video"
+    }
+  ],
+  "lastUpdated": 1706357792896,
+  "owner": "system",
+  "readOnly": true,
+  "version": "1.1",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

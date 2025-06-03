@@ -1,0 +1,34 @@
+{
+  "listId": "d84a4e23-e8e8-42e3-a69b-13af7d25a0e6",
+  "name": "oracle_apps",
+  "type": "app",
+  "description": "SaaS App List for Oracle",
+  "entries": [
+    {
+      "app": "oracle"
+    },
+    {
+      "app": "oracle-bi"
+    },
+    {
+      "app": "oracle-ebsuite-unsecured"
+    },
+    {
+      "app": "oracle-sqlnet"
+    },
+    {
+      "app": "oraclenames"
+    },
+    {
+      "app": "oraclenet8cman"
+    }
+  ],
+  "lastUpdated": 1706357793379,
+  "owner": "system",
+  "readOnly": true,
+  "version": "3.1",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

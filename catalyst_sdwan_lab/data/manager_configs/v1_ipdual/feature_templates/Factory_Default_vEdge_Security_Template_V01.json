@@ -1,0 +1,87 @@
+{
+  "deviceType": [
+    "vedge-1000",
+    "vedge-2000",
+    "vedge-cloud",
+    "vedge-5000",
+    "vedge-ISR1100-6G",
+    "vedge-100-B",
+    "vedge-ISR1100-4G",
+    "vedge-100",
+    "vedge-ISR1100-4GLTE",
+    "vedge-100-WM",
+    "vedge-100-M",
+    "vedge-ISR1100X-6G",
+    "vedge-ISR1100X-4G"
+  ],
+  "templateType": "security-vedge",
+  "templateMinVersion": "20.1.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "ipsec": {
+      "rekey": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 86400
+      },
+      "replay-window": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "512"
+      },
+      "authentication-type": {
+        "vipType": "constant",
+        "vipValue": [
+          "sha1-hmac",
+          "ah-sha1-hmac"
+        ],
+        "vipObjectType": "list"
+      },
+      "pairwise-keying": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      }
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "ipsec": {
+      "rekey": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 86400
+      },
+      "replay-window": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "512"
+      },
+      "authentication-type": {
+        "vipType": "constant",
+        "vipValue": [
+          "sha1-hmac",
+          "ah-sha1-hmac"
+        ],
+        "vipObjectType": "list"
+      },
+      "pairwise-keying": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "a620262b-c50f-4a22-ad51-c7377dc3d818",
+  "createdOn": 1706313418607,
+  "@rid": 294,
+  "feature": "vmanage-default",
+  "factoryDefault": true,
+  "createdBy": "system",
+  "templateName": "Factory_Default_vEdge_Security_Template_V01",
+  "devicesAttached": 0,
+  "templateDescription": "Default Security template settings for vEdge Version 01",
+  "lastUpdatedOn": 1706313418607
+}

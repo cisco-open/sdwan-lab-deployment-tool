@@ -1,0 +1,103 @@
+{
+  "deviceType": ["vsmart"],
+  "templateType": "vpn-vsmart",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "vsdwan",
+  "editedTemplateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "0"
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipVariableName": "vpn_name"
+    },
+    "dns": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "role": {
+            "vipType": "constant",
+            "vipValue": "primary",
+            "vipObjectType": "object"
+          },
+          "dns-addr": {
+            "vipType": "constant",
+            "vipValue": "fc00:172:16::254",
+            "vipObjectType": "object"
+          },
+          "priority-order": ["dns-addr", "role"]
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": ["dns-addr"]
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": ["hostname"]
+    },
+    "ip": {},
+    "ipv6": {
+      "ipv6": {}
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "vpn-id": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "0"
+    },
+    "name": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipVariableName": "vpn_name"
+    },
+    "dns": {
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "role": {
+            "vipType": "constant",
+            "vipValue": "primary",
+            "vipObjectType": "object"
+          },
+          "dns-addr": {
+            "vipType": "constant",
+            "vipValue": "172.16.0.254",
+            "vipObjectType": "object"
+          },
+          "priority-order": ["dns-addr", "role"]
+        }
+      ],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": ["dns-addr"]
+    },
+    "host": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": ["hostname"]
+    },
+    "ip": {},
+    "ipv6": {
+      "ipv6": {}
+    }
+  },
+  "attachedMastersCount": 1,
+  "configType": "xml",
+  "templateId": "a7470c28-fc97-4e69-9a90-845b6d37c456",
+  "createdOn": 1706357991282,
+  "@rid": 3156,
+  "factoryDefault": false,
+  "feature": "vmanage-default",
+  "templateName": "controller_basic_vpn0",
+  "createdBy": "vsdwan",
+  "devicesAttached": 1,
+  "templateDescription": "Do not modify!",
+  "lastUpdatedOn": 1706357991282
+}

@@ -39,6 +39,7 @@ from cisco_sdwan.tasks.implementation import RestoreArgs, TaskRestore
 from OpenSSL import crypto
 from requests.exceptions import ConnectionError
 from virl2_client import ClientLibrary
+from virl2_client.models import Lab, Node
 
 # Base directory where utils.py is located
 BASE_DIR = dirname(dirname(abspath(__file__)))
@@ -54,7 +55,7 @@ VALIDATOR_FQDN = "validator.sdwan.local"
 
 
 def attach_basic_controller_template(
-    manager_session: ManagerSession, log: Logger
+    manager_session: ManagerSession, ip_type: str, log: Logger
 ) -> None:
     """
     Attach basic template to all SD-WAN controllers that have no template yet
@@ -82,7 +83,11 @@ def attach_basic_controller_template(
     device_inventory = manager_session.endpoints.configuration_device_inventory
     control_components = device_inventory.get_device_details("controllers")
     new_controllers_uuids = {
-        device.uuid: device.device_ip.split(".")[3]
+        device.uuid: (
+            device.device_ip.split(".")[-1]
+            if "." in device.device_ip
+            else device.device_ip.split(":")[-1]
+        )
         for device in control_components
         if device.device_type == "vsmart" and not device.template
     }
@@ -100,19 +105,23 @@ def attach_basic_controller_template(
         }
         for dev_uuid, ip_4th_oct in new_controllers_uuids.items():
             # For every SD-WAN Controller, create a payload to attach template
-            attach_payload["deviceTemplateList"][0]["device"].append(
-                {
-                    "csv-status": "complete",
-                    "csv-deviceId": dev_uuid,
-                    "csv-deviceIP": f"100.0.0.{ip_4th_oct}",
-                    "csv-host-name": f"Controller{ip_4th_oct[-2:]}",
-                    "/0/eth1/interface/ip/address": f"172.16.0.{ip_4th_oct}/24",
-                    "//system/host-name": f"Controller{ip_4th_oct[-2:]}",
-                    "//system/system-ip": f"100.0.0.{ip_4th_oct}",
-                    "//system/site-id": "100",
-                    "csv-templateId": template_id,
-                }
-            )
+            variables = {
+                "csv-status": "complete",
+                "csv-deviceId": dev_uuid,
+                "csv-deviceIP": f"100.0.0.{ip_4th_oct}",
+                "csv-host-name": f"Controller{ip_4th_oct[-2:]}",
+                "//system/host-name": f"Controller{ip_4th_oct[-2:]}",
+                "//system/system-ip": f"100.0.0.{ip_4th_oct}",
+                "//system/site-id": "100",
+                "csv-templateId": template_id,
+            }
+            if ip_type in ["v4", "dual"]:
+                variables["/0/eth1/interface/ip/address"] = f"172.16.0.{ip_4th_oct}/24"
+            if ip_type in ["v6", "dual"]:
+                variables["/0/eth1/interface/ipv6/address"] = (
+                    f"fc00:172:16::{ip_4th_oct}/64"
+                )
+            attach_payload["deviceTemplateList"][0]["device"].append(variables)
 
         task_id = manager_session.post(
             "dataservice/template/device/config/attachfeature", json=attach_payload
@@ -322,6 +331,7 @@ def onboard_control_components(
         config = manager_session.get(
             f"dataservice/template/config/attached/{device.uuid}"
         ).json()["config"]
+        # Match IPv4 address on vpn 0 interface
         match = re.search(
             r"vpn 0[\s\S]+?ip\saddress\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", config
         )
@@ -329,9 +339,14 @@ def onboard_control_components(
             already_added_vpn0_ips.append(match.group(1))
         else:
             already_added_vpn0_ips.append(device.device_ip)
+        # Match IPv6 address on vpn 0 interface
+        match = re.search(r"vpn 0[\s\S]+?ipv6\saddress\s([0-9a-fA-F:]+)", config)
+        if match:
+            already_added_vpn0_ips.append(match.group(1))
     i = 0
     log.info("Adding control components...")
     for ip, node_type in new_control_components.items():
+        i += 1
         track_progress(
             log,
             f"Adding control components ({i}/{len(new_control_components.keys())})...",
@@ -613,3 +628,52 @@ def wait_for_wan_edge_onboaring(
                     wan_edges_onboarded.append(dev_uuid)
         else:
             break
+
+
+def find_node_by_label(lab: Lab, node_labels: List[str]) -> Node:
+    """
+    Find a node in the lab by its label.
+    If multiple nodes have the same label, return the first one found.
+    If no node with the label is found, return None.
+    :param lab: The Lab object to search in.
+    :param node_labels: A list of labels to search for.
+    :return: The first Node object with the matching label
+    """
+    for label in node_labels:
+        for node in lab.nodes():
+            if node.label == label:
+                return node
+    print(f"No node with label {' or '.join(node_labels)} found in the lab.")
+    exit(1)
+
+
+def get_ip_type(manager_session: ManagerSession) -> str:
+    """
+    Determine the IP type used by the SD-WAN overlay.
+    Checks the IP address on the vpn0 interface of the Manager.
+    Returns:
+        - "dual" if both IPv4 and IPv6 addresses are present
+        - "v6" if only IPv6 address is present
+        - "v4" if only IPv4 address is present
+    """
+    manager_system_ip = manager_session.get("/dataservice/device/vmanage").json()[
+        "data"
+    ]["ipAddress"]
+    manager_interfaces = manager_session.get(
+        f"/dataservice/device/interface/synced?deviceId={manager_system_ip}"
+    ).json()["data"]
+    manager_eth1_data = [
+        iface for iface in manager_interfaces if iface["ifname"] == "eth1"
+    ]
+    ipv4_enabled = any(
+        iface.get("ip-address", "-") != "-" for iface in manager_eth1_data
+    )
+    ipv6_enabled = any(
+        iface.get("ipv6-address", "-") != "-" for iface in manager_eth1_data
+    )
+    if ipv4_enabled and ipv6_enabled:
+        return "dual"
+    elif ipv6_enabled:
+        return "v6"
+    else:
+        return "v4"

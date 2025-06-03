@@ -1,0 +1,744 @@
+[
+  {
+    "listId": "ffdf8f8b-89c9-4596-ae5c-0fafe85fcb69",
+    "name": "box_net_apps",
+    "type": "app",
+    "description": "SaaS App List for Box Net",
+    "entries": [
+      {
+        "app": "box"
+      }
+    ],
+    "lastUpdated": 1706313440231,
+    "owner": "system",
+    "readOnly": true,
+    "version": "2.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "ba92d43e-5799-419b-863d-9f3e25e48e1d",
+    "name": "REAL_TIME_APPS",
+    "type": "app",
+    "description": "Real Time Applications List",
+    "entries": [
+      {
+        "app": "sip"
+      },
+      {
+        "app": "rtp"
+      },
+      {
+        "app": "skinny"
+      }
+    ],
+    "lastUpdated": 1706313440348,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "9b41b7a8-0788-4898-b864-249332fb9d54",
+    "name": "sugar_crm_apps",
+    "type": "app",
+    "description": "SaaS App List for Sugar CRM",
+    "entries": [
+      {
+        "app": "sugarcrm"
+      }
+    ],
+    "lastUpdated": 1706313440532,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "771e409b-b1b2-428b-9494-88bc842d5800",
+    "name": "Google_Apps",
+    "type": "app",
+    "description": "Google Applications List",
+    "entries": [
+      {
+        "app": "android-updates"
+      },
+      {
+        "app": "blogger"
+      },
+      {
+        "app": "chrome_update"
+      },
+      {
+        "app": "gcs"
+      },
+      {
+        "app": "gmail"
+      },
+      {
+        "app": "gmail_basic"
+      },
+      {
+        "app": "gmail_chat"
+      },
+      {
+        "app": "gmail_drive"
+      },
+      {
+        "app": "gmail_mobile"
+      },
+      {
+        "app": "google-services"
+      },
+      {
+        "app": "google-services-audio"
+      },
+      {
+        "app": "google-services-media"
+      },
+      {
+        "app": "google-services-video"
+      },
+      {
+        "app": "google_accounts"
+      },
+      {
+        "app": "google_ads"
+      },
+      {
+        "app": "google_analytics"
+      },
+      {
+        "app": "google_appengine"
+      },
+      {
+        "app": "google_cache"
+      },
+      {
+        "app": "google_calendar"
+      },
+      {
+        "app": "google_code"
+      },
+      {
+        "app": "google_desktop"
+      },
+      {
+        "app": "google_docs"
+      },
+      {
+        "app": "google-docs"
+      },
+      {
+        "app": "google-downloads"
+      },
+      {
+        "app": "google_earth"
+      },
+      {
+        "app": "google-earth"
+      },
+      {
+        "app": "google_groups"
+      },
+      {
+        "app": "google_maps"
+      },
+      {
+        "app": "google_photos"
+      },
+      {
+        "app": "google_picasa"
+      },
+      {
+        "app": "picasa"
+      },
+      {
+        "app": "google-photos"
+      },
+      {
+        "app": "google-play"
+      },
+      {
+        "app": "google_plus"
+      },
+      {
+        "app": "google-plus"
+      },
+      {
+        "app": "google_safebrowsing"
+      },
+      {
+        "app": "google_skymap"
+      },
+      {
+        "app": "google_spaces"
+      },
+      {
+        "app": "google_tags"
+      },
+      {
+        "app": "google_toolbar"
+      },
+      {
+        "app": "google_translate"
+      },
+      {
+        "app": "google_trusted_store"
+      },
+      {
+        "app": "google_weblight"
+      },
+      {
+        "app": "googlebot"
+      },
+      {
+        "app": "gstatic"
+      },
+      {
+        "app": "gtalk"
+      },
+      {
+        "app": "gtalk-chat"
+      },
+      {
+        "app": "gtalk-ft"
+      },
+      {
+        "app": "gtalk-video"
+      },
+      {
+        "app": "gtalk-voip"
+      },
+      {
+        "app": "hangouts"
+      },
+      {
+        "app": "hangouts-audio"
+      },
+      {
+        "app": "hangouts-chat"
+      },
+      {
+        "app": "hangouts-file-transfer"
+      },
+      {
+        "app": "hangouts-media"
+      },
+      {
+        "app": "hangouts-video"
+      },
+      {
+        "app": "youtube"
+      },
+      {
+        "app": "youtube_hd"
+      }
+    ],
+    "lastUpdated": 1706313440710,
+    "owner": "system",
+    "readOnly": true,
+    "version": "4.3",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "be9dae93-e661-4866-808d-f6752b91eaa7",
+    "name": "APP_Scavengers",
+    "type": "app",
+    "description": "Scavengers Applications List",
+    "entries": [
+      {
+        "app": "apple-updates"
+      },
+      {
+        "app": "apple-services"
+      },
+      {
+        "app": "twitter"
+      },
+      {
+        "app": "instagram"
+      },
+      {
+        "app": "youtube"
+      },
+      {
+        "app": "amazon-instant-video"
+      }
+    ],
+    "lastUpdated": 1706313440856,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "0b465054-2f5f-4c3e-acf3-822351649572",
+    "name": "zoho_crm_apps",
+    "type": "app",
+    "description": "SaaS App List for Zoho CRM",
+    "entries": [
+      {
+        "app": "zoho-services"
+      }
+    ],
+    "lastUpdated": 1706313441077,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "4952fe0e-7360-44f4-bc08-2cb40983e1e2",
+    "name": "salesforce_apps",
+    "type": "app",
+    "description": "SaaS App List for Salesforce",
+    "entries": [
+      {
+        "app": "salesforce"
+      }
+    ],
+    "lastUpdated": 1706313441148,
+    "owner": "system",
+    "readOnly": true,
+    "version": "2.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "258b50a3-6942-453b-959b-867cc3dff63a",
+    "name": "concur_apps",
+    "type": "app",
+    "description": "SaaS App List for Concur",
+    "entries": [
+      {
+        "app": "concur"
+      }
+    ],
+    "lastUpdated": 1706313441307,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "c21c0fb5-ea4e-4f8e-bcfa-a6d793e7a9a1",
+    "name": "APP_BULK_DATA",
+    "type": "app",
+    "description": "Bulk Data Applications List",
+    "entries": [
+      {
+        "app": "ftp"
+      },
+      {
+        "app": "ftp-data"
+      },
+      {
+        "app": "cisco-jabber-im"
+      },
+      {
+        "app": "netblt"
+      },
+      {
+        "app": "rsync"
+      }
+    ],
+    "lastUpdated": 1706313441381,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "16d01a8e-cd8a-471f-b3f8-ea48f60603d6",
+    "name": "dropbox_apps",
+    "type": "app",
+    "description": "SaaS App List for Dropbox",
+    "entries": [
+      {
+        "app": "dropbox"
+      }
+    ],
+    "lastUpdated": 1706313441459,
+    "owner": "system",
+    "readOnly": true,
+    "version": "2.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "24045d55-2c3f-411a-b21b-acf81ec83b39",
+    "name": "intuit_apps",
+    "type": "app",
+    "description": "SaaS App List for Intuit",
+    "entries": [
+      {
+        "app": "intuit"
+      }
+    ],
+    "lastUpdated": 1706313441540,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "f20a920b-fac2-4a96-ae90-eb487d0cbf92",
+    "name": "office365_apps",
+    "type": "app",
+    "description": "SaaS App List for Office365",
+    "entries": [
+      {
+        "app": "ms-live-accounts"
+      },
+      {
+        "app": "ms-lync"
+      },
+      {
+        "app": "ms-lync-audio"
+      },
+      {
+        "app": "ms-lync-control"
+      },
+      {
+        "app": "ms-lync-video"
+      },
+      {
+        "app": "ms-office-365"
+      },
+      {
+        "app": "ms-office-web-apps"
+      },
+      {
+        "app": "ms-services"
+      },
+      {
+        "app": "ms-teams"
+      },
+      {
+        "app": "ms-teams-audio"
+      },
+      {
+        "app": "ms-teams-media"
+      },
+      {
+        "app": "ms-teams-video"
+      },
+      {
+        "app": "ms-update"
+      },
+      {
+        "app": "outlook-web-service"
+      },
+      {
+        "app": "share-point"
+      },
+      {
+        "app": "skydrive"
+      },
+      {
+        "app": "skype"
+      }
+    ],
+    "lastUpdated": 1706313441610,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "88ff00ee-2262-44a1-8926-0ec4d4f2032b",
+    "name": "oracle_apps",
+    "type": "app",
+    "description": "SaaS App List for Oracle",
+    "entries": [
+      {
+        "app": "oracle"
+      },
+      {
+        "app": "oracle-bi"
+      },
+      {
+        "app": "oracle-ebsuite-unsecured"
+      },
+      {
+        "app": "oracle-sqlnet"
+      },
+      {
+        "app": "oraclenames"
+      },
+      {
+        "app": "oraclenet8cman"
+      }
+    ],
+    "lastUpdated": 1706313441749,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.1",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "9ff8028f-f1fc-4040-aa4c-5401004b7004",
+    "name": "amazon_aws_apps",
+    "type": "app",
+    "description": "SaaS App List for Amazon AWS",
+    "entries": [
+      {
+        "app": "amazon"
+      },
+      {
+        "app": "amazon-web-services"
+      },
+      {
+        "app": "amazon-instant-video"
+      },
+      {
+        "app": "amazon-cloudfront"
+      },
+      {
+        "app": "amazon-ec2"
+      },
+      {
+        "app": "amazon-s3"
+      }
+    ],
+    "lastUpdated": 1706313441839,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "66c801c7-b4b0-4594-839f-4ee3d126e1ef",
+    "name": "Microsoft_Apps",
+    "type": "app",
+    "description": "Microsoft Applications List",
+    "entries": [
+      {
+        "app": "bing"
+      },
+      {
+        "app": "hockeyapp"
+      },
+      {
+        "app": "live_hotmail"
+      },
+      {
+        "app": "lync"
+      },
+      {
+        "app": "lync_online"
+      },
+      {
+        "app": "ms-services"
+      },
+      {
+        "app": "ms_translator"
+      },
+      {
+        "app": "ms-office-365"
+      },
+      {
+        "app": "share-point"
+      },
+      {
+        "app": "skydrive"
+      },
+      {
+        "app": "skype"
+      },
+      {
+        "app": "windows_azure"
+      },
+      {
+        "app": "windows-azure"
+      },
+      {
+        "app": "windows_update"
+      },
+      {
+        "app": "windows_marketplace"
+      },
+      {
+        "app": "windowslive"
+      },
+      {
+        "app": "windowslivespace"
+      },
+      {
+        "app": "windowsmedia"
+      },
+      {
+        "app": "xbox"
+      },
+      {
+        "app": "xbox_music"
+      },
+      {
+        "app": "xbox_video"
+      },
+      {
+        "app": "xboxlive"
+      },
+      {
+        "app": "xboxlive_marketplace"
+      },
+      {
+        "app": "word_online"
+      },
+      {
+        "app": "powerpoint_online"
+      },
+      {
+        "app": "ms-lync"
+      },
+      {
+        "app": "ms-lync-audio"
+      },
+      {
+        "app": "ms-lync-control"
+      },
+      {
+        "app": "ms-lync-video"
+      },
+      {
+        "app": "ms-update"
+      },
+      {
+        "app": "outlook-web-service"
+      }
+    ],
+    "lastUpdated": 1706313442017,
+    "owner": "system",
+    "readOnly": true,
+    "version": "4.2",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "deccbff3-bc05-48cb-b6f0-bc30d4e23a63",
+    "name": "gotomeeting_apps",
+    "type": "app",
+    "description": "SaaS App List for Gotomeeting",
+    "entries": [
+      {
+        "app": "citrix"
+      },
+      {
+        "app": "gotomeeting"
+      }
+    ],
+    "lastUpdated": 1706313442104,
+    "owner": "system",
+    "readOnly": true,
+    "version": "3.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "6eed9179-b08d-408f-8110-6255d6004841",
+    "name": "VIDEO_CONF",
+    "type": "app",
+    "description": "Video Conference Applications List",
+    "entries": [
+      {
+        "app": "rtp"
+      }
+    ],
+    "lastUpdated": 1706313442328,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "66e4cf42-df9f-4f3c-a301-3e2417f5a174",
+    "name": "zendesk_apps",
+    "type": "app",
+    "description": "SaaS App List for Zendesk",
+    "entries": [
+      {
+        "app": "zendesk"
+      }
+    ],
+    "lastUpdated": 1706313442396,
+    "owner": "system",
+    "readOnly": true,
+    "version": "2.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  },
+  {
+    "listId": "7e508d66-b2c9-40e5-9e7e-50a7e6d72fe9",
+    "name": "WEB_TOOLS_APP",
+    "type": "app",
+    "description": "Web Tools Applications List",
+    "entries": [
+      {
+        "app": "http"
+      },
+      {
+        "app": "https"
+      },
+      {
+        "app": "sshell"
+      }
+    ],
+    "lastUpdated": 1706313442469,
+    "owner": "system",
+    "readOnly": true,
+    "version": "1.0",
+    "infoTag": "",
+    "referenceCount": 0,
+    "references": [],
+    "isActivatedByVsmart": false
+  }
+]

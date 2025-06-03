@@ -243,6 +243,14 @@ def gateway_mask_options(f: Callable[..., Any]) -> Callable[..., Any]:
     "during SD-WAN Manager boot, you can add --retry to continue "
     "onboarding the lab that is already in CML",
 )
+@click.option(
+    "--ip_type",
+    metavar="<ip_type>",
+    type=click.Choice(["v4", "v6", "dual"]),
+    default="v4",
+    show_default=True,
+    help="IP type to use for deployment: v4, v6, or dual. Default is v4.",
+)
 @click.pass_context
 def cli_deploy(
     ctx: click.Context,
@@ -255,6 +263,7 @@ def cli_deploy(
     lab: str,
     bridge: str,
     dns: str,
+    ip_type: str,
     retry: bool,
 ) -> None:
     """
@@ -284,6 +293,7 @@ def cli_deploy(
         lab,
         bridge,
         dns,
+        ip_type,
         patty_used,
         retry,
         loglevel,

@@ -1,0 +1,286 @@
+{
+  "listId": "e02fd644-acc5-45fa-808e-67157423950b",
+  "name": "Voice_Apps",
+  "type": "app",
+  "description": "Default Voice Applications",
+  "entries": [
+    {
+      "app": "adobe-connect"
+    },
+    {
+      "app": "amazon-chime"
+    },
+    {
+      "app": "amazon-chime-media"
+    },
+    {
+      "app": "audio-over-http"
+    },
+    {
+      "app": "circuit"
+    },
+    {
+      "app": "circuit-audio"
+    },
+    {
+      "app": "circuit-media"
+    },
+    {
+      "app": "circuit-video"
+    },
+    {
+      "app": "cisco-collab-audio"
+    },
+    {
+      "app": "cisco-collab-control"
+    },
+    {
+      "app": "cisco-collab-video"
+    },
+    {
+      "app": "cisco-collaboration"
+    },
+    {
+      "app": "cisco-ip-camera"
+    },
+    {
+      "app": "cisco-ip-sla"
+    },
+    {
+      "app": "cisco-jabber-audio"
+    },
+    {
+      "app": "cisco-jabber-control"
+    },
+    {
+      "app": "cisco-jabber-im"
+    },
+    {
+      "app": "cisco-jabber-video"
+    },
+    {
+      "app": "cisco-media-audio"
+    },
+    {
+      "app": "cisco-media-video"
+    },
+    {
+      "app": "cisco-phone"
+    },
+    {
+      "app": "cisco-phone-audio"
+    },
+    {
+      "app": "cisco-phone-control"
+    },
+    {
+      "app": "cisco-phone-media"
+    },
+    {
+      "app": "cisco-phone-video"
+    },
+    {
+      "app": "cisco-smart-probe"
+    },
+    {
+      "app": "cisco-tv"
+    },
+    {
+      "app": "conference-server"
+    },
+    {
+      "app": "conferencing"
+    },
+    {
+      "app": "dingtalk-media"
+    },
+    {
+      "app": "dmp"
+    },
+    {
+      "app": "douyin-media"
+    },
+    {
+      "app": "google-services-audio"
+    },
+    {
+      "app": "google-services-media"
+    },
+    {
+      "app": "google-services-video"
+    },
+    {
+      "app": "gotomeeting"
+    },
+    {
+      "app": "h225"
+    },
+    {
+      "app": "h245"
+    },
+    {
+      "app": "h323"
+    },
+    {
+      "app": "itunes-media"
+    },
+    {
+      "app": "jabber-audio"
+    },
+    {
+      "app": "jabber-video"
+    },
+    {
+      "app": "jive-software"
+    },
+    {
+      "app": "lifesize"
+    },
+    {
+      "app": "mgcp"
+    },
+    {
+      "app": "ms-lync"
+    },
+    {
+      "app": "ms-lync-audio"
+    },
+    {
+      "app": "ms-lync-control"
+    },
+    {
+      "app": "ms-lync-video"
+    },
+    {
+      "app": "ms-teams"
+    },
+    {
+      "app": "ms-teams-app-sharing"
+    },
+    {
+      "app": "ms-teams-audio"
+    },
+    {
+      "app": "ms-teams-media"
+    },
+    {
+      "app": "ms-teams-video"
+    },
+    {
+      "app": "ringcentral"
+    },
+    {
+      "app": "ringcentral-audio"
+    },
+    {
+      "app": "ringcentral-control"
+    },
+    {
+      "app": "ringcentral-media"
+    },
+    {
+      "app": "ringcentral-video"
+    },
+    {
+      "app": "rtcp"
+    },
+    {
+      "app": "rtp"
+    },
+    {
+      "app": "rtp-audio"
+    },
+    {
+      "app": "rtp-video"
+    },
+    {
+      "app": "rtsp"
+    },
+    {
+      "app": "rtsps"
+    },
+    {
+      "app": "sdnskmp"
+    },
+    {
+      "app": "sgcp"
+    },
+    {
+      "app": "sip"
+    },
+    {
+      "app": "sip-tls"
+    },
+    {
+      "app": "skinny"
+    },
+    {
+      "app": "ss7ns"
+    },
+    {
+      "app": "telepresence-audio"
+    },
+    {
+      "app": "telepresence-control"
+    },
+    {
+      "app": "telepresence-media"
+    },
+    {
+      "app": "tpip"
+    },
+    {
+      "app": "video-over-http"
+    },
+    {
+      "app": "voov-meeting"
+    },
+    {
+      "app": "web-rtc"
+    },
+    {
+      "app": "web-rtc-audio"
+    },
+    {
+      "app": "web-rtc-video"
+    },
+    {
+      "app": "webex-app-sharing"
+    },
+    {
+      "app": "webex-audio"
+    },
+    {
+      "app": "webex-control"
+    },
+    {
+      "app": "webex-media"
+    },
+    {
+      "app": "webex-meeting"
+    },
+    {
+      "app": "webex-video"
+    },
+    {
+      "app": "wifi-calling"
+    },
+    {
+      "app": "zoom-meetings"
+    },
+    {
+      "app": "zoom-phone"
+    },
+    {
+      "app": "skype"
+    }
+  ],
+  "lastUpdated": 1706357793135,
+  "owner": "system",
+  "readOnly": true,
+  "version": "1.1",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

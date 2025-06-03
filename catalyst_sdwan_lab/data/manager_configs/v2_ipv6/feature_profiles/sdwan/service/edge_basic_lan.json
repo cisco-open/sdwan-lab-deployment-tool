@@ -1,0 +1,90 @@
+{
+  "profileName": "edge_basic_lan",
+  "lastUpdatedBy": "admin",
+  "description": "Do not modify!",
+  "createdOn": 1706358541838,
+  "@rid": 3181,
+  "profileType": "service",
+  "solution": "sdwan",
+  "createdBy": "admin",
+  "profileId": "cf1c239f-2166-4d06-a9af-6c86aa168566",
+  "lastUpdatedOn": 1706359090589,
+  "associatedProfileParcels": [
+    {
+      "parcelId": "29d0e285-cda4-4817-b3c1-4eff69e9c699",
+      "parcelType": "lan/vpn",
+      "createdBy": "admin",
+      "lastUpdatedBy": "admin",
+      "createdOn": 1706358542365,
+      "lastUpdatedOn": 1706358943326,
+      "payload": {
+        "name": "edge_basic_vpn1",
+        "description": "Do not modify!",
+        "data": {
+          "vpnId": { "optionType": "global", "value": 1 },
+          "name": { "optionType": "global", "value": "VPN 1" },
+          "ipv4Route": [
+            {
+              "prefix": {
+                "ipAddress": { "optionType": "global", "value": "0.0.0.0" },
+                "subnetMask": { "optionType": "global", "value": "0.0.0.0" }
+              },
+              "oneOfIpRoute": {
+                "vpn": { "optionType": "default", "value": true }
+              }
+            }
+          ],
+          "enableSdra": { "optionType": "global", "value": false }
+        }
+      },
+      "subparcels": [
+        {
+          "parcelId": "9de90280-d718-4c51-880e-7acc1fe38b57",
+          "parcelType": "lan/vpn/interface/ethernet",
+          "createdBy": "admin",
+          "lastUpdatedBy": "admin",
+          "createdOn": 1706358542982,
+          "lastUpdatedOn": 1706359090589,
+          "payload": {
+            "name": "edge_basic_vpn1_int",
+            "description": "Do not modify!",
+            "data": {
+              "shutdown": { "optionType": "global", "value": false },
+              "interfaceName": {
+                "optionType": "global",
+                "value": "GigabitEthernet3"
+              },
+              "description": { "optionType": "global", "value": "LAN" },
+              "intfIpV6Address": {
+                "static": {
+                  "primaryIpV6Address": {
+                    "address": {
+                      "optionType": "variable",
+                      "value": "{{vpn1_gi3_lan_ipv6}}"
+                    }
+                  },
+                  "secondaryIpV6Address": []
+                }
+              },
+              "nat": { "optionType": "default", "value": false },
+              "advanced": {
+                "ipMtu": { "optionType": "default", "value": 1500 },
+                "arpTimeout": { "optionType": "default", "value": 1200 },
+                "loadInterval": { "optionType": "default", "value": 30 },
+                "ipDirectedBroadcast": {
+                  "optionType": "default",
+                  "value": false
+                },
+                "icmpRedirectDisable": {
+                  "optionType": "default",
+                  "value": true
+                }
+              }
+            }
+          },
+          "subparcels": []
+        }
+      ]
+    }
+  ]
+}

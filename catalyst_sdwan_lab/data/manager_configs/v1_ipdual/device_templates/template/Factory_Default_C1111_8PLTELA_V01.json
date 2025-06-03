@@ -1,0 +1,85 @@
+{
+  "templateName": "Factory_Default_C1111_8PLTELA_V01",
+  "templateDescription": "Factory Default template for C1111-8PLTELA",
+  "deviceType": "vedge-C1111-8PLTELA",
+  "configType": "template",
+  "factoryDefault": true,
+  "policyId": "",
+  "featureTemplateUidRange": [],
+  "connectionPreferenceRequired": true,
+  "connectionPreference": true,
+  "generalTemplates": [
+    {
+      "templateId": "f7b28678-9df8-4277-9528-00c75cbdc7ac",
+      "templateType": "cedge_aaa"
+    },
+    {
+      "templateId": "f4393fa0-d21f-4654-8a7e-4989b5bf402b",
+      "templateType": "cisco_bfd"
+    },
+    {
+      "templateId": "aab7c1b0-ca16-4f26-a0c6-201c905905d3",
+      "templateType": "cisco_omp"
+    },
+    {
+      "templateId": "81073152-069c-4366-9871-2b0bb3ad5a53",
+      "templateType": "cisco_security"
+    },
+    {
+      "templateId": "8d07ce66-beb7-4a33-8b56-f8df7691d225",
+      "templateType": "cisco_system",
+      "subTemplates": [
+        {
+          "templateId": "b8a29843-2ab3-463f-83c1-ffd1681e3c30",
+          "templateType": "cisco_logging"
+        }
+      ]
+    },
+    {
+      "templateId": "5723c272-5991-4d90-976d-038942dc1f3a",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "2747260c-e1d9-41e0-aae6-e9a47c67380d",
+          "templateType": "cisco_vpn_interface"
+        }
+      ]
+    },
+    {
+      "templateId": "6bb44a11-f50e-4b7f-bb62-38705cbb9b82",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "4e195979-931b-468c-87c5-0f71f82afb27",
+          "templateType": "vpn-interface-svi"
+        }
+      ]
+    },
+    {
+      "templateId": "d4478c48-aea6-4e3c-946c-5f4c07ec3c4c",
+      "templateType": "cisco_vpn",
+      "subTemplates": [
+        {
+          "templateId": "de75e067-5029-4a0b-9cb5-9c5a32bf5165",
+          "templateType": "cisco_vpn_interface"
+        }
+      ]
+    },
+    {
+      "templateId": "8eec8947-dbdd-426e-bb9b-2b6e06c0426e",
+      "templateType": "cedge_global"
+    },
+    {
+      "templateId": "c0c24fe8-c494-4ab3-9269-63cb4ddfc207",
+      "templateType": "cellular-cedge-controller"
+    },
+    {
+      "templateId": "78d5a53f-cab3-4870-9a1b-c08052924cc8",
+      "templateType": "switchport"
+    }
+  ],
+  "templateClass": "cedge",
+  "templateId": "fc78e373-636a-43b4-a004-5d046f3e821f",
+  "deviceRole": "sdwan-edge",
+  "draftMode": false
+}

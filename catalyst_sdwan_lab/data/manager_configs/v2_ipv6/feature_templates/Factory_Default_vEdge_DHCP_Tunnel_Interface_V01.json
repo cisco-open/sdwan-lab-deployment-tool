@@ -1,0 +1,843 @@
+{
+  "deviceType": [
+    "vedge-1000",
+    "vedge-2000",
+    "vedge-cloud",
+    "vedge-5000",
+    "vedge-ISR1100-6G",
+    "vedge-100-B",
+    "vedge-ISR1100-4G",
+    "vedge-100",
+    "vedge-ISR1100-4GLTE",
+    "vedge-100-WM",
+    "vedge-100-M",
+    "vedge-ISR1100X-6G",
+    "vedge-ISR1100X-4G"
+  ],
+  "templateType": "vpn-vedge-interface",
+  "templateMinVersion": "20.1.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "if-name": {
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipValue": "",
+      "vipVariableName": "vpn_if_name_Default_vEdge_DHCP_Tunnel_Interface"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "ip": {
+      "dhcp-client": {
+        "vipObjectType": "object",
+        "vipType": "constant",
+        "vipValue": "true"
+      },
+      "dhcp-distance": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 1
+      },
+      "secondary-address": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      }
+    },
+    "dhcp-helper": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "flow-control": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "autoneg"
+    },
+    "clear-dont-fragment": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "pmtu": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "mtu": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 1500
+    },
+    "static-ingress-qos": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tcp-mss-adjust": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "mac-address": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tloc-extension": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "speed": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "_empty"
+    },
+    "duplex": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "_empty"
+    },
+    "shutdown": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "false"
+    },
+    "arp-timeout": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 1200
+    },
+    "autonegotiate": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "true"
+    },
+    "tunnel-interface": {
+      "encapsulation": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "preference": {
+              "vipObjectType": "object",
+              "vipType": "ignore"
+            },
+            "weight": {
+              "vipObjectType": "object",
+              "vipType": "ignore",
+              "vipValue": 1
+            },
+            "encap": {
+              "vipType": "constant",
+              "vipValue": "ipsec",
+              "vipObjectType": "object"
+            },
+            "priority-order": [
+              "encap",
+              "preference",
+              "weight"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "encap"
+        ]
+      },
+      "group": {
+        "vipObjectType": "list",
+        "vipType": "ignore"
+      },
+      "color": {
+        "value": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "default"
+        },
+        "restrict": {
+          "vipObjectType": "node-only",
+          "vipType": "ignore",
+          "vipValue": "false"
+        }
+      },
+      "carrier": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "default"
+      },
+      "bind": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "allow-service": {
+        "dhcp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true"
+        },
+        "dns": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true"
+        },
+        "icmp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true"
+        },
+        "sshd": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "ntp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "stun": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "https": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true"
+        },
+        "all": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "bgp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "ospf": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "netconf": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "snmp": {}
+      },
+      "hello-interval": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 1000
+      },
+      "hello-tolerance": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 12
+      },
+      "border": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      },
+      "max-control-connections": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "vbond-as-stun-server": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      },
+      "exclude-controller-group-list": {
+        "vipObjectType": "list",
+        "vipType": "ignore"
+      },
+      "vmanage-connection-preference": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 5
+      },
+      "port-hop": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "true"
+      },
+      "tloc-extension-gre-to": {
+        "dst-ip": {
+          "vipObjectType": "object",
+          "vipType": "ignore"
+        }
+      },
+      "nat-refresh-interval": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 5
+      },
+      "last-resort-circuit": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      },
+      "hold-time": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 7000
+      },
+      "low-bandwidth-link": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      }
+    },
+    "shaping-rate": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "qos-map": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "rewrite-rule": {
+      "rule-name": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "access-list": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "direction"
+      ]
+    },
+    "policer": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "policer-name",
+        "direction"
+      ]
+    },
+    "tracker": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "tloc-extension-gre-from": {
+      "src-ip": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "xconnect": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "ip-directed-broadcast": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "icmp-redirect-disable": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "bandwidth-upstream": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "bandwidth-downstream": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "block-non-source-ip": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "ipv6": {
+      "access-list": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "direction"
+        ]
+      },
+      "address": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": ""
+      },
+      "dhcp-helper-v6": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      },
+      "secondary-address": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      }
+    },
+    "arp": {
+      "ip": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "addr"
+        ]
+      }
+    },
+    "vrrp": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    },
+    "ipv6-vrrp": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    },
+    "dot1x": {
+      "vipType": "ignore",
+      "vipObjectType": "node-only"
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "if-name": {
+      "vipObjectType": "object",
+      "vipType": "variableName",
+      "vipValue": "",
+      "vipVariableName": "vpn_if_name_Default_vEdge_DHCP_Tunnel_Interface"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "ip": {
+      "dhcp-client": {
+        "vipObjectType": "object",
+        "vipType": "constant",
+        "vipValue": "true"
+      },
+      "dhcp-distance": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 1
+      },
+      "secondary-address": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      }
+    },
+    "dhcp-helper": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "flow-control": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "autoneg"
+    },
+    "clear-dont-fragment": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "pmtu": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "mtu": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 1500
+    },
+    "static-ingress-qos": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tcp-mss-adjust": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "mac-address": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tloc-extension": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "speed": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "_empty"
+    },
+    "duplex": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "_empty"
+    },
+    "shutdown": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "false"
+    },
+    "arp-timeout": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 1200
+    },
+    "autonegotiate": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "true"
+    },
+    "tunnel-interface": {
+      "encapsulation": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "preference": {
+              "vipObjectType": "object",
+              "vipType": "ignore"
+            },
+            "weight": {
+              "vipObjectType": "object",
+              "vipType": "ignore",
+              "vipValue": 1
+            },
+            "encap": {
+              "vipType": "constant",
+              "vipValue": "ipsec",
+              "vipObjectType": "object"
+            },
+            "priority-order": [
+              "encap",
+              "preference",
+              "weight"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "encap"
+        ]
+      },
+      "group": {
+        "vipObjectType": "list",
+        "vipType": "ignore"
+      },
+      "color": {
+        "value": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "default"
+        },
+        "restrict": {
+          "vipObjectType": "node-only",
+          "vipType": "ignore",
+          "vipValue": "false"
+        }
+      },
+      "carrier": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "default"
+      },
+      "bind": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "allow-service": {
+        "dhcp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true"
+        },
+        "dns": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true"
+        },
+        "icmp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true"
+        },
+        "sshd": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "ntp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "stun": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "https": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true"
+        },
+        "all": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "bgp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "ospf": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "netconf": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false"
+        },
+        "snmp": {}
+      },
+      "hello-interval": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 1000
+      },
+      "hello-tolerance": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 12
+      },
+      "border": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      },
+      "max-control-connections": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "vbond-as-stun-server": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      },
+      "exclude-controller-group-list": {
+        "vipObjectType": "list",
+        "vipType": "ignore"
+      },
+      "vmanage-connection-preference": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 5
+      },
+      "port-hop": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "true"
+      },
+      "tloc-extension-gre-to": {
+        "dst-ip": {
+          "vipObjectType": "object",
+          "vipType": "ignore"
+        }
+      },
+      "nat-refresh-interval": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 5
+      },
+      "last-resort-circuit": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      },
+      "hold-time": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": 7000
+      },
+      "low-bandwidth-link": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "false"
+      }
+    },
+    "shaping-rate": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "qos-map": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "rewrite-rule": {
+      "rule-name": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "access-list": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "direction"
+      ]
+    },
+    "policer": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "policer-name",
+        "direction"
+      ]
+    },
+    "tracker": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "tloc-extension-gre-from": {
+      "src-ip": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "xconnect": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "ip-directed-broadcast": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "icmp-redirect-disable": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "bandwidth-upstream": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "bandwidth-downstream": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "block-non-source-ip": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": "false"
+    },
+    "ipv6": {
+      "access-list": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "direction"
+        ]
+      },
+      "address": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": ""
+      },
+      "dhcp-helper-v6": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      },
+      "secondary-address": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      }
+    },
+    "arp": {
+      "ip": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "addr"
+        ]
+      }
+    },
+    "vrrp": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    },
+    "ipv6-vrrp": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    },
+    "dot1x": {
+      "vipType": "ignore",
+      "vipObjectType": "node-only"
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 0,
+  "templateId": "63d27a45-211e-47e7-94ed-e4248fef8dcd",
+  "createdOn": 1706357758366,
+  "@rid": 1374,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_vEdge_DHCP_Tunnel_Interface_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default DHCP Tunnel Interface template settings for vEdge Version 01",
+  "lastUpdatedOn": 1706357758366
+}
