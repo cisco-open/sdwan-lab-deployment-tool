@@ -460,9 +460,9 @@ def main(
                         variables_dict["/1/GigabitEthernet3/interface/ip/address"] = (
                             f"192.168.{next_num_str}.1/24"
                         )
-                        variables_dict["/1/GigabitEthernet3//dhcp-server/address-pool"] = (
-                            f"192.168.{next_num_str}.0/24"
-                        )
+                        variables_dict[
+                            "/1/GigabitEthernet3//dhcp-server/address-pool"
+                        ] = f"192.168.{next_num_str}.0/24"
                         variables_dict["/1/GigabitEthernet3//dhcp-server/exclude"] = (
                             dhcp_exlude
                         )
@@ -479,7 +479,9 @@ def main(
                         variables_dict["/1/GigabitEthernet3/interface/ipv6/address"] = (
                             f"fc00:192:168:{next_num_str}::1/64"
                         )
-                    attach_payload["deviceTemplateList"][0]["device"].append(variables_dict)
+                    attach_payload["deviceTemplateList"][0]["device"].append(
+                        variables_dict
+                    )
                     increment_chassis += 1
 
                 task_id = manager_session.post(
