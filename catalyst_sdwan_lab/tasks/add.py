@@ -314,6 +314,14 @@ def main(
                 track_progress(
                     log, "Updating SD-WAN Validator FQDN entry on Gateway..."
                 )
+                if ip_type == "dual":
+                    # Since nodes_vpn0_ips contains only IPv4 addresses,
+                    # we need to add IPv6 addresses as well
+                    nodes_vpn0_ipv6s = [
+                        vpn0_ipv6_prefix[device_type] + next_num_str
+                        for next_num_str in new_nodes_nums
+                    ]
+                    nodes_vpn0_ips.extend(nodes_vpn0_ipv6s)
                 new_validator_ip_list = " ".join(nodes_vpn0_ips)
                 cml_user = cml_config.username
                 cml_password = cml_config.password
