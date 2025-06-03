@@ -293,7 +293,6 @@ def main(
                 r"<system-ip>([\d.]+)</system-ip>", node.configuration
             )
             if vpn0_ip_search and system_ip_search:
-                test = vpn0_ip_search.groups()
                 vpn0_ip = vpn0_ip_search.group(1)
                 system_ip = system_ip_search.group(1)
                 device_ip_to_system_ip[vpn0_ip] = system_ip
