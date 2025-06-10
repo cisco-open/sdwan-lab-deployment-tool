@@ -434,6 +434,48 @@ The tool supports the following scale per CML lab:
 
 The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free.
 
+## Appendix - Offline/Air-gapped Installation
+
+If you need to install the `catalyst-sdwan-lab` package in an air-gapped environment (without internet access), follow these steps:
+
+On a machine with internet access, download the package and all its dependencies.
+
+   ```
+   mkdir catalyst_sdwan_lab_packages
+   cd catalyst_sdwan_lab_packages
+   pip download catalyst-sdwan-lab
+   ```
+   This will create a local directory containing the package `.whl` or `.tar.gz` files along with all its dependencies.
+
+Transfer the folder to the Air-Gapped Environment.
+
+On the air-gapped machine, create a directory to store the virtual environment and runtime files:
+
+    mkdir csdwan
+    cd csdwan
+
+Create virtual environment:
+
+    python3 -m venv venv
+
+Activate virtual environment:
+
+    source venv/bin/activate
+
+Install the package and its dependencies from the transferred files:
+
+    pip install --no-index --find-links=/path/to/catalyst_sdwan_lab_packages catalyst-sdwan-lab
+
+Replace `/path/to/catalyst_sdwan_lab_packages` with the path where the downloaded files were copied.
+
+Verify that SD-WAN Lab tool can run:
+
+    sdwan-lab --version
+
+You can also use the following shortcut to run any lab task:
+
+    csdwan --version
+
 ## Appendix - WSL Installation
 
 To install WSL on your Windows VM or Physical machine. Ensure that the HW Virutalization is enabled in the BIOS or VM Defintion.
