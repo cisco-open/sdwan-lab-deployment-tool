@@ -12,6 +12,7 @@
 - Change Gateway node type from c8000v to IOL XE
 - Change transports node type from unmanaged_switch to IOL L2 XE
 - Add support for IPv6 and dual stack overlays
+- In add task, add option to set custom CPUs and RAM for a device
 
 # Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 

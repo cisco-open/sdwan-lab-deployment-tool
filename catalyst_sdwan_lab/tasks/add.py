@@ -65,6 +65,8 @@ def main(
     manager_user: str,
     manager_password: str,
     lab_name: str,
+    cpus: int,
+    ram: int,
     number_of_devices: int,
     device_type: str,
     software_version: str,
@@ -240,6 +242,8 @@ def main(
                     populate_interfaces=True,
                     x=next_node_x_position,
                     y=next_node_y_position,
+                    cpus=cpus,
+                    ram=ram,
                 )
                 # Need to wait few seconds as otherwise the next step might fail
                 # as interfaces will not yet be added to the new node
@@ -378,9 +382,9 @@ def main(
                 default=0,
             )
 
-            # Find the position of the right most control component value
+            # Find the position of the right most edge
             next_node_x_position = max(
-                [node.x for node in lab.nodes() if node.y == 320], default=-400
+                [node.x for node in lab.nodes() if node.y == 400], default=-400
             )
 
             free_uuids = [
@@ -656,6 +660,8 @@ def main(
                     populate_interfaces=True,
                     x=next_node_x_position,
                     y=400,
+                    cpus=cpus,
+                    ram=ram,
                 )
                 # Need to wait few seconds as otherwise the next step might fail
                 # as interfaces will not yet be added to the new node
@@ -703,9 +709,9 @@ def main(
                 default=0,
             )
 
-            # Find the position of the right most controller value
+            # Find the position of the right most edge
             next_node_x_position = max(
-                [node.x for node in lab.nodes() if node.y == 320], default=-400
+                [node.x for node in lab.nodes() if node.y == 400], default=-400
             )
 
             free_uuids = [
@@ -772,6 +778,8 @@ def main(
                     populate_interfaces=True,
                     x=next_node_x_position,
                     y=400,
+                    cpus=cpus,
+                    ram=ram,
                 )
                 # Need to wait few seconds as otherwise the next step might fail
                 # as interfaces will not yet be added to the new node
