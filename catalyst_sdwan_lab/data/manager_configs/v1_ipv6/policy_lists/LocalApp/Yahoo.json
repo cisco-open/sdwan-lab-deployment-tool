@@ -1,0 +1,22 @@
+{
+  "listId": "0c0bed21-38b3-4623-8082-d6974c731929",
+  "name": "Yahoo",
+  "type": "localApp",
+  "description": "Local App List for Yahoo",
+  "entries": [
+    {
+      "app": "yahoo"
+    },
+    {
+      "app": "yahoo-messenger-video"
+    }
+  ],
+  "lastUpdated": 1706313441011,
+  "owner": "system",
+  "readOnly": true,
+  "version": "1.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

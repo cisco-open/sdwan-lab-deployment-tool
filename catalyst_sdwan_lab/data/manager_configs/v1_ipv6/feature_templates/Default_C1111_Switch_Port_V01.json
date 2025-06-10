@@ -1,0 +1,67 @@
+{
+  "templateType": "switchport",
+  "templateMinVersion": "15.0.0",
+  "deviceType": [
+    "vedge-C1111-8PLTELA"
+  ],
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "slot": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 0
+    },
+    "module": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "8"
+    },
+    "age-time": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 300,
+      "vipVariableName": "switchport_'age_time'"
+    },
+    "subslot": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 1
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "slot": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 0
+    },
+    "module": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "8"
+    },
+    "age-time": {
+      "vipObjectType": "object",
+      "vipType": "ignore",
+      "vipValue": 300,
+      "vipVariableName": "switchport_'age_time'"
+    },
+    "subslot": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 1
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "78d5a53f-cab3-4870-9a1b-c08052924cc8",
+  "createdOn": 1706313405049,
+  "@rid": 251,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_C1111_Switch_Port_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Factory Default template for C1111 switch port",
+  "lastUpdatedOn": 1706313405049
+}

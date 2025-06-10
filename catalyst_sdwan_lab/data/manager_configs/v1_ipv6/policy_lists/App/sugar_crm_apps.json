@@ -1,0 +1,19 @@
+{
+  "listId": "9b41b7a8-0788-4898-b864-249332fb9d54",
+  "name": "sugar_crm_apps",
+  "type": "app",
+  "description": "SaaS App List for Sugar CRM",
+  "entries": [
+    {
+      "app": "sugarcrm"
+    }
+  ],
+  "lastUpdated": 1706313440532,
+  "owner": "system",
+  "readOnly": true,
+  "version": "3.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

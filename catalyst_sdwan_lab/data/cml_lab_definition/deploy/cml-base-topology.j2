@@ -1,4 +1,33 @@
-annotations: []
+annotations:
+  - border_color: '#00000000'
+    border_style: ''
+    color: '#808080FF'
+    rotation: 0
+    text_bold: false
+    text_content: |-
+      IP Addressing:
+{% if ip_type == 'v4' %}
+      VPN0: 172.16.0.0/24
+      INET: 172.16.1.0/24
+      MPLS: 172.16.2.0/24
+{% elif ip_type == 'v6' %}
+      VPN0: fc00:172:16::/64
+      INET: fc00:172:16:1::/64
+      MPLS: fc00:172:16:2::/64
+{% elif ip_type == 'dual' %}
+      VPN0: 172.16.0.0/24 | fc00:172:16::/64
+      INET: 172.16.1.0/24 | fc00:172:16:1::/64
+      MPLS: 172.16.2.0/24 | fc00:172:16:2::/64
+{% endif %}
+    text_font: monospace
+    text_italic: false
+    text_size: 12
+    text_unit: pt
+    thickness: 1
+    type: text
+    x1: -720.0
+    y1: -40.0
+    z_index: 0
 nodes:
   - boot_disk_size: null
     configuration: |-
@@ -102,7 +131,7 @@ nodes:
     hide_links: false
     id: n3
     image_definition: null
-    label: VPN0-172.16.0.0/24
+    label: VPN0
     node_definition: unmanaged_switch
     ram: null
     tags: []
@@ -241,6 +270,9 @@ nodes:
     configuration: |-
       hostname Gateway
       !
+{% if ip_type in ['v6', 'dual'] %}
+      ipv6 unicast-routing
+{% endif %}
       vrf definition inet
        rd 1:20
        route-target export 1:20
@@ -248,6 +280,9 @@ nodes:
        route-target import 1:20
        !
        address-family ipv4
+       exit-address-family
+       !
+       address-family ipv6
        exit-address-family
       !
       vrf definition mpls
@@ -257,6 +292,9 @@ nodes:
        route-target import 1:30
        !
        address-family ipv4
+       exit-address-family
+       !
+       address-family ipv6
        exit-address-family
       !
       vrf definition vpn0
@@ -268,12 +306,26 @@ nodes:
        !
        address-family ipv4
        exit-address-family
+       !
+       address-family ipv6
+       exit-address-family
       !
+{% if ip_type == 'v4' %}
       ip host vrf inet {{ validator_fqdn }} 172.16.0.201
       ip host vrf mpls {{ validator_fqdn }} 172.16.0.201
       ip host vrf vpn0 {{ validator_fqdn }} 172.16.0.201
+{% elif ip_type == 'v6' %}
+      ip host vrf inet {{ validator_fqdn }} fc00:172:16::201
+      ip host vrf mpls {{ validator_fqdn }} fc00:172:16::201
+      ip host vrf vpn0 {{ validator_fqdn }} fc00:172:16::201
+{% elif ip_type == 'dual' %}
+      ip host vrf inet {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
+      ip host vrf mpls {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
+      ip host vrf vpn0 {{ validator_fqdn }} 172.16.0.201 fc00:172:16::201
+{% endif %}
       no ip domain lookup
       !
+{% if ip_type in ['v4', 'dual'] %}
       ip dhcp pool inet
        vrf inet
        network 172.16.1.0 255.255.255.0
@@ -286,37 +338,63 @@ nodes:
        default-router 172.16.2.254
        dns-server 172.16.2.254
       !
-      interface GigabitEthernet1
-       vrf forwarding inet
-       ip address dhcp
-       ip nat outside
-       negotiation auto
-       no shutdown
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
+      ipv6 dhcp pool inet
+       vrf inet
+       dns-server fc00:172:16:1::254
       !
-      interface GigabitEthernet2
+      ipv6 dhcp pool mpls
+       vrf mpls
+       dns-server fc00:172:16:2::254
+      !
+      ipv6 dhcp server vrf enable
+{% endif %}
+      interface Ethernet0/0
        vrf forwarding vpn0
        ip address 172.16.0.254 255.255.255.0
        ip nat inside
-       negotiation auto
+{% if ip_type in ['v6', 'dual'] %}
+       ipv6 address fc00:172:16::254/64
+{% endif %}
        no shutdown
       !
-      interface GigabitEthernet3
+      interface Ethernet0/1
        vrf forwarding inet
+{% if ip_type in ['v4', 'dual'] %}
        ip address 172.16.1.254 255.255.255.0
        ip nat inside
-       negotiation auto
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
+       ipv6 address fc00:172:16:1::254/64
+       ipv6 dhcp server inet
+       ipv6 nd other-config-flag
+{% endif %}
        no shutdown
       !
-      interface GigabitEthernet4
+      interface Ethernet0/2
        vrf forwarding mpls
+{% if ip_type in ['v4', 'dual'] %}
        ip address 172.16.2.254 255.255.255.0
-       negotiation auto
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
+       ipv6 address fc00:172:16:2::254/64
+       ipv6 dhcp server mpls
+       ipv6 nd other-config-flag
+{% endif %}
+       no shutdown
+      !
+      interface Ethernet7/3
+       vrf forwarding inet
+       ip address dhcp
+       ip nat outside
        no shutdown
       !
       router bgp 65000
        bgp router-id 172.16.0.254
        bgp log-neighbor-changes
        !
+{% if ip_type in ['v4', 'dual'] %}
        address-family ipv4 vrf inet
         network 172.16.1.0 mask 255.255.255.0
         network 0.0.0.0 mask 0.0.0.0
@@ -329,15 +407,30 @@ nodes:
        address-family ipv4 vrf vpn0
         network 172.16.0.0 mask 255.255.255.0
        exit-address-family
+       !
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
+       address-family ipv6 vrf inet
+        network fc00:172:16:1::/64
+       exit-address-family
+       !
+       address-family ipv6 vrf mpls
+        network fc00:172:16:2::/64
+       exit-address-family
+       !
+       address-family ipv6 vrf vpn0
+        network fc00:172:16::/64
+       exit-address-family
       !
-      ip nat inside source list 1 interface GigabitEthernet1 vrf inet overload
-      ip nat inside source list 1 interface GigabitEthernet1 vrf vpn0 overload
+{% endif %}
+      ip nat inside source list 1 interface Ethernet7/3 vrf inet overload
+      ip nat inside source list 1 interface Ethernet7/3 vrf vpn0 overload
       ip dns view vrf vpn0 default
        dns forwarder vrf inet {{ dns_server }}
-       dns forwarding source-interface GigabitEthernet1
+       dns forwarding source-interface Ethernet7/3
       ip dns view vrf inet default
        dns forwarder vrf inet {{ dns_server }}
-       dns forwarding source-interface GigabitEthernet1
+       dns forwarding source-interface Ethernet7/3
       ip dns server
       !
       ip access-list standard 1
@@ -346,52 +439,149 @@ nodes:
        30 permit 192.168.0.0 0.0.255.255
       !
     cpu_limit: null
-    cpus: 2
+    cpus: null
     data_volume: null
     hide_links: false
     id: n4
     image_definition: null
     label: Gateway
-    node_definition: cat8000v
+    node_definition: iol-xe
     ram: null
     tags: []
     x: -160
     y: 120
     interfaces:
+    interfaces:
       - id: i0
         label: Loopback0
         type: loopback
       - id: i1
-        label: GigabitEthernet1
+        label: Ethernet0/0
         slot: 0
         type: physical
       - id: i2
-        label: GigabitEthernet2
+        label: Ethernet0/1
         slot: 1
         type: physical
       - id: i3
-        label: GigabitEthernet3
+        label: Ethernet0/2
         slot: 2
         type: physical
       - id: i4
-        label: GigabitEthernet4
+        label: Ethernet0/3
         slot: 3
         type: physical
       - id: i5
-        label: GigabitEthernet5
+        label: Ethernet1/0
         slot: 4
         type: physical
       - id: i6
-        label: GigabitEthernet6
+        label: Ethernet1/1
         slot: 5
         type: physical
       - id: i7
-        label: GigabitEthernet7
+        label: Ethernet1/2
         slot: 6
         type: physical
       - id: i8
-        label: GigabitEthernet8
+        label: Ethernet1/3
         slot: 7
+        type: physical
+      - id: i9
+        label: Ethernet2/0
+        slot: 8
+        type: physical
+      - id: i10
+        label: Ethernet2/1
+        slot: 9
+        type: physical
+      - id: i11
+        label: Ethernet2/2
+        slot: 10
+        type: physical
+      - id: i12
+        label: Ethernet2/3
+        slot: 11
+        type: physical
+      - id: i13
+        label: Ethernet3/0
+        slot: 12
+        type: physical
+      - id: i14
+        label: Ethernet3/1
+        slot: 13
+        type: physical
+      - id: i15
+        label: Ethernet3/2
+        slot: 14
+        type: physical
+      - id: i16
+        label: Ethernet3/3
+        slot: 15
+        type: physical
+      - id: i17
+        label: Ethernet4/0
+        slot: 16
+        type: physical
+      - id: i18
+        label: Ethernet4/1
+        slot: 17
+        type: physical
+      - id: i19
+        label: Ethernet4/2
+        slot: 18
+        type: physical
+      - id: i20
+        label: Ethernet4/3
+        slot: 19
+        type: physical
+      - id: i21
+        label: Ethernet5/0
+        slot: 20
+        type: physical
+      - id: i22
+        label: Ethernet5/1
+        slot: 21
+        type: physical
+      - id: i23
+        label: Ethernet5/2
+        slot: 22
+        type: physical
+      - id: i24
+        label: Ethernet5/3
+        slot: 23
+        type: physical
+      - id: i25
+        label: Ethernet6/0
+        slot: 24
+        type: physical
+      - id: i26
+        label: Ethernet6/1
+        slot: 25
+        type: physical
+      - id: i27
+        label: Ethernet6/2
+        slot: 26
+        type: physical
+      - id: i28
+        label: Ethernet6/3
+        slot: 27
+        type: physical
+      - id: i29
+        label: Ethernet7/0
+        slot: 28
+        type: physical
+      - id: i30
+        label: Ethernet7/1
+        slot: 29
+        type: physical
+      - id: i31
+        label: Ethernet7/2
+        slot: 30
+        type: physical
+      - id: i32
+        label: Ethernet7/3
+        slot: 31
         type: physical
   - boot_disk_size: null
     configuration: {{ bridge }}
@@ -413,289 +603,301 @@ nodes:
         slot: 0
         type: physical
   - boot_disk_size: null
-    configuration: ums-613a90b5-53
+    configuration:
+      - name: ios_config.txt
+        content: hostname INET
     cpu_limit: null
     cpus: null
     data_volume: null
     hide_links: false
     id: n6
     image_definition: null
-    label: INET-172.16.1.0/24
-    node_definition: unmanaged_switch
+    label: INET
+    node_definition: ioll2-xe
+    parameters: {}
     ram: null
     tags: []
-    x: -240
-    y: 200
+    x: -280
+    y: 240
     interfaces:
       - id: i0
-        label: port0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        label: Ethernet0/0
         slot: 0
         type: physical
-      - id: i1
-        label: port1
+      - id: i2
+        label: Ethernet0/1
         slot: 1
         type: physical
-      - id: i2
-        label: port2
+      - id: i3
+        label: Ethernet0/2
         slot: 2
         type: physical
-      - id: i3
-        label: port3
+      - id: i4
+        label: Ethernet0/3
         slot: 3
         type: physical
-      - id: i4
-        label: port4
+      - id: i5
+        label: Ethernet1/0
         slot: 4
         type: physical
-      - id: i5
-        label: port5
+      - id: i6
+        label: Ethernet1/1
         slot: 5
         type: physical
-      - id: i6
-        label: port6
+      - id: i7
+        label: Ethernet1/2
         slot: 6
         type: physical
-      - id: i7
-        label: port7
+      - id: i8
+        label: Ethernet1/3
         slot: 7
         type: physical
-      - id: i8
-        label: port8
+      - id: i9
+        label: Ethernet2/0
         slot: 8
         type: physical
-      - id: i9
-        label: port9
+      - id: i10
+        label: Ethernet2/1
         slot: 9
         type: physical
-      - id: i10
-        label: port10
+      - id: i11
+        label: Ethernet2/2
         slot: 10
         type: physical
-      - id: i11
-        label: port11
+      - id: i12
+        label: Ethernet2/3
         slot: 11
         type: physical
-      - id: i12
-        label: port12
+      - id: i13
+        label: Ethernet3/0
         slot: 12
         type: physical
-      - id: i13
-        label: port13
+      - id: i14
+        label: Ethernet3/1
         slot: 13
         type: physical
-      - id: i14
-        label: port14
+      - id: i15
+        label: Ethernet3/2
         slot: 14
         type: physical
-      - id: i15
-        label: port15
+      - id: i16
+        label: Ethernet3/3
         slot: 15
         type: physical
-      - id: i16
-        label: port16
+      - id: i17
+        label: Ethernet4/0
         slot: 16
         type: physical
-      - id: i17
-        label: port17
+      - id: i18
+        label: Ethernet4/1
         slot: 17
         type: physical
-      - id: i18
-        label: port18
+      - id: i19
+        label: Ethernet4/2
         slot: 18
         type: physical
-      - id: i19
-        label: port19
+      - id: i20
+        label: Ethernet4/3
         slot: 19
         type: physical
-      - id: i20
-        label: port20
+      - id: i21
+        label: Ethernet5/0
         slot: 20
         type: physical
-      - id: i21
-        label: port21
+      - id: i22
+        label: Ethernet5/1
         slot: 21
         type: physical
-      - id: i22
-        label: port22
+      - id: i23
+        label: Ethernet5/2
         slot: 22
         type: physical
-      - id: i23
-        label: port23
+      - id: i24
+        label: Ethernet5/3
         slot: 23
         type: physical
-      - id: i24
-        label: port24
+      - id: i25
+        label: Ethernet6/0
         slot: 24
         type: physical
-      - id: i25
-        label: port25
+      - id: i26
+        label: Ethernet6/1
         slot: 25
         type: physical
-      - id: i26
-        label: port26
+      - id: i27
+        label: Ethernet6/2
         slot: 26
         type: physical
-      - id: i27
-        label: port27
+      - id: i28
+        label: Ethernet6/3
         slot: 27
         type: physical
-      - id: i28
-        label: port28
+      - id: i29
+        label: Ethernet7/0
         slot: 28
         type: physical
-      - id: i29
-        label: port29
+      - id: i30
+        label: Ethernet7/1
         slot: 29
         type: physical
-      - id: i30
-        label: port30
+      - id: i31
+        label: Ethernet7/2
         slot: 30
         type: physical
-      - id: i31
-        label: port31
+      - id: i32
+        label: Ethernet7/3
         slot: 31
         type: physical
   - boot_disk_size: null
-    configuration: ums-ece511c1-2d
+    configuration:
+      - name: ios_config.txt
+        content: ''
     cpu_limit: null
     cpus: null
     data_volume: null
     hide_links: false
     id: n7
     image_definition: null
-    label: MPLS-172.16.2.0/24
-    node_definition: unmanaged_switch
+    label: MPLS
+    node_definition: ioll2-xe
+    parameters: {}
     ram: null
     tags: []
-    x: -80
-    y: 200
+    x: -40
+    y: 240
     interfaces:
       - id: i0
-        label: port0
+        label: Loopback0
+        type: loopback
+      - id: i1
+        label: Ethernet0/0
         slot: 0
         type: physical
-      - id: i1
-        label: port1
+      - id: i2
+        label: Ethernet0/1
         slot: 1
         type: physical
-      - id: i2
-        label: port2
+      - id: i3
+        label: Ethernet0/2
         slot: 2
         type: physical
-      - id: i3
-        label: port3
+      - id: i4
+        label: Ethernet0/3
         slot: 3
         type: physical
-      - id: i4
-        label: port4
+      - id: i5
+        label: Ethernet1/0
         slot: 4
         type: physical
-      - id: i5
-        label: port5
+      - id: i6
+        label: Ethernet1/1
         slot: 5
         type: physical
-      - id: i6
-        label: port6
+      - id: i7
+        label: Ethernet1/2
         slot: 6
         type: physical
-      - id: i7
-        label: port7
+      - id: i8
+        label: Ethernet1/3
         slot: 7
         type: physical
-      - id: i8
-        label: port8
+      - id: i9
+        label: Ethernet2/0
         slot: 8
         type: physical
-      - id: i9
-        label: port9
+      - id: i10
+        label: Ethernet2/1
         slot: 9
         type: physical
-      - id: i10
-        label: port10
+      - id: i11
+        label: Ethernet2/2
         slot: 10
         type: physical
-      - id: i11
-        label: port11
+      - id: i12
+        label: Ethernet2/3
         slot: 11
         type: physical
-      - id: i12
-        label: port12
+      - id: i13
+        label: Ethernet3/0
         slot: 12
         type: physical
-      - id: i13
-        label: port13
+      - id: i14
+        label: Ethernet3/1
         slot: 13
         type: physical
-      - id: i14
-        label: port14
+      - id: i15
+        label: Ethernet3/2
         slot: 14
         type: physical
-      - id: i15
-        label: port15
+      - id: i16
+        label: Ethernet3/3
         slot: 15
         type: physical
-      - id: i16
-        label: port16
+      - id: i17
+        label: Ethernet4/0
         slot: 16
         type: physical
-      - id: i17
-        label: port17
+      - id: i18
+        label: Ethernet4/1
         slot: 17
         type: physical
-      - id: i18
-        label: port18
+      - id: i19
+        label: Ethernet4/2
         slot: 18
         type: physical
-      - id: i19
-        label: port19
+      - id: i20
+        label: Ethernet4/3
         slot: 19
         type: physical
-      - id: i20
-        label: port20
+      - id: i21
+        label: Ethernet5/0
         slot: 20
         type: physical
-      - id: i21
-        label: port21
+      - id: i22
+        label: Ethernet5/1
         slot: 21
         type: physical
-      - id: i22
-        label: port22
+      - id: i23
+        label: Ethernet5/2
         slot: 22
         type: physical
-      - id: i23
-        label: port23
+      - id: i24
+        label: Ethernet5/3
         slot: 23
         type: physical
-      - id: i24
-        label: port24
+      - id: i25
+        label: Ethernet6/0
         slot: 24
         type: physical
-      - id: i25
-        label: port25
+      - id: i26
+        label: Ethernet6/1
         slot: 25
         type: physical
-      - id: i26
-        label: port26
+      - id: i27
+        label: Ethernet6/2
         slot: 26
         type: physical
-      - id: i27
-        label: port27
+      - id: i28
+        label: Ethernet6/3
         slot: 27
         type: physical
-      - id: i28
-        label: port28
+      - id: i29
+        label: Ethernet7/0
         slot: 28
         type: physical
-      - id: i29
-        label: port29
+      - id: i30
+        label: Ethernet7/1
         slot: 29
         type: physical
-      - id: i30
-        label: port30
+      - id: i31
+        label: Ethernet7/2
         slot: 30
         type: physical
-      - id: i31
-        label: port31
+      - id: i32
+        label: Ethernet7/3
         slot: 31
         type: physical
   - boot_disk_size: null
@@ -724,14 +926,14 @@ links:
     i1: i1
     i2: i0
     conditioning: {}
-    label: Manager0{{ manager_num }}-eth1<->VPN0-172.16.0.0/24-port0
+    label: Manager0{{ manager_num }}-eth1<->VPN0-port0
   - id: l1
     n1: n2
     n2: n3
     i1: i1
     i2: i2
     conditioning: {}
-    label: Validator{{ validator_num }}-ge0/0<->VPN0-172.16.0.0/24-port2
+    label: Validator{{ validator_num }}-ge0/0<->VPN0-port2
   - id: l2
     n1: n5
     n2: n0
@@ -745,35 +947,35 @@ links:
     i1: i1
     i2: i1
     conditioning: {}
-    label: Controller{{ controller_num }}-eth1<->VPN0-172.16.0.0/24-port1
+    label: Controller{{ controller_num }}-eth1<->VPN0-port1
   - id: l4
     n1: n4
     n2: n8
-    i1: i1
+    i1: i32
     i2: i0
     conditioning: {}
-    label: Gateway-GigabitEthernet1<->Internet-port
+    label: Gateway-Ethernet7/3<->Internet-port
   - id: l5
     n1: n4
     n2: n3
-    i1: i2
+    i1: i1
     i2: i3
     conditioning: {}
-    label: Gateway-GigabitEthernet2<->VPN0-172.16.0.0/24-port3
+    label: Gateway-Ethernet0/0<->VPN0-port3
   - id: l6
     n1: n4
     n2: n6
-    i1: i3
-    i2: i0
+    i1: i2
+    i2: i1
     conditioning: {}
-    label: Gateway-GigabitEthernet3<->INET-172.16.1.0/24-port0
+    label: Gateway-Ethernet0/1<->INET-Ethernet0/0
   - id: l7
     n1: n4
     n2: n7
-    i1: i4
-    i2: i0
+    i1: i3
+    i2: i1
     conditioning: {}
-    label: Gateway-GigabitEthernet4<->MPLS-172.16.2.0/24-port0
+    label: Gateway-Ethernet0/2<->MPLS-Ethernet0/1
 lab:
   description: This lab was deployed using SD-WAN lab automation.
   notes: |-

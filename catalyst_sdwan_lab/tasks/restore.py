@@ -50,12 +50,21 @@ def main(
     deleteexisitng: bool,
     retry: bool,
     loglevel: Union[int, str],
+    contr_version: str,
+    edge_version: str,
 ) -> None:
     # Time the script execution
     begin_time = datetime.datetime.now()
 
     # Setup logging
     log = setup_logging(loglevel)
+
+    # Verify if the SD-WAN Manager password is not using default credentials
+    if manager_password == "admin":
+        print(
+            "Cannot use default credentials. Please update SD-WAN Manager password and run the tool again."
+        )
+        exit(1)
 
     # create cml instance and check version
     cml = cml_config.make_client()
@@ -71,14 +80,69 @@ def main(
 
     cml_topology_dict = yaml.load(cml_topology)
 
-    # Verify if requested software version is defined in CML
     track_progress(log, "Preparing for restore...")
     log.info("Checking software version...")
+    if contr_version:
+        # Check if the software version requested by user is compatible with the backup
+        # In particular, check if the requested version is not older than the backup version
+        backup_version = next(
+            node["image_definition"].split("-")[-1]
+            for node in cml_topology_dict["nodes"]
+            if node["node_definition"] == "cat-sdwan-manager"
+        )
+        backup_version_split = backup_version.split(".")
+        contr_version_split = contr_version.split(".")
+        if int(contr_version_split[0]) < int(backup_version_split[0]) or (
+            int(contr_version_split[0]) == int(backup_version_split[0])
+            and int(contr_version_split[1]) < int(backup_version_split[1])
+        ):
+            exit(
+                f"\nDowngrade of image version from {backup_version} to {contr_version} is not supported."
+            )
+    if edge_version:
+        # Check if the software version requested by user is compatible with the backup
+        # In particular, check if the requested version is not older than the backup version
+        backup_version = next(
+            node["image_definition"].split("-")[-1]
+            for node in cml_topology_dict["nodes"]
+            if node["node_definition"] == "cat-sdwan-edge"
+        )
+        backup_version_split = backup_version.split(".")
+        edge_version_split = edge_version.split(".")
+        if int(edge_version_split[0]) < int(backup_version_split[0]) or (
+            int(edge_version_split[0]) == int(backup_version_split[0])
+            and int(edge_version_split[1]) < int(backup_version_split[1])
+        ):
+            exit(
+                f"\nDowngrade of image version from {backup_version} to {edge_version} is not supported."
+            )
+
+    # Verify if requested software version is defined in CML
     cml_image_definitions = cml.definitions.image_definitions()
     defined_images = set(image["id"] for image in cml_image_definitions)
     missing_images = []
     for node in cml_topology_dict["nodes"]:
-        if node["image_definition"] and node["image_definition"] not in defined_images:
+        if (
+            node["node_definition"]
+            in ["cat-sdwan-controller", "cat-sdwan-manager", "cat-sdwan-validator"]
+            and contr_version
+        ):
+            if (
+                f'{node["node_definition"]}-{contr_version}' not in defined_images
+                and f'{node["node_definition"]}-{contr_version}' not in missing_images
+            ):
+                missing_images.append(f'{node["node_definition"]}-{contr_version}')
+        elif node["node_definition"] == "cat-sdwan-edge" and edge_version:
+            if (
+                f'{node["node_definition"]}-{edge_version}' not in defined_images
+                and f'{node["node_definition"]}-{edge_version}' not in missing_images
+            ):
+                missing_images.append(f'{node["node_definition"]}-{edge_version}')
+        elif (
+            node["image_definition"]
+            and node["image_definition"] not in defined_images
+            and node["image_definition"] not in missing_images
+        ):
             missing_images.append(node["image_definition"])
     if missing_images:
         sys.exit(
@@ -112,8 +176,9 @@ def main(
     if retry:
         # If retry flag is set, skip the lab bringup and move directly to SD-WAN Manager steps
         track_progress(log, "Retry flag set, checking if lab already exists in CML...")
+        manager_details = f"{manager_ip}:{manager_port}" if patty_used else manager_ip
         labs = [lab for lab in cml.all_labs(show_all=True)]
-        lab = next((lab for lab in labs if manager_ip in lab.notes), None)
+        lab = next((lab for lab in labs if manager_details in lab.notes), None)
         if not lab:
             exit(
                 "\nRetry option is set, but script cloud not find the "
@@ -178,6 +243,24 @@ def main(
         if patty_used:
             manager_node["tags"] = [f"pat:{manager_port}:443"]
 
+        if contr_version:
+            # Overwrite the image definition for control components
+            for node in cml_topology_dict["nodes"]:
+                if node["node_definition"] in [
+                    "cat-sdwan-controller",
+                    "cat-sdwan-manager",
+                    "cat-sdwan-validator",
+                ]:
+                    node["image_definition"] = (
+                        f'{node["node_definition"]}-{contr_version}'
+                    )
+        if edge_version:
+            # Overwrite the image definition for control components
+            for node in cml_topology_dict["nodes"]:
+                if node["node_definition"] == "cat-sdwan-edge":
+                    node["image_definition"] = (
+                        f'{node["node_definition"]}-{edge_version}'
+                    )
         stream = io.StringIO()
         yaml.dump(cml_topology_dict, stream)
         track_progress(log, "Importing the lab...")
@@ -202,7 +285,10 @@ def main(
             manager_node = node
         elif node.node_definition == "cat-sdwan-controller":
             # Add Controller VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"(172.16.0.1\d+)/24", node.configuration)
+            vpn0_ip_search = re.search(
+                r"<address>((?:172\.16\.0\.1\d+)|(?:fc00:172:16::1\d+))",
+                node.configuration,
+            )
             system_ip_search = re.search(
                 r"<system-ip>([\d.]+)</system-ip>", node.configuration
             )
@@ -216,7 +302,10 @@ def main(
             node.start()
         elif node.node_definition == "cat-sdwan-validator":
             # Add Validator VPN 0 IP to the list
-            vpn0_ip_search = re.search(r"(172.16.0.2\d+)/24", node.configuration)
+            vpn0_ip_search = re.search(
+                r"<address>((?:172\.16\.0\.2\d+)|(?:fc00:172:16::2\d+))",
+                node.configuration,
+            )
             if vpn0_ip_search:
                 vpn0_ip = vpn0_ip_search.group(1)
                 control_components[vpn0_ip] = "validator"

@@ -1,0 +1,19 @@
+{
+  "listId": "2de99dea-ec2a-4145-b919-6a41d51a305e",
+  "name": "dropbox_apps",
+  "type": "app",
+  "description": "SaaS App List for Dropbox",
+  "entries": [
+    {
+      "app": "dropbox"
+    }
+  ],
+  "lastUpdated": 1706357792597,
+  "owner": "system",
+  "readOnly": true,
+  "version": "2.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

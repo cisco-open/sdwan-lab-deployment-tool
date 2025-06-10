@@ -1,0 +1,327 @@
+{
+  "deviceType": [
+    "vedge-C8000V"
+  ],
+  "templateMinVersion": "20.12.0",
+  "templateType": "cedge_global",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "nat64-global": {
+      "nat64-timeout": {
+        "udp-timeout": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": 300,
+          "vipVariableName": "udp_timeout"
+        },
+        "tcp-timeout": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": 3600,
+          "vipVariableName": "tcp_timeout"
+        }
+      }
+    },
+    "services-global": {
+      "services-ip": {
+        "http-server": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "http_server"
+        },
+        "https-server": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "https_server"
+        },
+        "arp-proxy": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "arp_proxy"
+        },
+        "ftp-passive": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "ftp_passive"
+        },
+        "rcmd": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "rcmd"
+        },
+        "domain-lookup": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "domain_lookup"
+        },
+        "lldp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "lldp"
+        },
+        "cdp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "cdp"
+        },
+        "line-vty": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "line_vty"
+        },
+        "source-intrf": {
+          "vipObjectType": "object",
+          "vipType": "constant",
+          "vipValue": "GigabitEthernet2",
+          "vipVariableName": "source_interface"
+        }
+      },
+      "services-other": {
+        "source-route": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "source_route"
+        },
+        "bootp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "bootp"
+        },
+        "tcp-keepalives-out": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "tcp_keepalives_out"
+        },
+        "tcp-keepalives-in": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "tcp_keepalives_in"
+        },
+        "tcp-small-servers": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "tcp_small_servers"
+        },
+        "udp-small-servers": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "udp_small_servers"
+        },
+        "snmp-ifindex-persist": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "snmp_ifindex_persist"
+        },
+        "console-logging": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "console_logging"
+        },
+        "vty-logging": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "vty_logging"
+        }
+      }
+    },
+    "http-global": {
+      "http-authentication": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "_empty",
+        "vipVariableName": "http_authentication"
+      }
+    },
+    "ssh": {
+      "version": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "ssh_version"
+      }
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "nat64-global": {
+      "nat64-timeout": {
+        "udp-timeout": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": 300,
+          "vipVariableName": "udp_timeout"
+        },
+        "tcp-timeout": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": 3600,
+          "vipVariableName": "tcp_timeout"
+        }
+      }
+    },
+    "services-global": {
+      "services-ip": {
+        "http-server": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "http_server"
+        },
+        "https-server": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "https_server"
+        },
+        "arp-proxy": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "arp_proxy"
+        },
+        "ftp-passive": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "ftp_passive"
+        },
+        "rcmd": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "rcmd"
+        },
+        "domain-lookup": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "domain_lookup"
+        },
+        "lldp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "lldp"
+        },
+        "cdp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "cdp"
+        },
+        "line-vty": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "line_vty"
+        },
+        "source-intrf": {
+          "vipObjectType": "object",
+          "vipType": "constant",
+          "vipValue": "GigabitEthernet2",
+          "vipVariableName": "source_interface"
+        }
+      },
+      "services-other": {
+        "source-route": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "source_route"
+        },
+        "bootp": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "bootp"
+        },
+        "tcp-keepalives-out": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "tcp_keepalives_out"
+        },
+        "tcp-keepalives-in": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "tcp_keepalives_in"
+        },
+        "tcp-small-servers": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "tcp_small_servers"
+        },
+        "udp-small-servers": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "udp_small_servers"
+        },
+        "snmp-ifindex-persist": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "snmp_ifindex_persist"
+        },
+        "console-logging": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "true",
+          "vipVariableName": "console_logging"
+        },
+        "vty-logging": {
+          "vipObjectType": "object",
+          "vipType": "ignore",
+          "vipValue": "false",
+          "vipVariableName": "vty_logging"
+        }
+      }
+    },
+    "http-global": {
+      "http-authentication": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "_empty",
+        "vipVariableName": "http_authentication"
+      }
+    },
+    "ssh": {
+      "version": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "ssh_version"
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "6516f724-a71c-41a3-b462-5056396a641e",
+  "createdOn": 1706357753082,
+  "@rid": 1360,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_EQUINIX_C8000V_GLOBAL_CISCO_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default Equinix ICGW C8000V Global CISCO TEMPLATE",
+  "lastUpdatedOn": 1706357753082
+}

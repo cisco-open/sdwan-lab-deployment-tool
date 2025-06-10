@@ -1,0 +1,506 @@
+{
+  "deviceType": [
+    "vedge-C8000V",
+    "vedge-C1111-8PLTELA",
+    "vedge-CSR-1000v",
+    "vedge-ISR-4331"
+  ],
+  "templateType": "cisco_vpn_interface",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "if-name": {
+      "vipValue": "GigabitEthernet5",
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "description": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "poe": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "ip": {
+      "address": {
+        "vipValue": "10.20.24.15/24",
+        "vipObjectType": "object",
+        "vipType": "constant",
+        "vipVariableName": ""
+      },
+      "secondary-address": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      },
+      "dhcp-client": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "dhcp-distance": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "ipv6": {
+      "address": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "dhcp-client": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "secondary-address": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      },
+      "access-list": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "direction"
+        ]
+      },
+      "dhcp-helper-v6": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      }
+    },
+    "dhcp-helper": {
+      "vipValue": [
+        "1.1.1.1",
+        "2.2.2.2"
+      ],
+      "vipObjectType": "list",
+      "vipType": "constant"
+    },
+    "tracker": {
+      "vipValue": "",
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "nat": {
+      "vipValue": "",
+      "vipObjectType": "node-only",
+      "vipType": "ignore",
+      "udp-timeout": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "tcp-timeout": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "static": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "source-ip",
+          "translate-ip"
+        ]
+      }
+    },
+    "nat64": {
+      "vipValue": "",
+      "vipObjectType": "node-only",
+      "vipType": "ignore"
+    },
+    "mtu": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tcp-mss-adjust": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tloc-extension": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tloc-extension-gre-from": {
+      "src-ip": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "xconnect": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "mac-address": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "speed": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "duplex": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "shutdown": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "arp-timeout": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "autonegotiate": {
+      "vipValue": "true",
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "ip-directed-broadcast": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "icmp-redirect-disable": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "shaping-rate": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "qos-map": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "rewrite-rule": {
+      "rule-name": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "access-list": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "direction"
+      ]
+    },
+    "arp": {
+      "ip": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "addr"
+        ]
+      }
+    },
+    "vrrp": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    },
+    "ipv6-vrrp": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "if-name": {
+      "vipValue": "GigabitEthernet5",
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "description": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "poe": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "ip": {
+      "address": {
+        "vipValue": "10.20.24.15/24",
+        "vipObjectType": "object",
+        "vipType": "constant",
+        "vipVariableName": ""
+      },
+      "secondary-address": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      },
+      "dhcp-client": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "dhcp-distance": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "ipv6": {
+      "address": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "dhcp-client": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "secondary-address": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      },
+      "access-list": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "direction"
+        ]
+      },
+      "dhcp-helper-v6": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "address"
+        ]
+      }
+    },
+    "dhcp-helper": {
+      "vipValue": [
+        "1.1.1.1",
+        "2.2.2.2"
+      ],
+      "vipObjectType": "list",
+      "vipType": "constant"
+    },
+    "tracker": {
+      "vipValue": "",
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "nat": {
+      "vipValue": "",
+      "vipObjectType": "node-only",
+      "vipType": "ignore",
+      "udp-timeout": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "tcp-timeout": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "static": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "source-ip",
+          "translate-ip"
+        ]
+      }
+    },
+    "nat64": {
+      "vipValue": "",
+      "vipObjectType": "node-only",
+      "vipType": "ignore"
+    },
+    "mtu": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tcp-mss-adjust": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tloc-extension": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "tloc-extension-gre-from": {
+      "src-ip": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "xconnect": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "mac-address": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "speed": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "duplex": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "shutdown": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "arp-timeout": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "autonegotiate": {
+      "vipValue": "true",
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipVariableName": ""
+    },
+    "ip-directed-broadcast": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "icmp-redirect-disable": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "shaping-rate": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "qos-map": {
+      "vipValue": "",
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "rewrite-rule": {
+      "rule-name": {
+        "vipValue": "",
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "access-list": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "direction"
+      ]
+    },
+    "arp": {
+      "ip": {
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipType": "ignore",
+        "vipPrimaryKey": [
+          "addr"
+        ]
+      }
+    },
+    "vrrp": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    },
+    "ipv6-vrrp": {
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipType": "ignore",
+      "vipPrimaryKey": [
+        "grp-id"
+      ]
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "5dc66bfd-3c67-4100-a9aa-4b99829a4da1",
+  "createdOn": 1706357740046,
+  "@rid": 851,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Default_Cisco_VPN_interface_GigabitEthernet5_V01",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Factory Default template for VPN Interface GigabitEthernet5",
+  "lastUpdatedOn": 1706357740046
+}

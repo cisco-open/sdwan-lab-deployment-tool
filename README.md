@@ -106,7 +106,7 @@ Task-specific parameters are provided after the task argument.
       │ delete                  Delete the CML lab and all the lab data.                                                                                                                           │
       │ deploy                  Deploy a new Catalyst SD-WAN lab pod.                                                                                                                              │
       │ restore                 Restore Catalyst SD-WAN POD from backup.                                                                                                                           │
-      │ setup                   Setup on-prem CML to use Catalyst SD-WAN Lab automation.                                                                                                           │
+      │ setup                   Setup CML to use Catalyst SD-WAN Lab automation.                                                                                                           │
       │ sign                    Sign CSR using the SD-WAN Lab Deployment Tool Root CA.                                                                                                             │
       ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
@@ -170,25 +170,28 @@ This task makes sure your CML is ready to run Catalyst SD-WAN labs. The task wil
 
 On each CML server that you want to use, you should run a setup task at least once to create required node and image definitions. You can rerun the setup task each time you want to add a new Catalyst SD-WAN software image to your CML server.
 
-This task have one task-specific argument that allows you to migrate the node and image definitions to new format if you've used SD-WAN Lab 1.x in the past.
+This task can also delete existing image definitions to clean up old SD-WAN releases from CML server.
 
       sdwan-lab setup -h
 
        Usage: sdwan-lab setup [OPTIONS]
 
-      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      │ --list  -l    After running setup task, list the available SD-WAN software per node type.                                                                                                  │
-      │ --help  -h    Show this message and exit.                                                                                                                                                  │
-      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --delete  -d  <software_versions>  Delete all image definitions for the specified software           │
+      │                                    version(s). To specify multiple versions, separate them with a    │
+      │                                    comma.                                                            │
+      │ --list    -l                       List the available SD-WAN software per node type and exit.        │
+      │ --help    -h                       Show this message and exit.                                       │
+      ╰──────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 ### Deploy Task
 
 This task:
 
-1. Defines four/five subnets:
-   - VPN0 - 172.16.0.0/24
-   - INET - 172.16.1.0/24
-   - MPLS - 172.16.2.0/24
+1. Defines subnets:
+   - VPN0 - 172.16.0.0/24 / fc00:172:16::/64
+   - INET - 172.16.1.0/24 / fc00:172:16:1:/64
+   - MPLS - 172.16.2.0/24 / fc00:172:16:2:/64
    - External Connector - in bridge mode, this subnet is defined by task-specific parameters and is used to provide external reachability to SD-WAN Manager.
    - Internet Connector - in NAT mode, this subnet provides Internet connectivity for Internet transport and is same as CML subnet
 2. Deploys basic SD-WAN topology with:
@@ -202,29 +205,73 @@ This task:
 
 You should run this task to deploy a new lab with control plane configured and build any WAN Edge topology you like.
 
-This task has several task-specific parameters, including software version that you want to run on the control components.
+This task has several task-specific parameters, including software version that you want to run on the control components. The ip_type option allows you to select if overlay will be deployed as IPv4-only (v4 - default), IPv6-only (v6) or dual stack (dual).
 
       (venv) tzarski:~$sdwan-lab deploy -h
 
        Usage: sdwan-lab deploy [OPTIONS] <software-version>
 
+     positional arguments:
+       <software-version>    Software version that will be used on
+     SD-WAN Control Components.
 
-       positional arguments:
-         <software-version>    Software version that will be used on SD-WAN Control Components.
-
-      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      │ --manager        <manager-ip>          SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                                                           │
-      │ --muser          <manager-user>        SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                                                                 │
-      │ --mpassword      <manager-password>    SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                                                             │
-      │ --mmask          <manager-mask>        Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK environment variable.                                      │
-      │ --mgateway       <manager-gateway>     Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY environment variable.                                               │
-      │ --lab            <lab_name>            Set CML Lab name, can also be defined via LAB_NAME environment variable. If not provided, default name "sdwan<number>" will be assigned.            │
-      │ --bridge         <custom-bridge-name>  Set custom bridge for SD-WAN Manager external connection. Default is System Bridge                                                                  │
-      │ --dns            <dns-server-ip>       Set custom DNS server for Internet/VPN0 transport. Default is same as CML DNS                                                                       │
-      │ --retry                                If for some reason your script lost connectivity during SD-WAN Manager boot, you can add --retry to continue onboarding the lab that is already in  │
-      │                                        CML                                                                                                                                                 │
-      │ --help       -h                        Show this message and exit.                                                                                                                         │
-      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      ╭─ Options ─────────────────────────────────────────────────────╮
+      │ --manager        <manager-ip>          SD-WAN Manager IP      │
+      │                                        address, can also be   │
+      │                                        defined via MANAGER_IP │
+      │                                        environment            │
+      │ --muser          <manager-user>        SD-WAN Manager         │
+      │                                        username, can also be  │
+      │                                        defined via            │
+      │                                        MANAGER_USER           │
+      │                                        environment variable.  │
+      │ --mpassword      <manager-password>    SD-WAN Manager         │
+      │                                        password, can also be  │
+      │                                        defined via            │
+      │                                        MANAGER_PASSWORD       │
+      │                                        environment variable.  │
+      │ --mmask          <manager-mask>        Subnet mask for given  │
+      │                                        SD-WAN Manager IP      │
+      │                                        (e.g. /24), can also   │
+      │                                        be defined via         │
+      │                                        MANAGER_MASK           │
+      │                                        environment variable.  │
+      │ --mgateway       <manager-gateway>     Gateway IP for given   │
+      │                                        SD-WAN Manager IP, can │
+      │                                        also be defined via    │
+      │                                        MANAGER_GATEWAY        │
+      │                                        environment variable.  │
+      │ --lab            <lab_name>            Set CML Lab name, can  │
+      │                                        also be defined via    │
+      │                                        LAB_NAME environment   │
+      │                                        variable. If not       │
+      │                                        provided, default name │
+      │                                        "sdwan<number>" will   │
+      │                                        be assigned.           │
+      │ --bridge         <custom-bridge-name>  Set custom bridge for  │
+      │                                        SD-WAN Manager         │
+      │                                        external connection.   │
+      │                                        Default is System      │
+      │                                        Bridge                 │
+      │ --dns            <dns-server-ip>       Set custom DNS server  │
+      │                                        for Internet/VPN0      │
+      │                                        transport. Default is  │
+      │                                        same as CML DNS        │
+      │ --retry                                If for some reason     │
+      │                                        your script lost       │
+      │                                        connectivity during    │
+      │                                        SD-WAN Manager boot,   │
+      │                                        you can add --retry to │
+      │                                        continue onboarding    │
+      │                                        the lab that is        │
+      │                                        already in CML         │
+      │ --ip_type        <ip_type>             IP type to use for     │
+      │                                        deployment: v4, v6, or │
+      │                                        dual. Default is v4.   │
+      │                                        [default: v4]          │
+      │ --help       -h                        Show this message and  │
+      │                                        exit.                  │
+      ╰───────────────────────────────────────────────────────────────╯
 
 Time to complete the deployment task depends on:
 
@@ -233,7 +280,7 @@ Time to complete the deployment task depends on:
 
 ### Add Task
 
-This task adds Catalyst SD-WAN nodes (Validators/Controllers/Edges) into existing Catalyst SD-WAN lab. This task will:
+This task adds Catalyst SD-WAN nodes (Validators/Controllers/Edges) into existing Catalyst SD-WAN lab. It will automatically recognize the IP type (v4/v6/dual) and onboard the devices using same IP type as discovered. This task will:
 
 1. Add requested number of nodes to the CML topology and boot them with cloud-init configuration
 2. Once nodes boot up, automatically onboard them to SD-WAN Manager
@@ -302,26 +349,43 @@ This task restores Catalyst SD-WAN lab from a backup. This task will:
 3. Restore SD-WAN Manager templates, policies and configuration groups using [Sastre](https://github.com/CiscoDevNet/sastre).
 4. Verify if there are any WAN Edges in the topology (SD-WAN and SD-Routing). If yes, then generate the new OTP and automatically reonboard them to SD-WAN Manager.
 
-This task has several task-specific parameters, including working directory from where backup is restored.
+This task has several task-specific parameters, including working directory from where backup is restored. You can also overwrite the software version for control components and SD-WAN/SD-Routing Edges (note that specifying version lower than the one in the backup is not supported).
 
       sdwan-lab restore -h
 
        Usage: sdwan-lab restore [OPTIONS]
 
-      ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-      │ --manager             <manager-ip>        SD-WAN Manager IP address, can also be defined via MANAGER_IP environment                                                                        │
-      │ --muser               <manager-user>      SD-WAN Manager username, can also be defined via MANAGER_USER environment variable.                                                              │
-      │ --mpassword           <manager-password>  SD-WAN Manager password, can also be defined via MANAGER_PASSWORD environment variable.                                                          │
-      │ --mmask               <manager-mask>      Subnet mask for given SD-WAN Manager IP (e.g. /24), can also be defined via MANAGER_MASK environment variable.                                   │
-      │ --mgateway            <manager-gateway>   Gateway IP for given SD-WAN Manager IP, can also be defined via MANAGER_GATEWAY environment variable.                                            │
-      │ --lab                 <lab_name>          CML Lab name, can also be defined via LAB_NAME environment variable.                                                                             │
-      │ --workdir             <directory>         Restore source folder                                                                                                                            │
-      │ --deleteexisting                          If there is already lab running with same name and using same SD-WAN Manager IP, delete this lab before restoring. Note the all running lab data │
-      │                                           will be lost!                                                                                                                                    │
-      │ --retry                                   If for some reason your script lost connectivity during SD-WAN Manager boot, you can add --retry to continue onboarding the lab that is already  │
-      │                                           in CML                                                                                                                                           │
-      │ --help            -h                      Show this message and exit.                                                                                                                      │
-      ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+      ╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────╮
+      │ --manager             <manager-ip>        SD-WAN Manager IP address, can also be defined via      │
+      │                                           MANAGER_IP environment                                  │
+      │ --muser               <manager-user>      SD-WAN Manager username, can also be defined via        │
+      │                                           MANAGER_USER environment variable.                      │
+      │ --mpassword           <manager-password>  SD-WAN Manager password, can also be defined via        │
+      │                                           MANAGER_PASSWORD environment variable.                  │
+      │ --mmask               <manager-mask>      Subnet mask for given SD-WAN Manager IP (e.g. /24), can │
+      │                                           also be defined via MANAGER_MASK environment variable.  │
+      │ --mgateway            <manager-gateway>   Gateway IP for given SD-WAN Manager IP, can also be     │
+      │                                           defined via MANAGER_GATEWAY environment variable.       │
+      │ --lab                 <lab_name>          CML Lab name, can also be defined via LAB_NAME          │
+      │                                           environment variable.                                   │
+      │ --workdir             <directory>         Restore source folder                                   │
+      │ --deleteexisting                          If there is already lab running with same name and      │
+      │                                           using same SD-WAN Manager IP, delete this lab before    │
+      │                                           restoring. Note the all running lab data will be lost!  │
+      │ --retry                                   If for some reason your script lost connectivity during │
+      │                                           SD-WAN Manager boot, you can add --retry to continue    │
+      │                                           onboarding the lab that is already in CML               │
+      │ --contr_version       <contr_version>     Change the controller version when restoring the lab.   │
+      │ --edge_version        <edge_version>      Change the SD-WAN edge version when restoring the lab.  │
+      │ --help            -h                      Show this message and exit.                             │
+      ╰───────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Below you will find few examples of restore task:
+
+    sdwan-lab restore --workdir backup
+    sdwan-lab restore --workdir backup --deleteexisting
+    sdwan-lab restore --workdir backup --contr_version 20.16.1
+    sdwan-lab restore --workdir backup --contr_version 20.16.1 --edge_version 17.16.01a
 
 ### Delete Task
 
@@ -388,6 +452,16 @@ Open PowerShell and run
 Once the installation is finished and you have restarted Windows you are able to continue the installation of this tool as described in the [installation section](README.md#installing) of this document.
 
 You can read more about [Linux on Windows with WSL here](https://learn.microsoft.com/en-us/windows/wsl/install).
+
+## FAQ
+
+Q1: My devices' consoles have stopped working after I created my own configuration groups. How do I recover console access?
+
+A1: Always include the `platform console serial` command in an CLI add-on feature parcel to ensure your consoles work from the CML UI. Note that after adding this command, a WAN Edge reboot is required.
+
+Q2: Can I SSH to my Manager instance directly?
+
+A2: Yes, you can if you are using an external IP. However, if you are using PATty, you cannot, as we only map the HTTPS port.
 
 ## Authors
 

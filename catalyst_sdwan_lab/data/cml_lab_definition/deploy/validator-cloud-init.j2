@@ -1,7 +1,5 @@
 #cloud-config
 write_files:
-- path: /etc/default/personality
-  content: "vedge\n"
 - path: /etc/default/inited
   content: "1\n"
 - path: /usr/share/viptela/symantec-root-ca.crt
@@ -21,7 +19,11 @@ write_files:
         <sp-organization-name>{{ org_name }}</sp-organization-name>
         <vbond>
           <local></local>
+{% if ip_type == 'v6' %}
+          <remote>fc00:172:16::2{{ validator_num }}</remote>
+{% else %}
           <remote>172.16.0.2{{ validator_num }}</remote>
+{% endif %}
           <port>12346</port>
         </vbond>
         <site-id>100</site-id>
@@ -39,9 +41,18 @@ write_files:
       <vpn xmlns="http://viptela.com/vpn">
         <vpn-instance>
           <vpn-id>0</vpn-id>
+{% if ip_type in ['v4', 'dual'] %}
           <dns>
             <dns-addr>172.16.0.254</dns-addr>
           </dns>
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
+          <dns>
+            <dns-addr>fc00:172:16::254</dns-addr>
+            <role>primaryv6</role>
+          </dns>
+{% endif %}
+{% if ip_type in ['v4', 'dual'] %}
           <ip>
             <route>
               <prefix>172.16.0.0/16</prefix>
@@ -50,11 +61,29 @@ write_files:
               </next-hop>
             </route>
           </ip>
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
+          <ipv6>
+            <route>
+              <prefix>::/0</prefix>
+              <next-hop>
+                <address>fc00:172:16::254</address>
+              </next-hop>
+            </route>
+          </ipv6>
+{% endif %}
           <interface>
             <if-name>ge0/0</if-name>
+{% if ip_type in ['v4', 'dual'] %}
             <ip>
               <address>172.16.0.2{{ validator_num }}/24</address>
             </ip>
+{% endif %}
+{% if ip_type in ['v6', 'dual'] %}
+            <ipv6>
+              <address>fc00:172:16::2{{ validator_num }}/64</address>
+            </ipv6>
+{% endif %}
             <tunnel-interface>
               <encapsulation>
                 <encap>ipsec</encap>

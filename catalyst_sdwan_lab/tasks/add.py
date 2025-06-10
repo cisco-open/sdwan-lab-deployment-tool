@@ -25,7 +25,9 @@ from virl2_client import ClientConfig
 from .utils import (
     CML_DEPLOY_LAB_DEFINITION_DIR,
     attach_basic_controller_template,
+    find_node_by_label,
     get_cml_sdwan_image_definition,
+    get_ip_type,
     load_certificate_details,
     onboard_control_components,
     setup_logging,
@@ -139,6 +141,8 @@ def main(
     org_name = manager_config_settings.get_organizations()[0].org
     validator_fqdn = manager_config_settings.get_devices()[0].domain_ip
 
+    ip_type = get_ip_type(manager_session)
+
     # Find the lab
     lab = cml.find_labs_by_title(lab_name)
     if lab:
@@ -153,9 +157,9 @@ def main(
             lab = lab[0]
 
         # Find the transport nodes
-        vpn0_switch = lab.get_node_by_label("VPN0-172.16.0.0/24")
-        inet_switch = lab.get_node_by_label("INET-172.16.1.0/24")
-        mpls_switch = lab.get_node_by_label("MPLS-172.16.2.0/24")
+        vpn0_switch = find_node_by_label(lab, ["VPN0", "VPN0-172.16.0.0/24"])
+        inet_switch = find_node_by_label(lab, ["INET", "INET-172.16.1.0/24"])
+        mpls_switch = find_node_by_label(lab, ["MPLS", "MPLS-172.16.2.0/24"])
 
         device_inventory = manager_session.endpoints.configuration_device_inventory
         if cml_node_type in ["cat-sdwan-validator", "cat-sdwan-controller"]:
@@ -225,6 +229,7 @@ def main(
                     manager_num=next_num_str,
                     controller_num=next_num_str,
                     validator_num=next_num_str,
+                    ip_type=ip_type,
                 )
                 label = f'{cml_node_type.split("-")[2].capitalize()}{next_num_str}'
                 next_node_x_position += 120
@@ -272,10 +277,21 @@ def main(
                 "vsmart": "172.16.0.1",
                 "vbond": "172.16.0.2",
             }
-            nodes_vpn0_ips = [
-                vpn0_ip_prefix[device_type] + next_num_str
-                for next_num_str in new_nodes_nums
-            ]
+            vpn0_ipv6_prefix = {
+                "vmanage": "fc00:172:16:0::",
+                "vsmart": "fc00:172:16::1",
+                "vbond": "fc00:172:16::2",
+            }
+            if ip_type == "v6":
+                nodes_vpn0_ips = [
+                    vpn0_ipv6_prefix[device_type] + next_num_str
+                    for next_num_str in new_nodes_nums
+                ]
+            else:
+                nodes_vpn0_ips = [
+                    vpn0_ip_prefix[device_type] + next_num_str
+                    for next_num_str in new_nodes_nums
+                ]
             with ThreadPoolExecutor() as executor:
                 # Make sure you can ping the devices before attemping to add to the SD-WAN Manager
                 ping_node_partial = partial(
@@ -302,6 +318,14 @@ def main(
                 track_progress(
                     log, "Updating SD-WAN Validator FQDN entry on Gateway..."
                 )
+                if ip_type == "dual":
+                    # Since nodes_vpn0_ips contains only IPv4 addresses,
+                    # we need to add IPv6 addresses as well
+                    nodes_vpn0_ipv6s = [
+                        vpn0_ipv6_prefix[device_type] + next_num_str
+                        for next_num_str in new_nodes_nums
+                    ]
+                    nodes_vpn0_ips.extend(nodes_vpn0_ipv6s)
                 new_validator_ip_list = " ".join(nodes_vpn0_ips)
                 cml_user = cml_config.username
                 cml_password = cml_config.password
@@ -319,7 +343,7 @@ def main(
                 gateway.run_pyats_command("write mem")
 
             if cml_node_type == "cat-sdwan-controller":
-                attach_basic_controller_template(manager_session, log)
+                attach_basic_controller_template(manager_session, ip_type, log)
 
         elif cml_node_type == "cat-sdwan-edge" and device_type == "sdwan":
             # Onboarding WAN Edges
@@ -390,10 +414,19 @@ def main(
                 ).json()["data"]
                 # Find the template ID for basic template
                 template_id = next(
-                    dev_tmpl["templateId"]
-                    for dev_tmpl in device_templates
-                    if dev_tmpl["templateName"] == "edge_basic"
+                    (
+                        dev_tmpl["templateId"]
+                        for dev_tmpl in device_templates
+                        if dev_tmpl["templateName"] == "edge_basic"
+                    ),
+                    None,
                 )
+                if not template_id:
+                    sys.exit(
+                        "edge_basic device template not found. "
+                        "If you want to recreate it, please run "
+                        "csdwan deploy <controller_version> --retry"
+                    )
                 attach_payload = {
                     "deviceTemplateList": [
                         {
@@ -410,24 +443,48 @@ def main(
                     uuid = free_uuids[increment_chassis]
                     new_routers_uuids[next_num_str] = uuid
                     dhcp_exlude = f"192.168.{next_num_str}.1-192.168.{next_num_str}.99"
-                    # For every SD-WAN Controller, create a payload to attach template
+                    # For every SD-WAN Edge, create a payload to attach template
+                    variables_dict = {
+                        "csv-status": "complete",
+                        "csv-deviceId": uuid,
+                        "csv-deviceIP": f"10.0.0.{next_num_str}",
+                        "csv-host-name": f"Edge{next_num_str}",
+                        "//system/host-name": f"Edge{next_num_str}",
+                        "//system/system-ip": f"10.0.0.{next_num_str}",
+                        "//system/site-id": next_num_str,
+                        "csv-templateId": template_id,
+                    }
+                    if ip_type in ["v4", "dual"]:
+                        variables_dict["/0/GigabitEthernet1/interface/ip/address"] = (
+                            f"172.16.1.{next_num_str}/24"
+                        )
+                        variables_dict["/0/GigabitEthernet2/interface/ip/address"] = (
+                            f"172.16.2.{next_num_str}/24"
+                        )
+                        variables_dict["/1/GigabitEthernet3/interface/ip/address"] = (
+                            f"192.168.{next_num_str}.1/24"
+                        )
+                        variables_dict[
+                            "/1/GigabitEthernet3//dhcp-server/address-pool"
+                        ] = f"192.168.{next_num_str}.0/24"
+                        variables_dict["/1/GigabitEthernet3//dhcp-server/exclude"] = (
+                            dhcp_exlude
+                        )
+                        variables_dict[
+                            "/1/GigabitEthernet3//dhcp-server/options/default-gateway"
+                        ] = f"192.168.{next_num_str}.1"
+                    if ip_type in ["v6", "dual"]:
+                        variables_dict["/0/GigabitEthernet1/interface/ipv6/address"] = (
+                            f"fc00:172:16:1::{next_num_str}/64"
+                        )
+                        variables_dict["/0/GigabitEthernet2/interface/ipv6/address"] = (
+                            f"fc00:172:16:2::{next_num_str}/64"
+                        )
+                        variables_dict["/1/GigabitEthernet3/interface/ipv6/address"] = (
+                            f"fc00:192:168:{next_num_str}::1/64"
+                        )
                     attach_payload["deviceTemplateList"][0]["device"].append(
-                        {
-                            "csv-status": "complete",
-                            "csv-deviceId": uuid,
-                            "csv-deviceIP": f"10.0.0.{next_num_str}",
-                            "csv-host-name": f"Edge{next_num_str}",
-                            "/1/GigabitEthernet3/interface/ip/address": f"192.168.{next_num_str}.1/24",
-                            "/1/GigabitEthernet3//dhcp-server/address-pool": f"192.168.{next_num_str}.0/24",
-                            "/1/GigabitEthernet3//dhcp-server/exclude": dhcp_exlude,
-                            "/1/GigabitEthernet3//dhcp-server/options/default-gateway": f"192.168.{next_num_str}.1",
-                            "/0/GigabitEthernet2/interface/ip/address": f"172.16.2.{next_num_str}/24",
-                            "/0/GigabitEthernet1/interface/ip/address": f"172.16.1.{next_num_str}/24",
-                            "//system/host-name": f"Edge{next_num_str}",
-                            "//system/system-ip": f"10.0.0.{next_num_str}",
-                            "//system/site-id": next_num_str,
-                            "csv-templateId": template_id,
-                        }
+                        variables_dict
                     )
                     increment_chassis += 1
 
@@ -452,13 +509,22 @@ def main(
                 configuration_group = manager_session.endpoints.configuration_group
                 # Find the configuration group ID for basic configuration group
                 # Find the template ID for basic template
-                config_group_id = [
-                    cfg_gr["id"]
-                    for cfg_gr in manager_session.get(
-                        "dataservice/v1/config-group"
-                    ).json()
-                    if cfg_gr["name"] == "edge_basic"
-                ][0]
+                config_group_id = next(
+                    (
+                        cfg_gr["id"]
+                        for cfg_gr in manager_session.get(
+                            "dataservice/v1/config-group"
+                        ).json()
+                        if cfg_gr["name"] == "edge_basic"
+                    ),
+                    None,
+                )
+                if not config_group_id:
+                    sys.exit(
+                        "edge_basic configuration group not found. "
+                        "If you want to recreate it, please run "
+                        "csdwan deploy <controller_version> --retry"
+                    )
 
                 increment_chassis = 0
                 new_routers_uuids = {}
@@ -469,46 +535,78 @@ def main(
                     uuid = free_uuids[increment_chassis]
                     new_routers_uuids[next_num_str] = uuid
                     associate_payload.devices.append(DeviceId(id=uuid))
-                    devices_variables.append(
+                    variables_list = [
                         {
-                            "device-id": uuid,
-                            "variables": [
-                                {
-                                    "name": "system_ip",
-                                    "value": f"10.0.0.{next_num_str}",
-                                },
-                                {"name": "host_name", "value": f"Edge{next_num_str}"},
-                                {"name": "site_id", "value": int(next_num_str)},
-                                {"name": "pseudo_commit_timer", "value": 300},
-                                {"name": "ipv6_strict_control", "value": False},
-                                {
-                                    "name": "vpn1_gi3_lan_ip",
-                                    "value": f"192.168.{next_num_str}.1",
-                                },
-                                {
-                                    "name": "vpn1_gi3_dhcp_network",
-                                    "value": f"192.168.{next_num_str}.0",
-                                },
-                                {
-                                    "name": "vpn1_gi3_dhcp_address_exclude",
-                                    "value": [f"192.168.{next_num_str}.1"],
-                                },
-                                {
-                                    "name": "vpn1_gi3_dhcp_default_gateway",
-                                    "value": f"192.168.{next_num_str}.1",
-                                },
-                                {
-                                    "name": "vpn0_gi1_inet_ip",
-                                    "value": f"172.16.1.{next_num_str}",
-                                },
-                                {
-                                    "name": "vpn0_gi2_mpls_ip",
-                                    "value": f"172.16.2.{next_num_str}",
-                                },
-                                {"name": "aaa_password", "value": "admin"},
-                            ],
-                        }
-                    )
+                            "name": "system_ip",
+                            "value": f"10.0.0.{next_num_str}",
+                        },
+                        {"name": "host_name", "value": f"Edge{next_num_str}"},
+                        {"name": "site_id", "value": int(next_num_str)},
+                        {"name": "pseudo_commit_timer", "value": 300},
+                        {"name": "ipv6_strict_control", "value": False},
+                        {"name": "aaa_password", "value": "admin"},
+                    ]
+                    if ip_type in ["v4", "dual"]:
+                        variables_list.append(
+                            {
+                                "name": "vpn1_gi3_lan_ip",
+                                "value": f"192.168.{next_num_str}.1",
+                            }
+                        )
+                        variables_list.append(
+                            {
+                                "name": "vpn1_gi3_dhcp_network",
+                                "value": f"192.168.{next_num_str}.0",
+                            }
+                        )
+                        variables_list.append(
+                            {
+                                "name": "vpn1_gi3_dhcp_address_exclude",
+                                "value": [f"192.168.{next_num_str}.1"],
+                            }
+                        )
+                        variables_list.append(
+                            {
+                                "name": "vpn1_gi3_dhcp_default_gateway",
+                                "value": f"192.168.{next_num_str}.1",
+                            }
+                        )
+                        variables_list.append(
+                            {
+                                "name": "vpn0_gi1_inet_ip",
+                                "value": f"172.16.1.{next_num_str}",
+                            }
+                        )
+                        variables_list.append(
+                            {
+                                "name": "vpn0_gi2_mpls_ip",
+                                "value": f"172.16.2.{next_num_str}",
+                            }
+                        )
+                    if ip_type in ["v6", "dual"]:
+                        variables_list.append(
+                            {
+                                "name": "vpn1_gi3_lan_ipv6",
+                                "value": f"fc00:192:168:{next_num_str}::1/64",
+                            }
+                        )
+                        variables_list.append(
+                            {
+                                "name": "vpn0_gi1_inet_ipv6",
+                                "value": f"fc00:172:16:1::{next_num_str}/64",
+                            }
+                        )
+                        variables_list.append(
+                            {
+                                "name": "vpn0_gi2_mpls_ipv6",
+                                "value": f"fc00:172:16:2::{next_num_str}/64",
+                            }
+                        )
+                    device_variables = {
+                        "device-id": uuid,
+                        "variables": variables_list,
+                    }
+                    devices_variables.append(device_variables)
                     increment_chassis += 1
 
                 variables_payload = {"solution": "sdwan", "devices": devices_variables}
@@ -561,7 +659,7 @@ def main(
                     configuration=bootstrap_configs[next_num_str],
                     populate_interfaces=True,
                     x=next_node_x_position,
-                    y=320,
+                    y=400,
                     cpus=cpus,
                     ram=ram,
                 )
@@ -658,6 +756,7 @@ def main(
                     next_num_str=next_num_str,
                     uuid=uuid,
                     token=token,
+                    ip_type=ip_type,
                 )
                 bootstrap_configs[next_num_str] = bootstrap_config
                 increment_chassis += 1
@@ -678,7 +777,7 @@ def main(
                     configuration=bootstrap_configs[next_num_str],
                     populate_interfaces=True,
                     x=next_node_x_position,
-                    y=320,
+                    y=400,
                     cpus=cpus,
                     ram=ram,
                 )

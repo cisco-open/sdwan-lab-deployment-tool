@@ -125,18 +125,30 @@ def cli(
 
 @cli.command(
     name="setup",
-    short_help="Setup on-prem CML to use Catalyst SD-WAN Lab automation.",
+    short_help="Setup CML to use Catalyst SD-WAN Lab automation.",
+)
+@click.option(
+    "--delete",
+    "-d",
+    metavar="<software_versions>",
+    help="Delete all image definitions for the specified software version(s). "
+    "To specify multiple versions, separate them with a comma.",
 )
 @click.option(
     "--list",
     "-l",
     "list_",
     is_flag=True,
-    help="After running setup task, list the available SD-WAN software per node type.",
+    help="List the available SD-WAN software per node type and exit.",
 )
 @click.pass_context
-def cli_setup(ctx: click.Context, list_: bool) -> None:
-    setup.main(ctx.obj["CML_CONFIG"], ctx.obj["LOGLEVEL"], list_)
+def cli_setup(ctx: click.Context, list_: bool, delete: str = "") -> None:
+    software_versions_to_delete = []
+    if delete:
+        software_versions_to_delete = delete.split(",")
+    setup.main(
+        ctx.obj["CML_CONFIG"], ctx.obj["LOGLEVEL"], list_, software_versions_to_delete
+    )
 
 
 def manager_options(f: Callable[..., Any]) -> Callable[..., Any]:
@@ -231,6 +243,14 @@ def gateway_mask_options(f: Callable[..., Any]) -> Callable[..., Any]:
     "during SD-WAN Manager boot, you can add --retry to continue "
     "onboarding the lab that is already in CML",
 )
+@click.option(
+    "--ip_type",
+    metavar="<ip_type>",
+    type=click.Choice(["v4", "v6", "dual"]),
+    default="v4",
+    show_default=True,
+    help="IP type to use for deployment: v4, v6, or dual. Default is v4.",
+)
 @click.pass_context
 def cli_deploy(
     ctx: click.Context,
@@ -243,6 +263,7 @@ def cli_deploy(
     lab: str,
     bridge: str,
     dns: str,
+    ip_type: str,
     retry: bool,
 ) -> None:
     """
@@ -272,6 +293,7 @@ def cli_deploy(
         lab,
         bridge,
         dns,
+        ip_type,
         patty_used,
         retry,
         loglevel,
@@ -434,6 +456,20 @@ def cli_backup(
     "during SD-WAN Manager boot, you can add --retry to continue "
     "onboarding the lab that is already in CML",
 )
+@click.option(
+    "--contr_version",
+    metavar="<contr_version>",
+    default=None,
+    help="Change the controller version when restoring the lab. Note the specified "
+    "version cannot be older than the one used in the backup.",
+)
+@click.option(
+    "--edge_version",
+    metavar="<edge_version>",
+    default=None,
+    help="Change the SD-WAN/SD-Routing edge version when restoring the lab. Note the specified "
+    "version cannot be older than the one used in the backup.",
+)
 @click.pass_context
 def cli_restore(
     ctx: click.Context,
@@ -446,6 +482,8 @@ def cli_restore(
     workdir: str,
     deleteexisting: bool,
     retry: bool,
+    contr_version: str,
+    edge_version: str,
 ) -> None:
     cml_config = ctx.obj["CML_CONFIG"]
     cml_ip = cml_config.url
@@ -472,6 +510,8 @@ def cli_restore(
         deleteexisting,
         retry,
         loglevel,
+        contr_version,
+        edge_version,
     )
 
 
