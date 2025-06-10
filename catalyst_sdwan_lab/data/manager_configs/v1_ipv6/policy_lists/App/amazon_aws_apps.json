@@ -1,0 +1,34 @@
+{
+  "listId": "9ff8028f-f1fc-4040-aa4c-5401004b7004",
+  "name": "amazon_aws_apps",
+  "type": "app",
+  "description": "SaaS App List for Amazon AWS",
+  "entries": [
+    {
+      "app": "amazon"
+    },
+    {
+      "app": "amazon-web-services"
+    },
+    {
+      "app": "amazon-instant-video"
+    },
+    {
+      "app": "amazon-cloudfront"
+    },
+    {
+      "app": "amazon-ec2"
+    },
+    {
+      "app": "amazon-s3"
+    }
+  ],
+  "lastUpdated": 1706313441839,
+  "owner": "system",
+  "readOnly": true,
+  "version": "3.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

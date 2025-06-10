@@ -1,0 +1,19 @@
+{
+  "listId": "b10d2771-b59a-4cc2-b1a5-aa1b1bac7400",
+  "name": "intuit_apps",
+  "type": "app",
+  "description": "SaaS App List for Intuit",
+  "entries": [
+    {
+      "app": "intuit"
+    }
+  ],
+  "lastUpdated": 1706357792801,
+  "owner": "system",
+  "readOnly": true,
+  "version": "3.0",
+  "infoTag": "",
+  "referenceCount": 0,
+  "references": [],
+  "isActivatedByVsmart": false
+}

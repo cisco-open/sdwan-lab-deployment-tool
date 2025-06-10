@@ -1,0 +1,65 @@
+[
+  {
+    "id": "a4756b7a-a610-41b5-874f-421d24e47eb6",
+    "name": "edge_basic",
+    "description": "Do not modify!",
+    "source": null,
+    "solution": "sdwan",
+    "lastUpdatedBy": "admin",
+    "lastUpdatedOn": 1706359126683,
+    "createdBy": null,
+    "createdOn": null,
+    "profiles": [
+      {
+        "id": "3e3ccb8f-aa40-4fca-a4ad-a93aadc48f75",
+        "name": "edge_basic_cli",
+        "solution": "sdwan",
+        "type": "cli",
+        "description": null,
+        "lastUpdatedBy": "admin",
+        "lastUpdatedOn": 1706359126683,
+        "createdBy": "admin",
+        "createdOn": 1706359125404
+      },
+      {
+        "id": "cf1c239f-2166-4d06-a9af-6c86aa168566",
+        "name": "edge_basic_lan",
+        "solution": "sdwan",
+        "type": "service",
+        "description": null,
+        "lastUpdatedBy": "admin",
+        "lastUpdatedOn": 1706359090589,
+        "createdBy": "admin",
+        "createdOn": 1706358541838
+      },
+      {
+        "id": "98f74019-ab7b-41e2-85da-0ff7dd5e6a4d",
+        "name": "edge_basic_wan",
+        "solution": "sdwan",
+        "type": "transport",
+        "description": null,
+        "lastUpdatedBy": "admin",
+        "lastUpdatedOn": 1706358818823,
+        "createdBy": "admin",
+        "createdOn": 1706358540076
+      },
+      {
+        "id": "f369d282-dad9-4b6a-ac6f-2a0c3a7b9ae3",
+        "name": "edge_basic_system",
+        "solution": "sdwan",
+        "type": "system",
+        "description": null,
+        "lastUpdatedBy": "admin",
+        "lastUpdatedOn": 1706359128305,
+        "createdBy": "admin",
+        "createdOn": 1706358537520
+      }
+    ],
+    "version": 1,
+    "state": null,
+    "devices": null,
+    "numberOfDevices": 0,
+    "numberOfDevicesUpToDate": 0,
+    "topology": null
+  }
+]

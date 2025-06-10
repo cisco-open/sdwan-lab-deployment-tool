@@ -1,0 +1,218 @@
+{
+  "templateType": "cisco_system",
+  "templateMinVersion": "18.3.0",
+  "deviceType": [
+    "cellular-gateway-CG522-E",
+    "cellular-gateway-CG418-E"
+  ],
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "clock": {
+      "timezone": {
+        "vipObjectType": "object",
+        "vipValue": "America/Los_Angeles",
+        "vipType": "ignore"
+      }
+    },
+    "gps-location": {
+      "latitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "longitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "timer": {
+      "dns-cache-timeout": {
+        "vipObjectType": "object",
+        "vipValue": 30,
+        "vipType": "ignore"
+      }
+    },
+    "location": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "system-tunnel-mtu": {
+      "vipObjectType": "object",
+      "vipValue": 1024,
+      "vipType": "ignore"
+    },
+    "track-transport": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "port-offset": {
+      "vipObjectType": "object",
+      "vipValue": 0,
+      "vipType": "ignore"
+    },
+    "port-hop": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "control-session-pps": {
+      "vipObjectType": "object",
+      "vipValue": 300,
+      "vipType": "ignore"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "device-groups": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "site-id": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "system-ip": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "max-controllers": {
+      "vipObjectType": "object",
+      "vipValue": 2,
+      "vipType": "ignore"
+    },
+    "usb-controller": {
+      "vipObjectType": "object",
+      "vipValue": "false",
+      "vipType": "ignore"
+    },
+    "track-default-gateway": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "host-policer-pps": {
+      "vipObjectType": "object",
+      "vipValue": 5000,
+      "vipType": "ignore"
+    },
+    "icmp-error-pps": {
+      "vipObjectType": "object",
+      "vipValue": 100,
+      "vipType": "ignore"
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "clock": {
+      "timezone": {
+        "vipObjectType": "object",
+        "vipValue": "America/Los_Angeles",
+        "vipType": "ignore"
+      }
+    },
+    "gps-location": {
+      "latitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      },
+      "longitude": {
+        "vipObjectType": "object",
+        "vipType": "ignore"
+      }
+    },
+    "timer": {
+      "dns-cache-timeout": {
+        "vipObjectType": "object",
+        "vipValue": 30,
+        "vipType": "ignore"
+      }
+    },
+    "location": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "system-tunnel-mtu": {
+      "vipObjectType": "object",
+      "vipValue": 1024,
+      "vipType": "ignore"
+    },
+    "track-transport": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "port-offset": {
+      "vipObjectType": "object",
+      "vipValue": 0,
+      "vipType": "ignore"
+    },
+    "port-hop": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "control-session-pps": {
+      "vipObjectType": "object",
+      "vipValue": 300,
+      "vipType": "ignore"
+    },
+    "description": {
+      "vipObjectType": "object",
+      "vipType": "ignore"
+    },
+    "device-groups": {
+      "vipObjectType": "list",
+      "vipType": "ignore"
+    },
+    "site-id": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "system-ip": {
+      "vipObjectType": "object",
+      "vipType": "variable",
+      "vipValue": ""
+    },
+    "max-controllers": {
+      "vipObjectType": "object",
+      "vipValue": 2,
+      "vipType": "ignore"
+    },
+    "usb-controller": {
+      "vipObjectType": "object",
+      "vipValue": "false",
+      "vipType": "ignore"
+    },
+    "track-default-gateway": {
+      "vipObjectType": "object",
+      "vipValue": "true",
+      "vipType": "ignore"
+    },
+    "host-policer-pps": {
+      "vipObjectType": "object",
+      "vipValue": 5000,
+      "vipType": "ignore"
+    },
+    "icmp-error-pps": {
+      "vipObjectType": "object",
+      "vipValue": 100,
+      "vipType": "ignore"
+    }
+  },
+  "attachedMastersCount": 0,
+  "configType": "xml",
+  "templateId": "6134854f-2992-42ea-888b-a615d021d353",
+  "createdOn": 1706313431621,
+  "@rid": 336,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_EIO_System_Template",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default EIO System template settings",
+  "lastUpdatedOn": 1706313431621
+}

@@ -1,0 +1,688 @@
+{
+  "templateType": "aaa",
+  "templateMinVersion": "15.0.0",
+  "deviceType": [
+    "vedge-1000",
+    "vedge-2000",
+    "vedge-cloud",
+    "vedge-5000",
+    "vedge-ISR1100-6G",
+    "vedge-100-B",
+    "vedge-ISR1100-4G",
+    "vedge-100",
+    "vsmart",
+    "vedge-ISR1100-4GLTE",
+    "vedge-100-WM",
+    "vmanage",
+    "vbond",
+    "vedge-100-M",
+    "vedge-ISR1100X-6G",
+    "vedge-ISR1100X-4G"
+  ],
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "aaa": {
+      "auth-order": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "vipType": "constant",
+            "vipValue": "local",
+            "vipObjectType": "object"
+          },
+          {
+            "vipType": "constant",
+            "vipValue": "radius",
+            "vipObjectType": "object"
+          },
+          {
+            "vipType": "constant",
+            "vipValue": "tacacs",
+            "vipObjectType": "object"
+          }
+        ],
+        "vipObjectType": "list"
+      },
+      "auth-fallback": {
+        "vipObjectType": "object",
+        "vipValue": "false",
+        "vipType": "ignore"
+      },
+      "usergroup": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "netadmin"
+            },
+            "viewMode": "view",
+            "priority-order": [
+              "name"
+            ]
+          },
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "basic"
+            },
+            "priority-order": [
+              "name",
+              "task"
+            ],
+            "task": {
+              "vipType": "constant",
+              "vipValue": [
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "system",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      },
+                      {
+                        "vipType": "constant",
+                        "vipValue": "write",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "interface",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      },
+                      {
+                        "vipType": "constant",
+                        "vipValue": "write",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                }
+              ],
+              "vipObjectType": "tree",
+              "vipPrimaryKey": [
+                "mode"
+              ]
+            }
+          },
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "operator"
+            },
+            "priority-order": [
+              "name",
+              "task"
+            ],
+            "task": {
+              "vipType": "constant",
+              "vipValue": [
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "system",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "interface",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "policy",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "routing",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "security",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                }
+              ],
+              "vipObjectType": "tree",
+              "vipPrimaryKey": [
+                "mode"
+              ]
+            }
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "name"
+        ]
+      },
+      "user": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipValue": "admin",
+              "vipType": "constant"
+            },
+            "password": {
+              "vipObjectType": "object",
+              "vipValue": "$6$siwKBQ==$wT2lUa9BSreDPI6gB8sl4E6PAJoVXgMbgv/whJ8F1C6sWdRazdxorYYTLrL6syiG6qnLABTnrE96HJiKF6QRq1",
+              "vipPasskey": "admin",
+              "vipType": "constant"
+            },
+            "secret": {
+              "vipObjectType": "object",
+              "vipValue": "$9$3VAI2FQD3UwH1k$hAKZcjzke0zyoJcyMqUV/o6xKnRmPqf1MG5WMa83ypc",
+              "vipType": "constant"
+            },
+            "pubkey-chain": {
+              "vipObjectType": "tree",
+              "vipType": "ignore",
+              "vipValue": [],
+              "vipVariableName": "user_pubkey_chain_0",
+              "vipPrimaryKey": [
+                "usertag"
+              ]
+            },
+            "description": {
+              "vipObjectType": "object",
+              "vipValue": "",
+              "vipType": "ignore"
+            },
+            "group": {
+              "vipType": "constant",
+              "vipValue": [],
+              "vipObjectType": "list"
+            },
+            "priority-order": [
+              "name",
+              "password",
+              "description",
+              "group",
+              "pubkey-chain"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "name"
+        ]
+      }
+    },
+    "tacacs": {
+      "timeout": {
+        "vipObjectType": "object",
+        "vipValue": 5,
+        "vipType": "ignore"
+      }
+    },
+    "radius": {
+      "timeout": {
+        "vipObjectType": "object",
+        "vipValue": 5,
+        "vipType": "ignore"
+      },
+      "retransmit": {
+        "vipObjectType": "object",
+        "vipValue": 3,
+        "vipType": "ignore"
+      }
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "aaa": {
+      "auth-order": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "vipType": "constant",
+            "vipValue": "local",
+            "vipObjectType": "object"
+          },
+          {
+            "vipType": "constant",
+            "vipValue": "radius",
+            "vipObjectType": "object"
+          },
+          {
+            "vipType": "constant",
+            "vipValue": "tacacs",
+            "vipObjectType": "object"
+          }
+        ],
+        "vipObjectType": "list"
+      },
+      "auth-fallback": {
+        "vipObjectType": "object",
+        "vipValue": "false",
+        "vipType": "ignore"
+      },
+      "usergroup": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "netadmin"
+            },
+            "viewMode": "view",
+            "priority-order": [
+              "name"
+            ]
+          },
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "basic"
+            },
+            "priority-order": [
+              "name",
+              "task"
+            ],
+            "task": {
+              "vipType": "constant",
+              "vipValue": [
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "system",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      },
+                      {
+                        "vipType": "constant",
+                        "vipValue": "write",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "interface",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      },
+                      {
+                        "vipType": "constant",
+                        "vipValue": "write",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                }
+              ],
+              "vipObjectType": "tree",
+              "vipPrimaryKey": [
+                "mode"
+              ]
+            }
+          },
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "operator"
+            },
+            "priority-order": [
+              "name",
+              "task"
+            ],
+            "task": {
+              "vipType": "constant",
+              "vipValue": [
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "system",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "interface",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "policy",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "routing",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                },
+                {
+                  "mode": {
+                    "vipType": "constant",
+                    "vipValue": "security",
+                    "vipObjectType": "object"
+                  },
+                  "permission": {
+                    "vipType": "constant",
+                    "vipValue": [
+                      {
+                        "vipType": "constant",
+                        "vipValue": "read",
+                        "vipObjectType": "object"
+                      }
+                    ],
+                    "vipObjectType": "list"
+                  },
+                  "priority-order": [
+                    "mode",
+                    "permission"
+                  ]
+                }
+              ],
+              "vipObjectType": "tree",
+              "vipPrimaryKey": [
+                "mode"
+              ]
+            }
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "name"
+        ]
+      },
+      "user": {
+        "vipType": "constant",
+        "vipValue": [
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipValue": "admin",
+              "vipType": "constant"
+            },
+            "password": {
+              "vipObjectType": "object",
+              "vipValue": "$6$siwKBQ==$wT2lUa9BSreDPI6gB8sl4E6PAJoVXgMbgv/whJ8F1C6sWdRazdxorYYTLrL6syiG6qnLABTnrE96HJiKF6QRq1",
+              "vipPasskey": "admin",
+              "vipType": "constant"
+            },
+            "secret": {
+              "vipObjectType": "object",
+              "vipValue": "$9$3VAI2FQD3UwH1k$hAKZcjzke0zyoJcyMqUV/o6xKnRmPqf1MG5WMa83ypc",
+              "vipType": "constant"
+            },
+            "pubkey-chain": {
+              "vipObjectType": "tree",
+              "vipType": "ignore",
+              "vipValue": [],
+              "vipVariableName": "user_pubkey_chain_0",
+              "vipPrimaryKey": [
+                "usertag"
+              ]
+            },
+            "description": {
+              "vipObjectType": "object",
+              "vipValue": "",
+              "vipType": "ignore"
+            },
+            "group": {
+              "vipType": "constant",
+              "vipValue": [],
+              "vipObjectType": "list"
+            },
+            "priority-order": [
+              "name",
+              "password",
+              "description",
+              "group",
+              "pubkey-chain"
+            ]
+          }
+        ],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "name"
+        ]
+      }
+    },
+    "tacacs": {
+      "timeout": {
+        "vipObjectType": "object",
+        "vipValue": 5,
+        "vipType": "ignore"
+      }
+    },
+    "radius": {
+      "timeout": {
+        "vipObjectType": "object",
+        "vipValue": 5,
+        "vipType": "ignore"
+      },
+      "retransmit": {
+        "vipObjectType": "object",
+        "vipValue": 3,
+        "vipType": "ignore"
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "78aa89f4-09a0-464a-9bb3-8cefb2cd4e33",
+  "createdOn": 1706313405375,
+  "@rid": 252,
+  "feature": "vmanage-default",
+  "factoryDefault": true,
+  "templateName": "Factory_Default_AAA_Template",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default AAA template settings",
+  "lastUpdatedOn": 1706313405375
+}

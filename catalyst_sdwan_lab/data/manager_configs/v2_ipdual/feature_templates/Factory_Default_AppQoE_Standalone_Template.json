@@ -1,0 +1,280 @@
+{
+  "deviceType": [
+    "vedge-C1121X-8PLTEP",
+    "vedge-C8200-1N-4T",
+    "vedge-C1121X-8P",
+    "vedge-C1131X-8PW",
+    "vedge-C8300-1N1S-4T2X",
+    "vedge-C8300-2N2S-6T",
+    "vedge-ISR1100X-6G-XE",
+    "vedge-ISR-4351",
+    "vedge-ISR-4431",
+    "vedge-ISR-4331",
+    "vedge-ISR-4221X",
+    "vedge-ISRv",
+    "vedge-C1127X-8PMLTEP",
+    "vedge-CSR-1000v",
+    "vedge-ISR-4451-X",
+    "vedge-C8300-1N1S-6T",
+    "vedge-C1121X-8PLTEPW",
+    "vedge-C8300-2N2S-4T2X",
+    "vedge-C1127X-8PLTEP",
+    "vedge-ISR-4461",
+    "vedge-ISR-4321",
+    "vedge-ISR-4221",
+    "vedge-C1111X-8P",
+    "vedge-C1126X-8PLTEP",
+    "vedge-C8000V",
+    "vedge-C1161X-8P",
+    "vedge-C1161X-8PLTEP",
+    "vedge-ISR1100X-4G-XE"
+  ],
+  "templateMinVersion": "15.0.0",
+  "templateType": "appqoe",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "appnav-controller-group": {
+      "vipObjectType": "tree",
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "group-name": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": "ACG-APPQOE"
+          },
+          "appnav-controllers": {
+            "vipObjectType": "tree",
+            "vipType": "constant",
+            "vipPrimaryKey": [
+              "address"
+            ],
+            "vipValue": [
+              {
+                "address": {
+                  "vipObjectType": "object",
+                  "vipType": "constant",
+                  "vipValue": "192.168.2.1"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "vipPrimaryKey": [
+        "group-name"
+      ]
+    },
+    "service-node-group": {
+      "vipObjectType": "tree",
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "name": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": "SNG-APPQOE"
+          },
+          "internal": {
+            "vipObjectType": "node-only",
+            "vipType": "constant",
+            "vipValue": "true"
+          },
+          "service-node": {
+            "vipObjectType": "tree",
+            "vipType": "constant",
+            "vipPrimaryKey": [
+              "address"
+            ],
+            "vipValue": [
+              {
+                "address": {
+                  "vipObjectType": "object",
+                  "vipType": "constant",
+                  "vipValue": "192.168.2.2",
+                  "vipVariableName": "appqoe_service_node_address_0"
+                },
+                "vpg-ip": {
+                  "vipObjectType": "object",
+                  "vipType": "ignore",
+                  "vipValue": ""
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "vipPrimaryKey": [
+        "name"
+      ]
+    },
+    "service-context": {
+      "appqoe": {
+        "vipObjectType": "tree",
+        "vipType": "constant",
+        "vipPrimaryKey": [
+          "name"
+        ],
+        "vipValue": [
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "/1"
+            },
+            "appnav-controller-group": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "ACG-APPQOE"
+            },
+            "service-node-group": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "SNG-APPQOE"
+            },
+            "enable": {
+              "vipObjectType": "node-only",
+              "vipType": "constant",
+              "vipValue": "true"
+            },
+            "vpn": {
+              "vipObjectType": "object",
+              "vipType": "ignore",
+              "vipValue": 0,
+              "vipVariableName": "appqoe_vrf"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "appnav-controller-group": {
+      "vipObjectType": "tree",
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "group-name": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": "ACG-APPQOE"
+          },
+          "appnav-controllers": {
+            "vipObjectType": "tree",
+            "vipType": "constant",
+            "vipPrimaryKey": [
+              "address"
+            ],
+            "vipValue": [
+              {
+                "address": {
+                  "vipObjectType": "object",
+                  "vipType": "constant",
+                  "vipValue": "192.168.2.1"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "vipPrimaryKey": [
+        "group-name"
+      ]
+    },
+    "service-node-group": {
+      "vipObjectType": "tree",
+      "vipType": "constant",
+      "vipValue": [
+        {
+          "name": {
+            "vipObjectType": "object",
+            "vipType": "constant",
+            "vipValue": "SNG-APPQOE"
+          },
+          "internal": {
+            "vipObjectType": "node-only",
+            "vipType": "constant",
+            "vipValue": "true"
+          },
+          "service-node": {
+            "vipObjectType": "tree",
+            "vipType": "constant",
+            "vipPrimaryKey": [
+              "address"
+            ],
+            "vipValue": [
+              {
+                "address": {
+                  "vipObjectType": "object",
+                  "vipType": "constant",
+                  "vipValue": "192.168.2.2",
+                  "vipVariableName": "appqoe_service_node_address_0"
+                },
+                "vpg-ip": {
+                  "vipObjectType": "object",
+                  "vipType": "ignore",
+                  "vipValue": ""
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "vipPrimaryKey": [
+        "name"
+      ]
+    },
+    "service-context": {
+      "appqoe": {
+        "vipObjectType": "tree",
+        "vipType": "constant",
+        "vipPrimaryKey": [
+          "name"
+        ],
+        "vipValue": [
+          {
+            "name": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "/1"
+            },
+            "appnav-controller-group": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "ACG-APPQOE"
+            },
+            "service-node-group": {
+              "vipObjectType": "object",
+              "vipType": "constant",
+              "vipValue": "SNG-APPQOE"
+            },
+            "enable": {
+              "vipObjectType": "node-only",
+              "vipType": "constant",
+              "vipValue": "true"
+            },
+            "vpn": {
+              "vipObjectType": "object",
+              "vipType": "ignore",
+              "vipValue": 0,
+              "vipVariableName": "appqoe_vrf"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "attachedMastersCount": 0,
+  "configType": "xml",
+  "templateId": "d4f00e95-5552-4d37-93e7-48e931910739",
+  "createdOn": 1706357759015,
+  "@rid": 1376,
+  "factoryDefault": true,
+  "feature": "vmanage-default",
+  "templateName": "Factory_Default_AppQoE_Standalone_Template",
+  "createdBy": "system",
+  "devicesAttached": 0,
+  "templateDescription": "Default AppQoE Standalone template settings",
+  "lastUpdatedOn": 1706357759015
+}

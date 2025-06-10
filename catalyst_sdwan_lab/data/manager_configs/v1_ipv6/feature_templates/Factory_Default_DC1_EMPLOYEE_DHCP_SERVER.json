@@ -1,0 +1,157 @@
+{
+  "deviceType": [
+    "vedge-C8000V"
+  ],
+  "templateType": "cisco_dhcp_server",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "system",
+  "editedTemplateDefinition": {
+    "address-pool": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "10.0.0.0/24",
+      "vipVariableName": "dhcp_address_pool"
+    },
+    "exclude": {
+      "vipObjectType": "list",
+      "vipType": "constant",
+      "vipValue": [
+        "10.0.0.1-10.0.0.6"
+      ],
+      "vipVariableName": "dhcp-address_exclude"
+    },
+    "lease-time": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 3600,
+      "vipVariableName": "lease_time"
+    },
+    "options": {
+      "interface-mtu": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_interface_mtu"
+      },
+      "domain-name": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_domain_name"
+      },
+      "default-gateway": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_default_gateway"
+      },
+      "dns-servers": {
+        "vipObjectType": "list",
+        "vipType": "constant",
+        "vipValue": [
+          "8.8.8.8"
+        ],
+        "vipVariableName": "dhcp_dns_server"
+      },
+      "tftp-servers": {
+        "vipObjectType": "list",
+        "vipType": "ignore",
+        "vipVariableName": "tftp-server"
+      },
+      "option-code": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "code"
+        ]
+      }
+    },
+    "static-lease": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "mac-address"
+      ]
+    }
+  },
+  "gTemplateClass": "cedge",
+  "templateDefinition": {
+    "address-pool": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": "10.0.0.0/24",
+      "vipVariableName": "dhcp_address_pool"
+    },
+    "exclude": {
+      "vipObjectType": "list",
+      "vipType": "constant",
+      "vipValue": [
+        "10.0.0.1-10.0.0.6"
+      ],
+      "vipVariableName": "dhcp-address_exclude"
+    },
+    "lease-time": {
+      "vipObjectType": "object",
+      "vipType": "constant",
+      "vipValue": 3600,
+      "vipVariableName": "lease_time"
+    },
+    "options": {
+      "interface-mtu": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_interface_mtu"
+      },
+      "domain-name": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_domain_name"
+      },
+      "default-gateway": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipVariableName": "dhcp_default_gateway"
+      },
+      "dns-servers": {
+        "vipObjectType": "list",
+        "vipType": "constant",
+        "vipValue": [
+          "8.8.8.8"
+        ],
+        "vipVariableName": "dhcp_dns_server"
+      },
+      "tftp-servers": {
+        "vipObjectType": "list",
+        "vipType": "ignore",
+        "vipVariableName": "tftp-server"
+      },
+      "option-code": {
+        "vipType": "ignore",
+        "vipValue": [],
+        "vipObjectType": "tree",
+        "vipPrimaryKey": [
+          "code"
+        ]
+      }
+    },
+    "static-lease": {
+      "vipType": "ignore",
+      "vipValue": [],
+      "vipObjectType": "tree",
+      "vipPrimaryKey": [
+        "mac-address"
+      ]
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "57d3a356-d1bc-401d-bb3a-615408056a7d",
+  "createdOn": 1706313398158,
+  "@rid": 190,
+  "feature": "vmanage-default",
+  "factoryDefault": true,
+  "createdBy": "system",
+  "templateName": "Factory_Default_DC1_EMPLOYEE_DHCP_SERVER",
+  "devicesAttached": 0,
+  "templateDescription": "Factory_Default_DC1_EMPLOYEE_DHCP_SERVER",
+  "lastUpdatedOn": 1706313398158
+}
