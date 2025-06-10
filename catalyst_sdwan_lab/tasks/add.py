@@ -382,9 +382,9 @@ def main(
                 default=0,
             )
 
-            # Find the position of the right most control component value
+            # Find the position of the right most edge
             next_node_x_position = max(
-                [node.x for node in lab.nodes() if node.y == 320], default=-400
+                [node.x for node in lab.nodes() if node.y == 400], default=-400
             )
 
             free_uuids = [
@@ -709,9 +709,9 @@ def main(
                 default=0,
             )
 
-            # Find the position of the right most controller value
+            # Find the position of the right most edge
             next_node_x_position = max(
-                [node.x for node in lab.nodes() if node.y == 320], default=-400
+                [node.x for node in lab.nodes() if node.y == 400], default=-400
             )
 
             free_uuids = [
