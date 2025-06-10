@@ -368,35 +368,47 @@ The tool supports the following scale per CML lab:
 
 The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free.
 
-## Appendix - Offline/Airgabbed Installation
+## Appendix - Offline/Air-gapped Installation
 
-To Install the tool on an airgabbed server please follow theese instructions.
+If you need to install the `catalyst-sdwan-lab` package in an air-gapped environment (without internet access), follow these steps:
 
-Make sure that you have Pythhon3, Python3-venv and unzip installed on your server. The installation of that is not covered in this guide. 
+On a machine with internet access, download the package and all its dependencies.
 
-Create a directory to store the virtual environment and runtime files:
+   ```
+   mkdir catalyst_sdwan_lab_packages
+   cd catalyst_sdwan_lab_packages
+   pip download catalyst-sdwan-lab
+   ```
+   This will create a local directory containing the package `.whl` or `.tar.gz` files along with all its dependencies.
 
-      mkdir csdwan
-      cd csdwan
+Transfer the folder to the Air-Gapped Environment.
 
-- Download the tool from github using the code/zip file.
-- Transfer the zipfile to the airgabbed machine and put into the folder above.
+On the air-gapped machine, create a directory to store the virtual environment and runtime files:
 
-Unszip the file
-    ```unzip sdwan-lab-deployment-tool-main.zip```
+    mkdir csdwan
+    cd csdwan
 
 Create virtual environment:
 
-      python3 -m venv venv
+    python3 -m venv venv
 
 Activate virtual environment:
 
-     source venv/bin/activate
+    source venv/bin/activate
 
-Install the scipt with pip 
+Install the package and its dependencies from the transferred files:
 
-```pip install catalyst-sdwan-lab --no-index --find-link file:///home/sedk/csdwan/sdwan-lab-deployment-tool-main/```
+    pip install --no-index --find-links=/path/to/catalyst_sdwan_lab_packages catalyst-sdwan-lab
 
+Replace `/path/to/catalyst_sdwan_lab_packages` with the path where the downloaded files were copied.
+
+Verify that SD-WAN Lab tool can run:
+
+    sdwan-lab --version
+
+You can also use the following shortcut to run any lab task:
+
+    csdwan --version
 
 ## Appendix - WSL Installation
 
