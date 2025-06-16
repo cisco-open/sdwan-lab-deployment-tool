@@ -139,6 +139,14 @@
                 "bfd": { "optionType": "default", "value": false }
               },
               "nat": { "optionType": "default", "value": false },
+              "intfIpAddress": {
+                "dynamic": {
+                  "dynamicDhcpDistance": {
+                    "optionType": "default",
+                    "value": 1
+                  }
+                }
+              },
               "intfIpV6Address": {
                 "static": {
                   "primaryIpV6Address": {
@@ -256,6 +264,14 @@
                 "bfd": { "optionType": "default", "value": false }
               },
               "nat": { "optionType": "global", "value": true },
+              "intfIpAddress": {
+                "dynamic": {
+                  "dynamicDhcpDistance": {
+                    "optionType": "default",
+                    "value": 1
+                  }
+                }
+              },
               "intfIpV6Address": {
                 "static": {
                   "primaryIpV6Address": {
