@@ -47,7 +47,7 @@ def main(
     workdir: str,
     lab_name: str,
     patty_used: bool,
-    deleteexisitng: bool,
+    deleteexisting: bool,
     retry: bool,
     loglevel: Union[int, str],
     contr_version: str,
@@ -150,7 +150,7 @@ def main(
             f"Use setup task to upload the correct images."
         )
 
-    if deleteexisitng:
+    if deleteexisting:
         track_progress(log, "Checking for exiting lab...")
         # If deleteexisting is set, check if there's existing lab with same name and SD-WAN Manager IP.
         lab = next(
@@ -164,7 +164,7 @@ def main(
         if lab:
             # If found, remove this lab.
             track_progress(log, "Removing existing lab...")
-            delete.main(cml, lab.title, True, loglevel)
+            delete.main(cml_config, lab.title, True, loglevel)
         else:
             log.info("No existing lab found, continuing...")
 

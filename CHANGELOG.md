@@ -13,6 +13,7 @@
 - In setup task, verify license and print error that the tool is not supported on CML-Free as it doesn't support required number of nodes
 - Fix issue where add task might fail for SD-WAN Manager 20.18 and higher
 - Fix issue where add task fails with traceback if user removed default device templates/configuration groups
+- Fix issue where restore task fails when --deleteexisting option is used
 
 # Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 

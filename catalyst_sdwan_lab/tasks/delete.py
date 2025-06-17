@@ -50,7 +50,7 @@ def main(
         lab.wipe()
         log.info("Removing the lab...")
         lab.remove()
-        track_progress(log, "Delete task done\n")
+        track_progress(log, "Delete task done")
 
     else:
         exit("Could not find a lab with specified name.")
