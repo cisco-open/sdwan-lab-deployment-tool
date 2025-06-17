@@ -496,14 +496,16 @@ def setup_logging(loglevel: Union[int, str]) -> Logger:
         not in record.getMessage()
     )
     # Filter out specific pyats warnings as they are expected for CML
-    def pyats_filter(record):
-        msg = record.getMessage()
-        return not (
-            "Could not find details in testbed for server terminal_server." in msg
-            or "No details found in testbed for hostname terminal_server." in msg
+    pyats_logger = logging.getLogger("genie.libs.filetransferutils.bases.fileutils")
+    pyats_logger.addFilter(
+        lambda record: not any(
+            msg in record.getMessage()
+            for msg in [
+                "Could not find details in testbed for server terminal_server.",
+                "No details found in testbed for hostname terminal_server.",
+            ]
         )
-
-    logging.getLogger("genie.libs.filetransferutils.bases.fileutils").addFilter(pyats_filter)
+    )
     return log
 
 
