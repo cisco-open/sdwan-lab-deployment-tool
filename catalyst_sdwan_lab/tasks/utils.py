@@ -495,6 +495,15 @@ def setup_logging(loglevel: Union[int, str]) -> Logger:
         lambda record: "Failed to establish a new connection: [Errno 61]"
         not in record.getMessage()
     )
+    # Filter out specific pyats warnings as they are expected for CML
+    def pyats_filter(record):
+        msg = record.getMessage()
+        return not (
+            "Could not find details in testbed for server terminal_server." in msg
+            or "No details found in testbed for hostname terminal_server." in msg
+        )
+
+    logging.getLogger("genie.libs.filetransferutils.bases.fileutils").addFilter(pyats_filter)
     return log
 
 
