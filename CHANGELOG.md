@@ -1,18 +1,18 @@
-# Catalyst SD-WAN Lab 2.0.16 [unreleased]
+# Catalyst SD-WAN Lab 2.1.0 [Jun 17, 2025]
 
-- In setup task, add option to delete already defined software images
-- Fix issue where add task might fail for SD-WAN Manager 20.18 and higher
-- In setup task, change behaviour when --list is specified, print software version and exit
-- In setup task, verify license and print error that the tool is not supported on CML-Free as it doesn't support required number of nodes
-- Update validator cloud-init to support 20.18 release
-- In restore task, add option to change the software version of control components and SD-WAN/SD-Routing edges during restore
-- Increase SD-WAN Manager CPU count from 8 to 10
-- In setup and restore tasks, add check to make sure user is not using default credentials for SD-WAN Manager
-- Fix issue where add task fails with traceback if user removed default device templates/configuration groups
+- Add support for IPv6 and dual stack overlays
 - Change Gateway node type from c8000v to IOL XE
 - Change transports node type from unmanaged_switch to IOL L2 XE
-- Add support for IPv6 and dual stack overlays
+- Update validator cloud-init to support 20.18 release
+- Increase SD-WAN Manager CPU count from 8 to 10
 - In add task, add option to set custom CPUs and RAM for a device
+- In deploy and restore tasks, add check to make sure user is not using default credentials for SD-WAN Manager
+- In restore task, add option to change the software version of control components and SD-WAN/SD-Routing edges during restore
+- In setup task, add option to delete already defined software images
+- In setup task, change behaviour when --list is specified, print software version and exit
+- In setup task, verify license and print error that the tool is not supported on CML-Free as it doesn't support required number of nodes
+- Fix issue where add task might fail for SD-WAN Manager 20.18 and higher
+- Fix issue where add task fails with traceback if user removed default device templates/configuration groups
 
 # Catalyst SD-WAN Lab 2.0.15 [Feb 25, 2025]
 
