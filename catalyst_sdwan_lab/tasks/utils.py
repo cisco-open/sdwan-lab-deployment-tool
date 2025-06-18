@@ -208,10 +208,10 @@ def create_cert(ca_cert_str: str, ca_key_str: str, csr_str: str) -> str:
 
 
 def verify_cml_version(cml: ClientLibrary) -> None:
-    if cml.VERSION.major == 2 and cml.VERSION.minor >= 6:
+    if cml.VERSION.major == 2 and cml.VERSION.minor >= 7:
         pass
     else:
-        exit("Upgrade CML to 2.6 or later to use the tool.")
+        exit("Upgrade CML to 2.7 or later to use the tool.")
 
 
 def get_cml_sdwan_image_definition(
