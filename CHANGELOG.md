@@ -1,6 +1,6 @@
 # Catalyst SD-WAN Lab 2.2.0 [unreleased]
 
-- Update minimum versions of virl2-client and cisco-sdwan packages
+- Update minimum versions of cisco-sdwan, urllib3 and virl2-client packages
 
 # Catalyst SD-WAN Lab 2.1.1 [Jun 18, 2025]
 
