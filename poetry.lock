@@ -638,14 +638,14 @@ files = [
 
 [[package]]
 name = "cisco-sdwan"
-version = "1.24"
+version = "1.26"
 description = "Cisco-SDWAN Automation Toolset"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "cisco_sdwan-1.24-py3-none-any.whl", hash = "sha256:da39b1c6034bac49c7d41743f9c029532c6d81a4f46358a29f13d0fe2622d60f"},
-    {file = "cisco_sdwan-1.24.tar.gz", hash = "sha256:bf0d945000ba971468cd9a80b4fad72ecb551eca53b449bde437c8ba9322cb9a"},
+    {file = "cisco_sdwan-1.26-py3-none-any.whl", hash = "sha256:ea3a785d019efe0b9598ed0a801d1e30a36167a1b21f85d5b92ce1ddb632a8c0"},
+    {file = "cisco_sdwan-1.26.tar.gz", hash = "sha256:4f1f2d0dcda8b110ae44173d1978d77e29ff9307a29298d111a7e1daf8dc013d"},
 ]
 
 [package.dependencies]
@@ -1546,14 +1546,14 @@ trio = ["trio (>=0.22.0,<1.0)"]
 
 [[package]]
 name = "httpx"
-version = "0.27.2"
+version = "0.28.1"
 description = "The next generation HTTP client."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "httpx-0.27.2-py3-none-any.whl", hash = "sha256:7bb2708e112d8fdd7829cd4243970f0c223274051cb35ee80c03301ee29a3df0"},
-    {file = "httpx-0.27.2.tar.gz", hash = "sha256:f7c2be1d2f3c3c3160d441802406b206c2b76f5947b11115e6df10c6c65e66c2"},
+    {file = "httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"},
+    {file = "httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc"},
 ]
 
 [package.dependencies]
@@ -1561,7 +1561,6 @@ anyio = "*"
 certifi = "*"
 httpcore = "==1.*"
 idna = "*"
-sniffio = "*"
 
 [package.extras]
 brotli = ["brotli ; platform_python_implementation == \"CPython\"", "brotlicffi ; platform_python_implementation != \"CPython\""]
@@ -3999,23 +3998,23 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "virl2-client"
-version = "2.8.0"
+version = "2.9.0"
 description = "VIRL2 Client Library"
 optional = false
-python-versions = "<4.0.0,>=3.9.0"
+python-versions = "<4.0.0,>=3.9.2"
 groups = ["main"]
 files = [
-    {file = "virl2_client-2.8.0-py3-none-any.whl", hash = "sha256:c0659daade9b436201ca8dea989877c031e58690d834be8eecd368aee45ab0a5"},
-    {file = "virl2_client-2.8.0.tar.gz", hash = "sha256:b8ecb95948dcaeea2e956834137985eeee1f3fb64cbc9eeb40eb277d230960fe"},
+    {file = "virl2_client-2.9.0-py3-none-any.whl", hash = "sha256:a1ced7ae42bb1491c0468fd6ee31d4a2022f9f8ee6b25a62aef7297ca5e0bfef"},
+    {file = "virl2_client-2.9.0.tar.gz", hash = "sha256:cbb86227e75d287368aa158f74e20dad440f2b3f6dd399bfda269e451248aaa3"},
 ]
 
 [package.dependencies]
-httpx = ">=0.27.0,<0.28.0"
+httpx = ">=0.28.1,<0.29.0"
 
 [package.extras]
-docs = ["sphinx (>=7,<8)", "sphinx_rtd_theme (>=2,<3)"]
-events = ["aiohttp (>=3.8,<4.0)"]
-pyats = ["pyats (>=24,<25)"]
+docs = ["sphinx (>=7,<8)", "sphinx_rtd_theme (>=3,<4)"]
+events = ["aiohttp (>=3.11.18,<3.12.0)"]
+pyats = ["pyats (>=25,<26)"]
 
 [[package]]
 name = "wcwidth"
@@ -4370,4 +4369,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9.2"
-content-hash = "fb0e24fa0f4452a512a9b87b7d6865f654b73096da67955448a235290eb7ea24"
+content-hash = "82c920559606aa9da3bdc2d4c4dd1063d4a2d269fe59e78dde74fe357b8d1bcf"

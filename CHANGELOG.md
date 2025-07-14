@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.2.0 [unreleased]
+
+- Update minimum versions of virl2-client and cisco-sdwan packages
+
 # Catalyst SD-WAN Lab 2.1.1 [Jun 18, 2025]
 
 - Print error when user tries to use the SD-WAN Lab Tool 2.1.x or higher against CML 2.6.x
