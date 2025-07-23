@@ -63,7 +63,7 @@ write_files:
 {% if ip_type in ['v4', 'dual'] %}
           <ip>
             <route>
-              <prefix>172.16.0.0/16</prefix>
+              <prefix>0.0.0.0/0</prefix>
               <next-hop>
                 <address>172.16.0.254</address>
               </next-hop>
