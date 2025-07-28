@@ -1,6 +1,7 @@
-# Catalyst SD-WAN Lab 2.2.0 [unreleased]
+# Catalyst SD-WAN Lab 2.1.2 [Jul 28, 2025]
 
-- Update minimum versions of cisco-sdwan, urllib3 and virl2-client packages
+- Update minimum versions of aiohttp, cisco-sdwan, urllib3 and virl2-client packages
+- Fix issue where DNS resolution for Internet access fails
 
 # Catalyst SD-WAN Lab 2.1.1 [Jun 18, 2025]
 
