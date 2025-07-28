@@ -280,6 +280,7 @@ nodes:
        route-target import 1:20
        !
        address-family ipv4
+        import ipv4 unicast map RM_DEFAULT
        exit-address-family
        !
        address-family ipv6
@@ -305,6 +306,7 @@ nodes:
        route-target import 1:30
        !
        address-family ipv4
+        import ipv4 unicast map RM_DEFAULT
        exit-address-family
        !
        address-family ipv6
@@ -385,7 +387,6 @@ nodes:
        no shutdown
       !
       interface Ethernet7/3
-       vrf forwarding inet
        ip address dhcp
        ip nat outside
        no shutdown
@@ -394,10 +395,12 @@ nodes:
        bgp router-id 172.16.0.254
        bgp log-neighbor-changes
        !
+       address-family ipv4
+        network 0.0.0.0
+       exit-address-family
 {% if ip_type in ['v4', 'dual'] %}
        address-family ipv4 vrf inet
         network 172.16.1.0 mask 255.255.255.0
-        network 0.0.0.0 mask 0.0.0.0
        exit-address-family
        !
        address-family ipv4 vrf mpls
@@ -426,17 +429,22 @@ nodes:
       ip nat inside source list 1 interface Ethernet7/3 vrf inet overload
       ip nat inside source list 1 interface Ethernet7/3 vrf vpn0 overload
       ip dns view vrf vpn0 default
-       dns forwarder vrf inet {{ dns_server }}
+       dns forwarder {{ dns_server }}
        dns forwarding source-interface Ethernet7/3
       ip dns view vrf inet default
-       dns forwarder vrf inet {{ dns_server }}
+       dns forwarder {{ dns_server }}
        dns forwarding source-interface Ethernet7/3
       ip dns server
+      !
+      ip prefix-list PL_DEFAULT seq 5 permit 0.0.0.0/0
       !
       ip access-list standard 1
        10 permit 10.0.0.0 0.0.0.255
        20 permit 172.16.0.0 0.15.255.255
        30 permit 192.168.0.0 0.0.255.255
+      !
+      route-map RM_DEFAULT permit 10 
+       match ip address prefix-list PL_DEFAULT
       !
     cpu_limit: null
     cpus: null
