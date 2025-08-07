@@ -35,17 +35,10 @@ def validate_credentials(pylab: ClPyats, node_label: str) -> bool:
     try:
         pylab.run_command(node_label, "show version")
         return True
-    except unicon.core.errors.ConnectionError as conn_err:
+    except (unicon.core.errors.UniconAuthenticationError, unicon.core.errors.ConnectionError) as conn_err:
         current_exception = conn_err
-        # Loop to inspect the chain of causes
         while current_exception:
-            if isinstance(
-                current_exception,
-                unicon.core.errors.UniconAuthenticationError,
-            ) or isinstance(
-                current_exception,
-                unicon.core.errors.CredentialsExhaustedError,
-            ):
+            if isinstance(current_exception, unicon.core.errors.UniconAuthenticationError) or isinstance(current_exception, unicon.core.errors.ConnectionError):
                 return False
             # Move to the next cause in the chain
             current_exception = getattr(current_exception, "__cause__", None)
@@ -107,7 +100,7 @@ def check_pyats_device_connectivity(
                 return [personality, node_type, pylab]
             else:
                 exit(
-                    f"Could not login to {node_label} using admin username and default or SD-WAN Manager password."
+                    f"Could not login to {node_label} using admin username and default or SD-WAN Manager password. "
                     f"Please fix admin user password and rerun the script."
                 )
     except unicon.core.errors.ConnectionError as conn_err:
@@ -130,7 +123,7 @@ def check_pyats_device_connectivity(
                     return [personality, node_type, pylab]
                 else:
                     exit(
-                        f"Could not login to {node_label} using admin username and default or SD-WAN Manager password."
+                        f"Could not login to {node_label} using admin username and default or SD-WAN Manager password. "
                         f"Please fix admin user password and rerun the script."
                     )
             # Move to the next cause in the chain
