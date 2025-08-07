@@ -35,7 +35,10 @@ def validate_credentials(pylab: ClPyats, node_label: str) -> bool:
     try:
         pylab.run_command(node_label, "show version")
         return True
-    except (unicon.core.errors.UniconAuthenticationError, unicon.core.errors.ConnectionError) as conn_err:
+    except (
+        unicon.core.errors.UniconAuthenticationError,
+        unicon.core.errors.ConnectionError,
+    ) as conn_err:
         current_exception = conn_err
         # Loop to inspect the chain of causes
         while current_exception:
