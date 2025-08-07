@@ -37,13 +37,14 @@ def validate_credentials(pylab: ClPyats, node_label: str) -> bool:
         return True
     except (unicon.core.errors.UniconAuthenticationError, unicon.core.errors.ConnectionError) as conn_err:
         current_exception = conn_err
+        # Loop to inspect the chain of causes
         while current_exception:
             if isinstance(
                 current_exception,
-                unicon.core.errors.UniconAuthenticationError
+                unicon.core.errors.UniconAuthenticationError,
             ) or isinstance(
                 current_exception,
-                unicon.core.errors.ConnectionError
+                unicon.core.errors.ConnectionError,
             ):
                 return False
             # Move to the next cause in the chain
