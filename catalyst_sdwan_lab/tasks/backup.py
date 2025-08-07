@@ -39,10 +39,10 @@ def validate_credentials(pylab: ClPyats, node_label: str) -> bool:
         current_exception = conn_err
         while current_exception:
             if isinstance(
-                current_exception, 
+                current_exception,
                 unicon.core.errors.UniconAuthenticationError
             ) or isinstance(
-                current_exception, 
+                current_exception,
                 unicon.core.errors.ConnectionError
             ):
                 return False
