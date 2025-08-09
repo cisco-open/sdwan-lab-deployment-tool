@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 2.1.3 [unreleased]
+# Catalyst SD-WAN Lab 2.1.3 [Aug 9, 2025]
 
 - In backup task, fix issue where task might fail with generic traceback if SD-WAN Edge uses custom credentials
 - In restore task, fix issue where task will fail if PATTy is used and MRF is configured
