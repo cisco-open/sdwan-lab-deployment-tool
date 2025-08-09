@@ -352,7 +352,7 @@ def main(
     if os.path.exists(join(manager_configs_dir, "mrf")):
         track_progress(log, "Restoring MRF regions...")
         with Rest(
-            base_url=f"https://{manager_ip}",
+            base_url=f"https://{manager_ip}:{manager_port}",
             username=manager_user,
             password=manager_password,
         ) as api:
