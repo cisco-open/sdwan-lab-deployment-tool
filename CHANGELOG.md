@@ -1,3 +1,8 @@
+# Catalyst SD-WAN Lab 2.1.3 [unreleased]
+
+- In setup task, fix problem where error is not printed on CML-Free
+- In setup task, fix problem where refplat ISO images are not converted properly
+
 # Catalyst SD-WAN Lab 2.1.2 [Jul 28, 2025]
 
 - Update minimum versions of aiohttp, cisco-sdwan, urllib3 and virl2-client packages

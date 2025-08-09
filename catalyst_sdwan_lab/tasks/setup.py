@@ -68,7 +68,7 @@ def main(
 
     # Check CML license status
     license_status = cml.licensing.status()["authorization"]["status"]
-    if license_status == "INIT":
+    if license_status in ["INIT", "EVAL"]:
         print(
             "The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free."
         )
@@ -208,6 +208,7 @@ def main(
             image_definition["id"] for image_definition in existing_image_definitions
         ]
 
+        track_progress(log, "Verifying if refplat images require conversion...")
         for image_definition in existing_image_definitions:
             match = re.match(
                 r"^cat-sdwan-(edge|controller|validator|manager)-([\w\-]+)$",
@@ -217,6 +218,7 @@ def main(
                 # Migrate image from using - in software version to using .
                 # For example from cat-sdwan-manager-20-13-1 to cat-sdwan-manager-20.13.1
                 # Before update, check if node definition is read only
+                track_progress(log, f"Updating image {image_definition['id']}...")
                 if image_definition["read_only"]:
                     # Remove read-only flag
                     cml.definitions.set_image_definition_read_only(
@@ -224,16 +226,17 @@ def main(
                     )
                 try:
                     cml.definitions.remove_image_definition(image_definition["id"])
-                    # Set new ID and disk folder
-                    image_definition["id"] = (
-                        f"cat-sdwan-{match.group(1)}-{match.group(2).replace('-', '.')}"
-                    )
-                    image_definition["disk_subfolder"] = image_definition["id"]
+                    # Leave only required fields
+                    image_definition = {
+                        "disk_image": image_definition["disk_image"],
+                        "id": f"cat-sdwan-{match.group(1)}-{match.group(2).replace('-', '.')}",
+                        "label": image_definition["label"],
+                        "node_definition_id": image_definition["node_definition_id"],
+                        "read_only": image_definition.get("read_only", False),
+                    }
                     cml.definitions.upload_image_definition(image_definition)
-                except HTTPStatusError:
-                    warnings.append(
-                        f"Cannot setup image {image_definition['id']} as it's currently in use by a lab."
-                    )
+                except HTTPStatusError as e:
+                    log.warning(f"Failed to update image {image_definition['id']}: {e}")
 
         log.info(f"Looking for new software images in {os.getcwd()}...")
         software_type_to_node_type_mapping = {
