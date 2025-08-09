@@ -1,6 +1,7 @@
 # Catalyst SD-WAN Lab 2.1.3 [unreleased]
 
-- Fix issue where backup task might fail with generic traceback if SD-WAN Edge uses custom credentials
+- In backup task, fix issue where task might fail with generic traceback if SD-WAN Edge uses custom credentials
+- In restore task, fix issue where task will fail if PATTy is used and MRF is configured
 - In setup task, fix problem where error is not printed on CML-Free
 - In setup task, fix problem where refplat ISO images are not converted properly
 
