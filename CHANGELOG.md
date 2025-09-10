@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.1.4 [unreleased]
+
+- Fix issue where SD-WAN Manager might not boot in CML 2.8 and 2.9
+
 # Catalyst SD-WAN Lab 2.1.3 [Aug 9, 2025]
 
 - In backup task, fix issue where task might fail with generic traceback if SD-WAN Edge uses custom credentials

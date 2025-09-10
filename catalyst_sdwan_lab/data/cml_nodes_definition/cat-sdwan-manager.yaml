@@ -71,7 +71,7 @@ boot:
 sim:
   linux_native:
     cpus: 10
-    disk_driver: ide
+    disk_driver: virtio
     driver: server
     libvirt_domain_driver: kvm
     nic_driver: virtio
