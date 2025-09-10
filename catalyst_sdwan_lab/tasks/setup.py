@@ -238,7 +238,7 @@ def main(
                 except HTTPStatusError as e:
                     log.warning(f"Failed to update image {image_definition['id']}: {e}")
 
-        log.info(f"Looking for new software images in {os.getcwd()}...")
+        track_progress(log, f"Looking for new software images in {os.getcwd()}...")
         software_type_to_node_type_mapping = {
             "edge": "cat-sdwan-validator",
             "bond": "cat-sdwan-validator",
