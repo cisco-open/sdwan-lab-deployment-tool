@@ -119,32 +119,33 @@ def main(
             )
 
     # Verify if requested software version is defined in CML
-    manager_image = get_cml_sdwan_image_definition(
-        cml, "cat-sdwan-manager", contr_version
-    )
-    controller_image = get_cml_sdwan_image_definition(
-        cml, "cat-sdwan-controller", contr_version
-    )
-    validator_image = get_cml_sdwan_image_definition(
-        cml, "cat-sdwan-validator", contr_version
-    )
+    if contr_version:
+        manager_image = get_cml_sdwan_image_definition(
+            cml, "cat-sdwan-manager", contr_version
+        )
+        controller_image = get_cml_sdwan_image_definition(
+            cml, "cat-sdwan-controller", contr_version
+        )
+        validator_image = get_cml_sdwan_image_definition(
+            cml, "cat-sdwan-validator", contr_version
+        )
     cml_image_definitions = cml.definitions.image_definitions()
     defined_images = set(image["id"] for image in cml_image_definitions)
     missing_images = []
     for node in cml_topology_dict["nodes"]:
-        if node["node_definition"] in ["cat-sdwan-manager"] and manager_image:
+        if node["node_definition"] in ["cat-sdwan-manager"] and contr_version:
             if (
                 f"{manager_image}" not in defined_images
                 and f"{manager_image}" not in missing_images
             ):
                 missing_images.append(f"{manager_image}")
-        elif node["node_definition"] in ["cat-sdwan-controller"] and controller_image:
+        elif node["node_definition"] in ["cat-sdwan-controller"] and contr_version:
             if (
                 f"{controller_image}" not in defined_images
                 and f"{controller_image}" not in missing_images
             ):
                 missing_images.append(f"{controller_image}")
-        elif node["node_definition"] in ["cat-sdwan-validator"] and validator_image:
+        elif node["node_definition"] in ["cat-sdwan-validator"] and contr_version:
             if (
                 f"{validator_image}" not in defined_images
                 and f"{validator_image}" not in missing_images
