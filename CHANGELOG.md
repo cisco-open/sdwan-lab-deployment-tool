@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 2.1.5 [unreleased]
+# Catalyst SD-WAN Lab 2.1.5 [Sep 19, 2025]
 
 - In restore task, fix issue where task might fail if Manager and Controller/Validator versions are not matching
 - In restore task, fix issue where the final output contains port 8443 instead of port used by PATty

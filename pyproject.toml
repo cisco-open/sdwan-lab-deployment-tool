@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "catalyst-sdwan-lab"
-version = "2.1.4"
+version = "2.1.5"
 description = "Catalyst SD-WAN Lab Deployment Tool - Automation Tool for managing Cisco Catalyst SD-WAN labs inside Cisco Modeling Labs"
 license = "BSD-3-Clause"
 authors = ["Tomasz Zarski <tzarski@cisco.com>"]
