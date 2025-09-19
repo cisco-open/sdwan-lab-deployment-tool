@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.1.5 [unreleased]
+
+- In restore task, fix issue where the final output contains port 8443 instead of port used by PATty
+
 # Catalyst SD-WAN Lab 2.1.4 [Sep 10, 2025]
 
 - Fix issue where SD-WAN Manager might not boot in CML 2.8 and 2.9
