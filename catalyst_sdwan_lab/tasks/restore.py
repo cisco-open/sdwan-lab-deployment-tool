@@ -538,7 +538,7 @@ def main(
         f"#############################################\n"
         f"Lab is restored.\n"
         f"CML URL: https://{cml_config.url}\n"
-        f"SD-WAN Manager URL: https://{manager_ip}:8443\n"
+        f"SD-WAN Manager URL: https://{manager_ip}:{manager_port}\n"
         f"Use the username/password set with the script for CML and SD-WAN Manager login.\n"
         f"All other nodes use default username/password.\n"
         f"#############################################"
