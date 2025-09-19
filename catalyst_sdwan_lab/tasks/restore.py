@@ -24,6 +24,7 @@ from .utils import (
     DATA_DIR,
     check_manager_ip_is_free,
     configure_manager_basic_settings,
+    get_cml_sdwan_image_definition,
     get_sdwan_lab_parameters,
     load_certificate_details,
     onboard_control_components,
@@ -118,20 +119,38 @@ def main(
             )
 
     # Verify if requested software version is defined in CML
+    if contr_version:
+        manager_image = get_cml_sdwan_image_definition(
+            cml, "cat-sdwan-manager", contr_version
+        )
+        controller_image = get_cml_sdwan_image_definition(
+            cml, "cat-sdwan-controller", contr_version
+        )
+        validator_image = get_cml_sdwan_image_definition(
+            cml, "cat-sdwan-validator", contr_version
+        )
     cml_image_definitions = cml.definitions.image_definitions()
     defined_images = set(image["id"] for image in cml_image_definitions)
     missing_images = []
     for node in cml_topology_dict["nodes"]:
-        if (
-            node["node_definition"]
-            in ["cat-sdwan-controller", "cat-sdwan-manager", "cat-sdwan-validator"]
-            and contr_version
-        ):
+        if node["node_definition"] in ["cat-sdwan-manager"] and contr_version:
             if (
-                f'{node["node_definition"]}-{contr_version}' not in defined_images
-                and f'{node["node_definition"]}-{contr_version}' not in missing_images
+                f"{manager_image}" not in defined_images
+                and f"{manager_image}" not in missing_images
             ):
-                missing_images.append(f'{node["node_definition"]}-{contr_version}')
+                missing_images.append(f"{manager_image}")
+        elif node["node_definition"] in ["cat-sdwan-controller"] and contr_version:
+            if (
+                f"{controller_image}" not in defined_images
+                and f"{controller_image}" not in missing_images
+            ):
+                missing_images.append(f"{controller_image}")
+        elif node["node_definition"] in ["cat-sdwan-validator"] and contr_version:
+            if (
+                f"{validator_image}" not in defined_images
+                and f"{validator_image}" not in missing_images
+            ):
+                missing_images.append(f"{validator_image}")
         elif node["node_definition"] == "cat-sdwan-edge" and edge_version:
             if (
                 f'{node["node_definition"]}-{edge_version}' not in defined_images
@@ -246,14 +265,12 @@ def main(
         if contr_version:
             # Overwrite the image definition for control components
             for node in cml_topology_dict["nodes"]:
-                if node["node_definition"] in [
-                    "cat-sdwan-controller",
-                    "cat-sdwan-manager",
-                    "cat-sdwan-validator",
-                ]:
-                    node["image_definition"] = (
-                        f'{node["node_definition"]}-{contr_version}'
-                    )
+                if node["node_definition"] in ["cat-sdwan-manager"]:
+                    node["image_definition"] = f"{manager_image}"
+                if node["node_definition"] in ["cat-sdwan-controller"]:
+                    node["image_definition"] = f"{controller_image}"
+                if node["node_definition"] in ["cat-sdwan-validator"]:
+                    node["image_definition"] = f"{validator_image}"
         if edge_version:
             # Overwrite the image definition for control components
             for node in cml_topology_dict["nodes"]:
