@@ -154,7 +154,7 @@ def check_manager_ip_is_free(ip: str) -> None:
 
 
 def configure_manager_basic_settings(
-    manager_session: ManagerSession, ca_chain: str, log: Logger
+    manager_session: ManagerSession, ca_chain: str, org_name: str, log: Logger
 ) -> None:
     """
     Configure basic settings for SD-WAN Manager
@@ -162,7 +162,7 @@ def configure_manager_basic_settings(
     track_progress(log, "Configuring basic settings...")
     manager_config_settings = manager_session.endpoints.configuration_settings
     if manager_config_settings.get_organizations().first().org is None:
-        manager_config_settings.edit_organizations(Organization(org=ORG_NAME))
+        manager_config_settings.edit_organizations(Organization(org=org_name))
     else:
         log.info("Org-name is already set")
     manager_config_settings.edit_devices(Device(domain_ip=VALIDATOR_FQDN))
@@ -688,3 +688,88 @@ def get_ip_type(manager_session: ManagerSession) -> str:
         return "v6"
     else:
         return "v4"
+
+
+def extract_org_name_from_serial_file(serial_file_path: str) -> str:
+    """
+    Extract organization name from .viptela serial file.
+    The .viptela file is a gzipped tar archive containing JSON data in 'viptela_serial_file'.
+    Returns the organization name from the JSON or raises an exception if not found.
+    """
+    import gzip
+    import json
+    import tarfile
+    from io import BytesIO
+
+    try:
+        # Read and decompress the .viptela file
+        with open(serial_file_path, 'rb') as f:
+            # First decompress with gzip
+            with gzip.GzipFile(fileobj=f) as gz:
+                # The decompressed content is a tar archive
+                tar_data = gz.read()
+
+        # Extract the JSON content from the tar archive
+        with tarfile.open(fileobj=BytesIO(tar_data), mode='r') as tar:
+            # Look specifically for 'viptela_serial_file' member
+            try:
+                json_member = tar.getmember('viptela_serial_file')
+            except KeyError:
+                raise ValueError("viptela_serial_file not found in serial file archive")
+
+            # Extract the JSON content
+            json_file = tar.extractfile(json_member)
+            if json_file is None:
+                raise ValueError("Could not extract viptela_serial_file from serial file")
+
+            json_content = json_file.read().decode('utf-8')
+
+        # Parse JSON and extract organization name
+        serial_data = json.loads(json_content)
+        org_name = serial_data.get('organization')
+
+        if not org_name:
+            raise ValueError("Organization name not found in serial file")
+
+        return org_name
+
+    except (IOError, OSError, gzip.BadGzipFile, tarfile.TarError, json.JSONDecodeError) as e:
+        raise ValueError(f"Failed to extract organization name from serial file {serial_file_path}: {e}")
+
+
+def extract_org_name_from_topology(cml_topology_dict: Dict) -> str:
+    """
+    Extract organization name from CML topology dictionary.
+    Searches for <organization-name> tag in manager node's cloud-init configuration.
+    Returns the organization name or defaults to ORG_NAME if not found.
+    """
+    try:
+        # Find the manager node in the topology
+        manager_node = next(
+            node
+            for node in cml_topology_dict.get("nodes", [])
+            if node.get("node_definition") == "cat-sdwan-manager"
+        )
+
+        # Get the cloud-init configuration
+        cloud_init_config = manager_node.get("configuration", "")
+
+        # Extract organization name using regex
+        org_match = re.search(
+            r"<organization-name>([^<]+)</organization-name>",
+            cloud_init_config
+        )
+
+        if org_match:
+            return org_match.group(1).strip()
+        else:
+            # Fallback to default if not found
+            return ORG_NAME
+
+    except (StopIteration, KeyError, AttributeError) as e:
+        # Fallback to default if parsing fails
+        sys.exit(
+            f"Failed to extract organization name from topology: {e}. "
+            f"Using default organization name: {ORG_NAME}"
+        )
+        return ORG_NAME

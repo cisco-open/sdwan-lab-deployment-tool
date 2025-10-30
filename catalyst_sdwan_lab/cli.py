@@ -251,6 +251,11 @@ def gateway_mask_options(f: Callable[..., Any]) -> Callable[..., Any]:
     show_default=True,
     help="IP type to use for deployment: v4, v6, or dual. Default is v4.",
 )
+@click.option(
+    "--serial-file",
+    metavar="<serial-file-path>",
+    help="Path to custom serial file (.viptela). Organization name will be automatically extracted from this file.",
+)
 @click.pass_context
 def cli_deploy(
     ctx: click.Context,
@@ -264,6 +269,7 @@ def cli_deploy(
     bridge: str,
     dns: str,
     ip_type: str,
+    serial_file: str,
     retry: bool,
 ) -> None:
     """
@@ -294,6 +300,7 @@ def cli_deploy(
         bridge,
         dns,
         ip_type,
+        serial_file,
         patty_used,
         retry,
         loglevel,

@@ -6,7 +6,8 @@
 
 import datetime
 import re
-from os.path import join
+import sys
+from os.path import exists, join
 from typing import Union
 
 from catalystwan.endpoints.configuration_device_inventory import SerialFilePayload
@@ -23,6 +24,7 @@ from .utils import (
     attach_basic_controller_template,
     check_manager_ip_is_free,
     configure_manager_basic_settings,
+    extract_org_name_from_serial_file,
     get_cml_sdwan_image_definition,
     get_sdwan_lab_parameters,
     load_certificate_details,
@@ -48,6 +50,7 @@ def main(
     bridge: str,
     dns_server: str,
     ip_type: str,
+    serial_file: str,
     patty_used: bool,
     retry: bool,
     loglevel: Union[int, str],
@@ -57,6 +60,17 @@ def main(
 
     # Setup logging
     log = setup_logging(loglevel)
+
+    # Extract org-name from serial file if provided, otherwise use default
+    if serial_file:
+        try:
+            org_name = extract_org_name_from_serial_file(serial_file)
+            log.info(f"Extracted organization name from serial file: {org_name}")
+        except ValueError as e:
+            sys.exit(f"Error extracting organization name from serial file: {e}")
+    else:
+        org_name = ORG_NAME
+        log.info(f"Using default organization name: {org_name}")
 
     # Verify if the SD-WAN Manager password is not using default credentials
     if manager_password == "admin":
@@ -127,7 +141,7 @@ def main(
         controller_image=controller_image,
         validator_image=validator_image,
         root_ca=ca_chain,
-        org_name=ORG_NAME,
+        org_name=org_name,
         validator_fqdn=VALIDATOR_FQDN,
         manager_num="1",
         controller_num="01",
@@ -180,7 +194,7 @@ def main(
         manager_ip, manager_port, manager_user, manager_password, log
     )
     # Configure basic settings like org-name, validator fqdn etc.
-    configure_manager_basic_settings(manager_session, ca_chain, log)
+    configure_manager_basic_settings(manager_session, ca_chain, org_name, log)
 
     # Add controllers to SD-WAN Manager and sing certificates
     if ip_type == "v6":
@@ -198,12 +212,21 @@ def main(
     )
 
     track_progress(log, "Uploading Serial File...")
-    serial_file = SerialFilePayload(
-        join(DATA_DIR, f"serial_files/serialFile-v{str(serial_file_version)}.viptela"),
-        "valid",
-    )
+    # Use custom serial file if provided, otherwise use default
+    if serial_file:
+        # Validate that the custom serial file exists
+        if not exists(serial_file):
+            sys.exit(f"Custom serial file not found: {serial_file}")
+        serial_file_payload = SerialFilePayload(serial_file, "valid")
+        log.info(f"Using custom serial file: {serial_file}")
+    else:
+        # Use default serial file
+        default_serial_file = join(DATA_DIR, f"serial_files/serialFile-v{str(serial_file_version)}.viptela")
+        serial_file_payload = SerialFilePayload(default_serial_file, "valid")
+        log.info(f"Using default serial file: {default_serial_file}")
+
     manager_session.endpoints.configuration_device_inventory.upload_wan_edge_list(
-        serial_file
+        serial_file_payload
     )
 
     if config_version == 1:
