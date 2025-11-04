@@ -313,7 +313,7 @@ Below you will find few examples of add task:
     sdwan-lab add 1 validator 20.9.4 --lab sdwan1
     sdwan-lab add 2 controllers 20.12.2 --lab sdwan2
     sdwan-lab add 5 edges 17.09.03a --lab vsdwan1
-    sdwan-lab add 1 edge 17.12.04 --cpu 8 --ram 8192
+    sdwan-lab add 1 edge 17.12.04 --cpus 8 --ram 8192
     sdwan-lab add 2 sdrouting 17.12.2 --lab vsdwan1
 
 ### Backup Task
