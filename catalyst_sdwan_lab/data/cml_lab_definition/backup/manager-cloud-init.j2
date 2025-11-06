@@ -1,10 +1,10 @@
 #cloud-config
 fs_setup:
-- device: "/dev/sdb"
+- device: "/dev/vdb"
   partition: "none"
   filesystem: "ext4"
 mounts:
-- [ sdb, /opt/data ]
+- [ vdb, /opt/data ]
 write_files:
 - path: /etc/default/personality
   content: "vmanage\n"
