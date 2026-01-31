@@ -111,7 +111,7 @@ def check_pyats_device_connectivity(
             else:
                 exit(
                     f"Could not login to {node_label} using admin username and default or SD-WAN Manager password. "
-                    f"Please fix admin user password and rerun the script."
+                    f"Verify SSH to CML IP works, validate credentials to {node_label} and rerun the script."
                 )
     except unicon.core.errors.ConnectionError as conn_err:
         current_exception = conn_err
@@ -134,7 +134,7 @@ def check_pyats_device_connectivity(
                 else:
                     exit(
                         f"Could not login to {node_label} using admin username and default or SD-WAN Manager password. "
-                        f"Please fix admin user password and rerun the script."
+                        f"Verify SSH to CML IP works, validate credentials to {node_label} and rerun the script."
                     )
             # Move to the next cause in the chain
             current_exception = getattr(current_exception, "__cause__", None)
