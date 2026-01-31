@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 2.1.6 [unreleased]
+# Catalyst SD-WAN Lab 2.1.6 [Jan 31, 2026]
 
 - Fix issue where backup task creates "sdb" instead of "vdb" in SD-WAN Manager cloud-init
 - In deploy task, add additional empty interfaces to SD-WAN Manager that can be used for other use cases like clustering
