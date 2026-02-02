@@ -133,7 +133,8 @@ def main(
         license_status = cml.licensing.status()["authorization"]["status"]
         if license_status in ["INIT", "EVAL"]:
             print(
-                "The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free."
+                "The tool requires a minimum of 9 nodes to deploy the topology; "
+                "therefore, it is not supported on CML-Free."
             )
             exit(1)
 
@@ -202,8 +203,12 @@ def main(
         track_progress(log, "Verifying IOL images...")
         node_definitions = cml.definitions.node_definitions()
         for node_id in ["iol-xe", "ioll2-xe"]:
-            if not next((node for node in node_definitions if node["id"] == node_id), None):
-                log.error(f"{node_id} node definition is missing in CML. Please upload the newest CML refplat ISO.")
+            if not next(
+                (node for node in node_definitions if node["id"] == node_id), None
+            ):
+                log.error(
+                    f"{node_id} node definition is missing in CML. Please upload the newest CML refplat ISO."
+                )
                 exit(1)
         # Refresh node definitions
         node_definitions = cml.definitions.node_definitions()

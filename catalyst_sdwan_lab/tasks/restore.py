@@ -241,7 +241,7 @@ def main(
                 manager_node["configuration"] = re.sub(
                     rf"(<user>[\s\S]+?<name>){re.escape(existing_manager_users[0])}(</name>)",
                     rf"\1{manager_user}\2",
-                    manager_node["configuration"]
+                    manager_node["configuration"],
                 )
         # Update SD-WAN Manager IP
         existing_manager_ip_mask_search = re.search(
