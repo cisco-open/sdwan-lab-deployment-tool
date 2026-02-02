@@ -66,14 +66,6 @@ def main(
     cml = cml_config.make_client()
     verify_cml_version(cml)
 
-    # Check CML license status
-    license_status = cml.licensing.status()["authorization"]["status"]
-    if license_status in ["INIT", "EVAL"]:
-        print(
-            "The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free."
-        )
-        exit(1)
-
     if list:
         print("Available Software Versions:")
         for node_definition_id in [
@@ -137,6 +129,14 @@ def main(
             track_progress(log, f"Deleting image file {image_file}...")
             cml.definitions.remove_dropfolder_image(image_file)
     else:
+        # Check CML license status
+        license_status = cml.licensing.status()["authorization"]["status"]
+        if license_status in ["INIT", "EVAL"]:
+            print(
+                "The tool requires a minimum of 9 nodes to deploy the topology; therefore, it is not supported on CML-Free."
+            )
+            exit(1)
+
         # Setup YAML
         yaml = YAML(typ="rt")
 
@@ -198,6 +198,13 @@ def main(
                         new_node_definition, json=True
                     )
 
+        # Verify IOL node definitions exist
+        track_progress(log, "Verifying IOL images...")
+        node_definitions = cml.definitions.node_definitions()
+        for node_id in ["iol-xe", "ioll2-xe"]:
+            if not next((node for node in node_definitions if node["id"] == node_id), None):
+                log.error(f"{node_id} node definition is missing in CML. Please upload the newest CML refplat ISO.")
+                exit(1)
         # Refresh node definitions
         node_definitions = cml.definitions.node_definitions()
         track_progress(log, "Verifying software images...")

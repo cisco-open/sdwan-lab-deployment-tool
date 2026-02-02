@@ -229,14 +229,20 @@ def main(
                 existing_manager_password, encrypted_manager_password
             )
         # Update SD-WAN Manager cloud-init config with username
-        existing_manager_users = re.findall(
-            r"<user>[\s\S]+?<name>(\w+)</name>", manager_node["configuration"]
-        )
-        existing_manager_users.remove("admin")
-        if existing_manager_users and manager_user not in existing_manager_users:
-            manager_node["configuration"] = manager_node["configuration"].replace(
-                existing_manager_users[0], manager_user
+        if manager_user != "admin":
+            existing_manager_users = re.findall(
+                r"<user>[\s\S]+?<name>(\w+)</name>", manager_node["configuration"]
             )
+            print(existing_manager_users)
+            existing_manager_users.remove("admin")
+            if existing_manager_users and manager_user not in existing_manager_users:
+                # Use regex to replace only the username within <name> tags to avoid
+                # replacing other occurrences of the username string in the config
+                manager_node["configuration"] = re.sub(
+                    rf"(<user>[\s\S]+?<name>){re.escape(existing_manager_users[0])}(</name>)",
+                    rf"\1{manager_user}\2",
+                    manager_node["configuration"]
+                )
         # Update SD-WAN Manager IP
         existing_manager_ip_mask_search = re.search(
             r"<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?"
