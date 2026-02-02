@@ -1,3 +1,9 @@
+# Catalyst SD-WAN Lab 2.1.7 [Feb 2, 2026]
+
+- In restore task, fix issue where SD-WAN Manager might not boot properly if task is run with SD-WAN Manager username "admin"
+- In setup task, add verification for IOL and IOL-L2 node definitions
+- In setup task, allow to run "csdwan setup --list" without CML administrator privileges
+
 # Catalyst SD-WAN Lab 2.1.6 [Jan 31, 2026]
 
 - Fix issue where backup task creates "sdb" instead of "vdb" in SD-WAN Manager cloud-init

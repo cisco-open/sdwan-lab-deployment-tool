@@ -65,6 +65,7 @@ Notes:
 
 - The virtual environment is deactivated by typing 'deactivate' at the command prompt.
 - Before running Catalyst SD-WAN Lab Deployment Tool again, make sure to activate the virtual environment back again (source venv/bin/activate).
+- After upgrading to a new version of Catalyst SD-WAN Lab Deployment Tool, make sure you run "csdwan setup" once before running other tasks.
 
 ## Usage
 
