@@ -221,6 +221,36 @@ def main(
             for node in cml_topology_dict["nodes"]
             if node["node_definition"] == "cat-sdwan-manager"
         )
+
+        # Check if manager node definition uses virtio disk driver and convert old sdb naming to vdb
+        node_definitions = cml.definitions.node_definitions()
+        manager_node_def = next(
+            (
+                nd
+                for nd in node_definitions
+                if nd["id"] == manager_node["node_definition"]
+            ),
+            None,
+        )
+        if (
+            manager_node_def
+            and manager_node_def.get("sim", {})
+            .get("linux_native", {})
+            .get("disk_driver")
+            == "virtio"
+        ):
+            # Replace old sdb references with vdb for virtio disk driver compatibility
+            if "/dev/sdb" in manager_node["configuration"]:
+                log.info(
+                    "Converting legacy disk naming (sdb) to virtio naming (vdb) in manager configuration..."
+                )
+                manager_node["configuration"] = manager_node["configuration"].replace(
+                    '"/dev/sdb"', '"/dev/vdb"'
+                )
+                manager_node["configuration"] = manager_node["configuration"].replace(
+                    "[ sdb,", "[ vdb,"
+                )
+
         existing_manager_passwords = re.findall(
             r"<user>[\s\S]+?<password>(\S+)</password>", manager_node["configuration"]
         )
@@ -337,7 +367,7 @@ def main(
         elif node.node_definition == "cat8000v" and node.is_booted() is False:
             # To workaround CML problem, after config export for this node
             # we need to add 'no shutdown' under all interfaces
-            node.config = re.sub(
+            node.configuration = re.sub(
                 r"(interface\sGigabitEthernet\d\n)",
                 r"\1 no shutdown\n",
                 node.configuration,
@@ -526,7 +556,7 @@ def main(
                 uuid = uuid_search.group(1)
                 token = uuid_to_token[uuid]
                 # Update node config with new otp token
-                node.config = re.sub(
+                node.configuration = re.sub(
                     r"(vinitparam:[\w\W]+?otp\s:)\s(\w+)",
                     rf"\1 {token}",
                     node.configuration,
