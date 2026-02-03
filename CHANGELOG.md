@@ -1,3 +1,8 @@
+# Catalyst SD-WAN Lab 2.1.8 [unreleased]
+
+- In restore task, add backward compatibility for restoring old backups with legacy disk naming (sdb to vdb conversion for virtio disks)
+- In restore task, fix deprecation warnings by replacing node.config with node.configuration
+
 # Catalyst SD-WAN Lab 2.1.7 [Feb 2, 2026]
 
 - In restore task, fix issue where SD-WAN Manager might not boot properly if task is run with SD-WAN Manager username "admin"
