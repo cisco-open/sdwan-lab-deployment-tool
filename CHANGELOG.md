@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 2.1.8 [Mar 5, 2026]
+
+- In setup task, fix issue where --list would fail with `IndexError: list index out of range` when user has invalid image definitions created manually in CML
+
 # Catalyst SD-WAN Lab 2.1.7 [Feb 3, 2026]
 
 - In restore task, add backward compatibility for restoring old backups with legacy disk naming (sdb to vdb conversion for virtio disks)
