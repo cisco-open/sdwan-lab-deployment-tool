@@ -81,7 +81,9 @@ def main(
             ) in cml.definitions.image_definitions_for_node_definition(
                 node_definition_id
             ):
-                available_software_versions.append(image_definition["id"].split("-")[3])
+                parts = image_definition["id"].split("-")
+                if len(parts) > 3:
+                    available_software_versions.append(parts[3])
             print(f"- {node_definition_id}: {available_software_versions}\n")
 
     elif software_versions_to_delete:
@@ -166,7 +168,7 @@ def main(
                     if new_node_definition == current_node_definition:
                         # If dicts are same then no update is required
                         log.info(
-                            f'[KEEP] Node {current_node_definition["id"]} is already defined and up to date.'
+                            f"[KEEP] Node {current_node_definition['id']} is already defined and up to date."
                         )
                     else:
                         # If dicts are not the same, then we need to update the node definition
@@ -178,9 +180,9 @@ def main(
                             )
 
                         log.info(
-                            f'[UPDATE] Updating node {new_node_definition["id"]} with '
-                            f'{new_node_definition["sim"]["linux_native"]["cpus"]} CPUs and '
-                            f'{new_node_definition["sim"]["linux_native"]["ram"]} MB RAM.'
+                            f"[UPDATE] Updating node {new_node_definition['id']} with "
+                            f"{new_node_definition['sim']['linux_native']['cpus']} CPUs and "
+                            f"{new_node_definition['sim']['linux_native']['ram']} MB RAM."
                         )
                         try:
                             # For virl2_client lower than 2.7.0
@@ -194,7 +196,7 @@ def main(
                             )
                 else:
                     # If node is not yet created, we need to create it
-                    log.info(f'[CREATE] Creating node {new_node_definition["id"]}...')
+                    log.info(f"[CREATE] Creating node {new_node_definition['id']}...")
                     cml.definitions.upload_node_definition(
                         new_node_definition, json=True
                     )
