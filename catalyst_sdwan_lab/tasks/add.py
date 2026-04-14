@@ -453,6 +453,7 @@ def main(
                         "//system/system-ip": f"10.0.0.{next_num_str}",
                         "//system/site-id": next_num_str,
                         "csv-templateId": template_id,
+                        "selected": "true",
                     }
                     if ip_type in ["v4", "dual"]:
                         variables_dict["/0/GigabitEthernet1/interface/ip/address"] = (

@@ -114,6 +114,7 @@ def attach_basic_controller_template(
                 "//system/system-ip": f"100.0.0.{ip_4th_oct}",
                 "//system/site-id": "100",
                 "csv-templateId": template_id,
+                "selected": "true",
             }
             if ip_type in ["v4", "dual"]:
                 variables["/0/eth1/interface/ip/address"] = f"172.16.0.{ip_4th_oct}/24"
