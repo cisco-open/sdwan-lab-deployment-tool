@@ -575,6 +575,11 @@ def setup_logging(loglevel: Union[int, str]) -> Logger:
             ]
         )
     )
+    # Filter out catalystwan API version warnings — expected when running on newer SD-WAN versions
+    catalystwan_endpoints_logger = logging.getLogger("catalystwan.endpoints")
+    catalystwan_endpoints_logger.addFilter(
+        lambda record: "only supported for API versions" not in record.getMessage()
+    )
     return log
 
 

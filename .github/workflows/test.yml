@@ -25,12 +25,12 @@ jobs:
 
       - name: Lint Checks
         run: |
-          pip install poetry
-          poetry install
-          poetry run flake8 catalyst_sdwan_lab
-          poetry run isort --check --diff --profile black catalyst_sdwan_lab
-          poetry run black --check catalyst_sdwan_lab
-          poetry run mypy --show-error-codes --show-error-context --pretty --install-types --non-interactive catalyst_sdwan_lab --cache-dir=.mypy_cache/
+          pip install uv
+          uv sync --group dev
+          uv run flake8 catalyst_sdwan_lab
+          uv run isort --check --diff --profile black catalyst_sdwan_lab
+          uv run black --check catalyst_sdwan_lab
+          uv run mypy --show-error-codes --show-error-context --pretty --install-types --non-interactive catalyst_sdwan_lab --cache-dir=.mypy_cache/
 
   test:
     name: Tests
@@ -55,9 +55,9 @@ jobs:
 
       - name: Test
         run: |
-          pip install poetry
-          poetry install
-          poetry run sdwan-lab -h
+          pip install uv
+          uv sync
+          uv run sdwan-lab -h
 
   notification:
     name: Notification
