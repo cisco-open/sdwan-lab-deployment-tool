@@ -264,7 +264,6 @@ def main(
             existing_manager_users = re.findall(
                 r"<user>[\s\S]+?<name>(\w+)</name>", manager_node["configuration"]
             )
-            print(existing_manager_users)
             existing_manager_users.remove("admin")
             if existing_manager_users and manager_user not in existing_manager_users:
                 # Use regex to replace only the username within <name> tags to avoid
