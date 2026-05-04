@@ -23,6 +23,7 @@ from . import delete
 from .utils import (
     DATA_DIR,
     check_manager_ip_is_free,
+    complete_initial_setup_workflow,
     configure_manager_basic_settings,
     get_cml_sdwan_image_definition,
     get_sdwan_lab_parameters,
@@ -382,10 +383,11 @@ def main(
     manager_node.wait_until_converged()
     # Wait for SD-WAN Manager API to be available
     manager_session = wait_for_manager_session(
-        manager_ip, manager_port, manager_user, manager_password, log
+        manager_ip, manager_port, manager_user, manager_password, software_version, log
     )
     # Configure basic settings like org-name, validator fqdn etc.
     configure_manager_basic_settings(manager_session, ca_chain, log)
+    complete_initial_setup_workflow(manager_session, software_version, log)
 
     # Add controllers to SD-WAN Manager and sing certificates
     onboard_control_components(
