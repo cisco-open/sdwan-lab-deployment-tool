@@ -1,3 +1,9 @@
+# Catalyst SD-WAN Lab 2.2.0 [unreleased]
+
+- Add support for Catalyst SD-WAN release 26.1.1
+- In deploy and restore tasks, add progress status for SD-WAN Manager boot (>26.1.1)
+- In deploy and restore tasks, skip initial setup workflow on first UI login (>26.1.1)
+
 # Catalyst SD-WAN Lab 2.1.8 [Mar 5, 2026]
 
 - In setup task, fix issue where --list would fail with `IndexError: list index out of range` when user has invalid image definitions created manually in CML

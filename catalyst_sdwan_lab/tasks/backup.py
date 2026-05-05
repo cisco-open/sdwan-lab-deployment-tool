@@ -10,7 +10,7 @@ import os
 import re
 import sys
 from os.path import join
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import unicon.core.errors
 from catalystwan.session import create_manager_session
@@ -38,16 +38,24 @@ def validate_credentials(pylab: ClPyats, node_label: str) -> bool:
     except (
         unicon.core.errors.UniconAuthenticationError,
         unicon.core.errors.ConnectionError,
+        unicon.core.errors.CredentialsExhaustedError,
     ) as conn_err:
         current_exception = conn_err
         # Loop to inspect the chain of causes
         while current_exception:
-            if isinstance(
-                current_exception,
-                unicon.core.errors.UniconAuthenticationError,
-            ) or isinstance(
-                current_exception,
-                unicon.core.errors.ConnectionError,
+            if (
+                isinstance(
+                    current_exception,
+                    unicon.core.errors.UniconAuthenticationError,
+                )
+                or isinstance(
+                    current_exception,
+                    unicon.core.errors.ConnectionError,
+                )
+                or isinstance(
+                    current_exception,
+                    unicon.core.errors.CredentialsExhaustedError,
+                )
             ):
                 return False
             # Move to the next cause in the chain
@@ -61,7 +69,7 @@ def check_pyats_device_connectivity(
     node_definition: str,
     manager_user: str,
     manager_password: str,
-) -> List[Union[str, ClPyats]]:
+) -> Tuple[Optional[str], Optional[str], ClPyats]:
     personality = None
     node_type = None
     if node_definition == "cat-sdwan-manager":
@@ -99,7 +107,7 @@ def check_pyats_device_connectivity(
     try:
         if validate_credentials(pylab, node_label):
             # If credentials are valid, proceed
-            return [personality, node_type, pylab]
+            return (personality, node_type, pylab)
         else:
             # If default credentials are not valid, try admin user and SD-WAN Manager password
             pylab._testbed.devices[node_label].credentials.default.password = (
@@ -107,11 +115,12 @@ def check_pyats_device_connectivity(
             )
             if validate_credentials(pylab, node_label):
                 # If credentials are valid, proceed
-                return [personality, node_type, pylab]
+                return (personality, node_type, pylab)
             else:
                 exit(
-                    f"Could not login to {node_label} using admin username and default or SD-WAN Manager password. "
-                    f"Verify SSH to CML IP works, validate credentials to {node_label} and rerun the script."
+                    f"Could not login to {node_label} console using admin username "
+                    f"and default or SD-WAN Manager password. "
+                    f"Verify SSH to CML IP works, login to node console in CML UI and then rerun the script."
                 )
     except unicon.core.errors.ConnectionError as conn_err:
         current_exception = conn_err
@@ -130,11 +139,11 @@ def check_pyats_device_connectivity(
                 pylab._testbed.devices[node_label].platform = "csr1000v"
                 node_type = "sdrouting"
                 if validate_credentials(pylab, node_label):
-                    return [personality, node_type, pylab]
+                    return (personality, node_type, pylab)
                 else:
                     exit(
                         f"Could not login to {node_label} using admin username and default or SD-WAN Manager password. "
-                        f"Verify SSH to CML IP works, validate credentials to {node_label} and rerun the script."
+                        f"Verify SSH to CML IP works, login to node console in CML UI and then rerun the script."
                     )
             # Move to the next cause in the chain
             current_exception = getattr(current_exception, "__cause__", None)
