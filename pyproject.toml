@@ -17,7 +17,8 @@ dependencies = [
     "ruamel-yaml>=0.17.21,<1",
     "urllib3>=1.26.18,<3.0.0",
     "catalystwan>=0.33.10,<1",
-    "pyats[full]>=25.1",
+    "pyats[full]>=25.1,<26.4; python_version < '3.12' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "pyats[full]>=25.1; python_version >= '3.12' or sys_platform != 'linux' or platform_machine != 'x86_64'",
     "click>=8.1.7,<9",
     "rich-click>=1.8.5,<2",
 ]
