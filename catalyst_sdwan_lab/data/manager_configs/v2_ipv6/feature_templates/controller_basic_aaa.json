@@ -459,7 +459,7 @@
             "password": {
               "vipObjectType": "object",
               "vipType": "constant",
-              "vipValue": "$6$pNMqIw==$WgdfBnKKzTYGVEQIxOfflqrD.mb4wikAS519DAVh1epC3OoPHxwywKisB0cHPqGG2MEaCuLHoC896.RGXYGDV."
+              "vipValue": "$6$9ac6af765f1cd0c0$jRM/rCPsQ56JlDU/1s9H7zhhksy/FZHv37zDJkzM6h/IU/FsnTcBuLwV3AVI5kCnfX9wYmqP8CsGk.4PrjC22/"
             },
             "pubkey-chain": {
               "vipObjectType": "tree",
@@ -1030,7 +1030,7 @@
             "password": {
               "vipObjectType": "object",
               "vipType": "constant",
-              "vipValue": "$6$pNMqIw==$WgdfBnKKzTYGVEQIxOfflqrD.mb4wikAS519DAVh1epC3OoPHxwywKisB0cHPqGG2MEaCuLHoC896.RGXYGDV."
+              "vipValue": "$6$9ac6af765f1cd0c0$jRM/rCPsQ56JlDU/1s9H7zhhksy/FZHv37zDJkzM6h/IU/FsnTcBuLwV3AVI5kCnfX9wYmqP8CsGk.4PrjC22/"
             },
             "pubkey-chain": {
               "vipObjectType": "tree",

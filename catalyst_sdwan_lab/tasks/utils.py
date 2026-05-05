@@ -16,8 +16,9 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from logging import Logger
 from os.path import abspath, dirname, exists, join
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Tuple, Union
 
+import requests
 from catalystwan.api.task_status_api import OperationStatus, OperationStatusId, Task
 from catalystwan.endpoints.certificate_management_device import TargetDevice
 from catalystwan.endpoints.configuration_device_inventory import (
@@ -184,6 +185,74 @@ def configure_manager_basic_settings(
         )
     )
     manager_config_settings.edit_cloudx(CloudX(mode="on"))
+
+
+def complete_initial_setup_workflow(
+    manager_session: ManagerSession, software_version: str, log: Logger
+) -> None:
+    """
+    SD-WAN Manager 26.1+ presents an initial setup workflow on first UI login.
+    Since we already configure everything via API, mark the workflow as
+    complete so the user is not prompted when they log into the UI.
+    """
+    try:
+        major_version = int(software_version.split(".")[0])
+    except (ValueError, IndexError):
+        return
+    if major_version < 26:
+        return
+
+    track_progress(log, "Completing initial setup workflow...")
+    existing = (
+        manager_session.get("/dataservice/workflow?type=ux_initial_setup")
+        .json()
+        .get("workflows", [])
+    )
+    if existing:
+        workflow = existing[0]
+        if workflow.get("userContext", {}).get("complete"):
+            log.info("Initial setup workflow is already complete")
+            return
+        workflow_id = workflow["id"]
+    else:
+        workflow_id = manager_session.post(
+            "/dataservice/workflow",
+            json={
+                "type": "ux_initial_setup",
+                "userContext": {
+                    "currentStep": 1,
+                    "complete": False,
+                    "type": "express",
+                    "stepsRemaining": 7,
+                    "version": 1,
+                    "id": None,
+                    "navigate": True,
+                },
+            },
+        ).json()["id"]
+    completed_user_context = {
+        "complete": True,
+        "type": "none",
+        "currentStep": 0,
+        "stepsRemaining": 0,
+        "version": 1,
+        "id": workflow_id,
+        "navigate": True,
+    }
+    manager_session.put(
+        "/dataservice/workflow",
+        json={
+            "id": workflow_id,
+            "type": "ux_initial_setup",
+            "activities": {
+                "SAVE_ACTION": {
+                    "type": "ux_initial_setup",
+                    "userContext": completed_user_context,
+                }
+            },
+            "userContext": completed_user_context,
+        },
+    )
 
 
 def create_cert(ca_cert_str: str, ca_key_str: str, csr_str: str) -> str:
@@ -506,6 +575,11 @@ def setup_logging(loglevel: Union[int, str]) -> Logger:
             ]
         )
     )
+    # Filter out catalystwan API version warnings — expected when running on newer SD-WAN versions
+    catalystwan_endpoints_logger = logging.getLogger("catalystwan.endpoints")
+    catalystwan_endpoints_logger.addFilter(
+        lambda record: "only supported for API versions" not in record.getMessage()
+    )
     return log
 
 
@@ -554,23 +628,48 @@ def track_progress(log: Logger, message: str) -> None:
             log.info(message)
 
 
+def _query_boot_diagnostic(manager_ip: str, port: int) -> Optional[Tuple[int, int]]:
+    """
+    Query the boot diagnostic API available in SD-WAN Manager 26+.
+    Returns (activeServices, totalServices) or None if unavailable.
+    """
+    try:
+        response = requests.get(
+            f"https://{manager_ip}:{port}/diagnostic/api/v1/boot",
+            verify=False,
+            timeout=5,
+        )
+        if response.status_code == 200:
+            data = response.json()
+            return data["activeServices"], data["totalServices"]
+    except Exception:
+        pass
+    return None
+
+
 def wait_for_manager_session(
     manager_ip: str,
     manager_patty_port: int,
     manager_user: str,
     manager_password: str,
+    software_version: str,
     log: Logger,
 ) -> ManagerSession:
     """
     Retry to log in to SD-WAN Manager until API is up
     """
-    # Different SD-WAN Manager versions requires different time to boot and bring up application-server with REST API
-    # Start trying to log in to SD-WAN Manager until it's succesful or until 60 minutes passes.
-    track_progress(log, "Waiting for SD-WAN Manager API...")
-    retries = 0
+    try:
+        major_version = int(software_version.split(".")[0])
+    except (ValueError, IndexError):
+        major_version = 0
+    use_diagnostic_api = major_version >= 26
+
+    waiting_msg = "Waiting for SD-WAN Manager API (can take up to 1h)..."
+    log.info(waiting_msg)
+    track_progress(log, waiting_msg)
     max_retries = 120
-    manager_session = None
-    while True:
+    previous_boot_status: Optional[Tuple[int, int]] = None
+    for _ in range(max_retries):
         try:
             manager_session = create_manager_session(
                 url=manager_ip,
@@ -578,28 +677,34 @@ def wait_for_manager_session(
                 username=manager_user,
                 password=manager_password,
             )
+            log.info("SD-WAN Manager login successful")
+            return manager_session
         except (
             ConnectionRefusedError,
             ConnectionError,
             UnauthorizedAccessError,
             ManagerRequestException,
         ):
-            retries += 1
-            if retries < max_retries:
+            boot_status = (
+                _query_boot_diagnostic(manager_ip, manager_patty_port)
+                if use_diagnostic_api
+                else None
+            )
+            if boot_status and boot_status != previous_boot_status:
+                active, total = boot_status
                 track_progress(
-                    log, f"Waiting for SD-WAN Manager API (attempt {retries})..."
+                    log, f"SD-WAN Manager booting ({active}/{total} services)..."
                 )
-                if retries % 10 == 0:
+                previous_boot_status = boot_status
+            elif not boot_status:
+                if previous_boot_status is not None:
                     log.info(
-                        f"Waiting for SD-WAN Manager API (attempt {retries}/{max_retries})..."
+                        "SD-WAN Manager services started, waiting for API login..."
                     )
-                time.sleep(30)
-                continue
-            else:
-                sys.exit("Failed to login to SD-WAN Manager after 60 minutes.")
-        break
-    log.info("SD-WAN Manager login successful")
-    return manager_session
+                    previous_boot_status = None
+                track_progress(log, waiting_msg)
+            time.sleep(30)
+    sys.exit("Failed to login to SD-WAN Manager after 60 minutes.")
 
 
 def wait_for_wan_edge_onboaring(
