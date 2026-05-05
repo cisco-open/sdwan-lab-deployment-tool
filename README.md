@@ -1,5 +1,5 @@
 [![Tests](https://github.com/cisco-open/sdwan-lab-deployment-tool/actions/workflows/test.yml/badge.svg)](https://github.com/cisco-open/sdwan-lab-deployment-tool/actions/workflows/test.yml)
-![Python Support](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-informational "Python Support: 3.9, 3.10, 3.11, 3.12, 3.13")
+![Python Support](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-informational "Python Support: 3.10, 3.11, 3.12, 3.13, 3.14")
 
 # Catalyst SD-WAN Lab Deployment Tool for Cisco Modeling Labs
 
@@ -28,30 +28,15 @@ Demo of the tool and guide on how to use it can be found on this [youtube video]
 
 ### Installing
 
-The recommended way to install is via pip.
+The recommended way to install is via [uv](https://docs.astral.sh/uv/).
 
-Create a directory to store the virtual environment and runtime files:
+Install uv if you don't have it yet:
 
-      mkdir csdwan
-      cd csdwan
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 
-Create virtual environment:
+Install Catalyst SD-WAN Lab Deployment Tool:
 
-      python3 -m venv venv
-
-Activate virtual environment:
-
-     source venv/bin/activate
-
-- Note that the prompt is updated with the virtual environment name (venv), indicating that the virtual environment is active.
-
-Upgrade initial virtual environment packages:
-
-    pip install --upgrade pip setuptools
-
-To install SD-WAN Lab Deployment Tool:
-
-    pip install --upgrade catalyst-sdwan-lab
+    uv tool install catalyst-sdwan-lab
 
 Verify that SD-WAN Lab tool can run:
 
@@ -61,11 +46,17 @@ You can also use the following shortcut to run any lab task:
 
     csdwan --version
 
+To upgrade to a newer version:
+
+    uv tool upgrade catalyst-sdwan-lab
+
 Notes:
 
-- The virtual environment is deactivated by typing 'deactivate' at the command prompt.
-- Before running Catalyst SD-WAN Lab Deployment Tool again, make sure to activate the virtual environment back again (source venv/bin/activate).
+- uv tool manages the virtual environment for you — no manual activation needed.
 - After upgrading to a new version of Catalyst SD-WAN Lab Deployment Tool, make sure you run "csdwan setup" once before running other tasks.
+- If you previously installed with pip, uninstall it first to avoid conflicts on the PATH:
+
+      pip uninstall catalyst-sdwan-lab
 
 ## Usage
 
@@ -444,28 +435,15 @@ On a machine with internet access, download the package and all its dependencies
    ```
    mkdir catalyst_sdwan_lab_packages
    cd catalyst_sdwan_lab_packages
-   pip download catalyst-sdwan-lab
+   uv tool install --download-only catalyst-sdwan-lab
    ```
    This will create a local directory containing the package `.whl` or `.tar.gz` files along with all its dependencies.
 
 Transfer the folder to the Air-Gapped Environment.
 
-On the air-gapped machine, create a directory to store the virtual environment and runtime files:
-
-    mkdir csdwan
-    cd csdwan
-
-Create virtual environment:
-
-    python3 -m venv venv
-
-Activate virtual environment:
-
-    source venv/bin/activate
-
 Install the package and its dependencies from the transferred files:
 
-    pip install --no-index --find-links=/path/to/catalyst_sdwan_lab_packages catalyst-sdwan-lab
+    uv tool install --no-index --find-links=/path/to/catalyst_sdwan_lab_packages catalyst-sdwan-lab
 
 Replace `/path/to/catalyst_sdwan_lab_packages` with the path where the downloaded files were copied.
 

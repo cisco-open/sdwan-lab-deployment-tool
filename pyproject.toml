@@ -1,38 +1,57 @@
-[tool.poetry]
+[project]
 name = "catalyst-sdwan-lab"
-version = "2.1.8"
+version = "2.2.0"
 description = "Catalyst SD-WAN Lab Deployment Tool - Automation Tool for managing Cisco Catalyst SD-WAN labs inside Cisco Modeling Labs"
-license = "BSD-3-Clause"
-authors = ["Tomasz Zarski <tzarski@cisco.com>"]
+license = { text = "BSD-3-Clause" }
+authors = [{ name = "Tomasz Zarski", email = "tzarski@cisco.com" }]
 readme = "README.md"
-repository = "https://github.com/cisco-open/sdwan-lab-deployment-tool"
+requires-python = ">=3.10,<3.15"
 keywords = ["cisco", "catalyst", "sdwan", "lab"]
+dependencies = [
+    "virl2-client>=2.8.0,<3",
+    "requests>=2.28.1,<3",
+    "pyopenssl>=24.0.0,<27",
+    "passlib>=1.7.4,<2",
+    "jinja2>=3.1.6,<4",
+    "cisco-sdwan==1.26",
+    "ruamel-yaml>=0.17.21,<1",
+    "urllib3>=1.26.18,<3.0.0",
+    "catalystwan>=0.33.10,<1",
+    "pyats[full]>=25.1,<26.4; python_version < '3.12' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "pyats[full]>=25.1; python_version >= '3.12' or sys_platform != 'linux' or platform_machine != 'x86_64'",
+    "click>=8.1.7,<9",
+    "rich-click>=1.8.5,<2",
+]
 
-[tool.poetry.scripts]
+[project.urls]
+Repository = "https://github.com/cisco-open/sdwan-lab-deployment-tool"
+
+[project.scripts]
 sdwan-lab = "catalyst_sdwan_lab.cli:cli"
 csdwan = "catalyst_sdwan_lab.cli:cli"
 
-[tool.poetry.dependencies]
-python = "^3.9.2"
-virl2-client = "^2.8.0"
-requests = "^2.28.1"
-pyopenssl = "^24.0.0"
-passlib = "^1.7.4"
-jinja2 = "^3.1.6"
-cisco-sdwan = "1.26"
-ruamel-yaml = "^0.17.21"
-urllib3 = ">=1.26.18,<3.0.0"
-catalystwan = "^0.33.10"
-pyats = { version = ">=25.1", extras = ["full"] }
-click = "^8.1.7"
-rich-click = "^1.8.5"
-
-[tool.poetry.group.dev.dependencies]
-isort = "^5.13.2"
-flake8 = "^7.0.0"
-black = "^24.4.0"
-mypy = "^1.9.0"
+[dependency-groups]
+dev = [
+    "isort>=5.13.2",
+    "flake8>=7.0.0",
+    "black>=24.4.0",
+    "mypy>=1.9.0",
+    "types-requests>=2.28.0",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.6,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv]
+required-environments = [
+    "sys_platform == 'darwin'",
+    "python_version == '3.10' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "python_version == '3.11' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "python_version == '3.12' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "python_version == '3.13' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "python_version == '3.14' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+
+[tool.uv.build-backend]
+module-root = ""
