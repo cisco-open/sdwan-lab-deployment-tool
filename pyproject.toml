@@ -41,5 +41,12 @@ dev = [
 requires = ["uv_build>=0.6,<0.12"]
 build-backend = "uv_build"
 
+[tool.uv]
+required-environments = [
+    "sys_platform == 'darwin'",
+    "sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "sys_platform == 'linux' and platform_machine == 'aarch64'",
+]
+
 [tool.uv.build-backend]
 module-root = ""
