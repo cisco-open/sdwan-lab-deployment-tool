@@ -10,7 +10,7 @@ import os
 import re
 import sys
 from os.path import join
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import unicon.core.errors
 from catalystwan.session import create_manager_session
@@ -69,7 +69,7 @@ def check_pyats_device_connectivity(
     node_definition: str,
     manager_user: str,
     manager_password: str,
-) -> List[Union[str, ClPyats]]:
+) -> Tuple[Optional[str], Optional[str], ClPyats]:
     personality = None
     node_type = None
     if node_definition == "cat-sdwan-manager":
@@ -107,7 +107,7 @@ def check_pyats_device_connectivity(
     try:
         if validate_credentials(pylab, node_label):
             # If credentials are valid, proceed
-            return [personality, node_type, pylab]
+            return (personality, node_type, pylab)
         else:
             # If default credentials are not valid, try admin user and SD-WAN Manager password
             pylab._testbed.devices[node_label].credentials.default.password = (
@@ -115,7 +115,7 @@ def check_pyats_device_connectivity(
             )
             if validate_credentials(pylab, node_label):
                 # If credentials are valid, proceed
-                return [personality, node_type, pylab]
+                return (personality, node_type, pylab)
             else:
                 exit(
                     f"Could not login to {node_label} console using admin username "
@@ -139,7 +139,7 @@ def check_pyats_device_connectivity(
                 pylab._testbed.devices[node_label].platform = "csr1000v"
                 node_type = "sdrouting"
                 if validate_credentials(pylab, node_label):
-                    return [personality, node_type, pylab]
+                    return (personality, node_type, pylab)
                 else:
                     exit(
                         f"Could not login to {node_label} using admin username and default or SD-WAN Manager password. "
