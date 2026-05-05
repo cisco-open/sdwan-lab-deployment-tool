@@ -5,7 +5,7 @@ description = "Catalyst SD-WAN Lab Deployment Tool - Automation Tool for managin
 license = { text = "BSD-3-Clause" }
 authors = [{ name = "Tomasz Zarski", email = "tzarski@cisco.com" }]
 readme = "README.md"
-requires-python = ">=3.9.2"
+requires-python = ">=3.10"
 keywords = ["cisco", "catalyst", "sdwan", "lab"]
 dependencies = [
     "virl2-client>=2.8.0,<3",
@@ -44,8 +44,11 @@ build-backend = "uv_build"
 [tool.uv]
 required-environments = [
     "sys_platform == 'darwin'",
-    "sys_platform == 'linux' and platform_machine == 'x86_64'",
-    "sys_platform == 'linux' and platform_machine == 'aarch64'",
+    "python_version == '3.10' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "python_version == '3.11' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "python_version == '3.12' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "python_version == '3.13' and sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "python_version == '3.14' and sys_platform == 'linux' and platform_machine == 'x86_64'",
 ]
 
 [tool.uv.build-backend]
