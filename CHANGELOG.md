@@ -3,8 +3,6 @@
 - Add support for Catalyst SD-WAN release 26.1.1
 - In deploy and restore tasks, add progress status for SD-WAN Manager boot (>26.1.1)
 - In deploy and restore tasks, skip initial setup workflow on first UI login (>26.1.1)
-- Migrate package tooling from Poetry to uv
-- Drop Python 3.9 (EOL), add Python 3.14 support
 
 # Catalyst SD-WAN Lab 2.1.8 [Mar 5, 2026]
 
