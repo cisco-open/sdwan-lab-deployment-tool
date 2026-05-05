@@ -25,12 +25,12 @@ jobs:
 
       - name: Lint Checks
         run: |
-          pip install uv
-          uv sync --group dev
-          uv run flake8 catalyst_sdwan_lab
-          uv run isort --check --diff --profile black catalyst_sdwan_lab
-          uv run black --check catalyst_sdwan_lab
-          uv run mypy --show-error-codes --show-error-context --pretty --install-types --non-interactive catalyst_sdwan_lab --cache-dir=.mypy_cache/
+          pip install poetry
+          poetry install
+          poetry run flake8 catalyst_sdwan_lab
+          poetry run isort --check --diff --profile black catalyst_sdwan_lab
+          poetry run black --check catalyst_sdwan_lab
+          poetry run mypy --show-error-codes --show-error-context --pretty --install-types --non-interactive catalyst_sdwan_lab --cache-dir=.mypy_cache/
 
   test:
     name: Tests
@@ -39,11 +39,11 @@ jobs:
     strategy:
       matrix:
         python:
+          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
-          - "3.14"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,9 +55,9 @@ jobs:
 
       - name: Test
         run: |
-          pip install uv
-          uv sync
-          uv run sdwan-lab -h
+          pip install poetry
+          poetry install
+          poetry run sdwan-lab -h
 
   notification:
     name: Notification
