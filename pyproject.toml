@@ -5,7 +5,7 @@ description = "Catalyst SD-WAN Lab Deployment Tool - Automation Tool for managin
 license = { text = "BSD-3-Clause" }
 authors = [{ name = "Tomasz Zarski", email = "tzarski@cisco.com" }]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.15"
 keywords = ["cisco", "catalyst", "sdwan", "lab"]
 dependencies = [
     "virl2-client>=2.8.0,<3",
