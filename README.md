@@ -54,6 +54,9 @@ Notes:
 
 - uv tool manages the virtual environment for you — no manual activation needed.
 - After upgrading to a new version of Catalyst SD-WAN Lab Deployment Tool, make sure you run "csdwan setup" once before running other tasks.
+- If you previously installed with pip, uninstall it first to avoid conflicts on the PATH:
+
+      pip uninstall catalyst-sdwan-lab
 
 ## Usage
 
