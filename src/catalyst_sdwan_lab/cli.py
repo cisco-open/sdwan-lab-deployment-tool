@@ -1,0 +1,153 @@
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Annotated, Optional
+
+import httpx
+import typer
+from rich.logging import RichHandler
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from virl2_client import ClientLibrary
+
+from catalyst_sdwan_lab import __version__
+from catalyst_sdwan_lab.tasks import images as _images
+from catalyst_sdwan_lab.tasks import setup as _setup
+from catalyst_sdwan_lab.tasks.utils import console
+
+app = typer.Typer(no_args_is_help=True)
+images_app = typer.Typer(no_args_is_help=True)
+app.add_typer(images_app, name="images", help="Manage SD-WAN software images in CML.")
+
+
+@dataclass
+class _State:
+    cml_host: str | None = None
+    cml_user: str | None = None
+    cml_password: str | None = None
+    verbose: bool = False
+    debug: bool = False
+    _cml_client: ClientLibrary | None = field(default=None, repr=False)
+
+
+_state = _State()
+log = logging.getLogger(__name__)
+
+
+def _configure_logging(verbose: bool, debug: bool) -> None:
+    level = logging.DEBUG if debug else logging.INFO if verbose else logging.WARNING
+    handler = RichHandler(console=console, show_time=False, show_path=False)
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    logging.basicConfig(level=level, handlers=[handler])
+    logging.getLogger("virl2_client.virl2_client").addFilter(
+        lambda r: "SSL Verification disabled" not in r.getMessage()
+    )
+    if not debug:
+        logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+
+
+def _cml() -> ClientLibrary:
+    if _state._cml_client is None:
+        if not _state.cml_host or not _state.cml_user or not _state.cml_password:
+            log.error(
+                "CML credentials required. Use --cml / --user / --password "
+                "or set CML_IP / CML_USER / CML_PASSWORD environment variables."
+            )
+            raise typer.Exit(1)
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+            transient=True,
+        ) as progress:
+            progress.add_task(f"Connecting to CML ({_state.cml_host})...")
+            try:
+                _state._cml_client = ClientLibrary(
+                    _state.cml_host,
+                    username=_state.cml_user,
+                    password=_state.cml_password,
+                    ssl_verify=False,
+                )
+            except httpx.TransportError as e:
+                log.error("Cannot reach CML at %s: %s", _state.cml_host, e)
+                raise typer.Exit(1)
+    return _state._cml_client
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        console.print(f"catalyst-sdwan-lab {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def _main(
+    cml_host: Annotated[
+        Optional[str], typer.Option("--cml", "-c", envvar="CML_IP", help="CML hostname or IP")
+    ] = None,
+    cml_user: Annotated[
+        Optional[str], typer.Option("--user", "-u", envvar="CML_USER", help="CML username")
+    ] = None,
+    cml_password: Annotated[
+        Optional[str],
+        typer.Option(
+            "--password", "-p", envvar="CML_PASSWORD", help="CML password", hide_input=True
+        ),
+    ] = None,
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", help="Show INFO level output")
+    ] = False,
+    debug: Annotated[
+        bool, typer.Option("--debug", help="Show DEBUG level output including HTTP requests")
+    ] = False,
+    _version: Annotated[
+        Optional[bool],
+        typer.Option(
+            "--version", callback=_version_callback, is_eager=True,
+            expose_value=False, help="Show version and exit",
+        ),
+    ] = None,
+) -> None:
+    _state.cml_host = cml_host
+    _state.cml_user = cml_user
+    _state.cml_password = cml_password
+    _state.verbose = verbose
+    _state.debug = debug
+    _configure_logging(verbose, debug)
+
+
+@app.command()
+def setup() -> None:
+    """Prepare CML for SD-WAN lab deployment. Run after install and after tool upgrades."""
+    _setup.run(_cml())
+
+
+@images_app.command(name="list")
+def images_list() -> None:
+    """List SD-WAN software versions installed in CML."""
+    _images.list_versions(_cml())
+
+
+@images_app.command(name="upload")
+def images_upload(
+    images_dir: Annotated[
+        Optional[Path], typer.Option("--dir", "-d", help="Directory containing .qcow2 files")
+    ] = None,
+) -> None:
+    """Upload SD-WAN software images to CML."""
+    _images.upload(_cml(), images_dir or Path.cwd())
+
+
+@images_app.command(name="delete")
+def images_delete(
+    versions: Annotated[
+        list[str], typer.Argument(help="Software versions to delete (e.g. 20.12.1)")
+    ],
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Show what would be deleted without deleting")
+    ] = False,
+) -> None:
+    """Delete SD-WAN image definitions and files from CML."""
+    _images.delete(_cml(), versions, dry_run=dry_run)

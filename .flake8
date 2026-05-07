@@ -1,4 +1,0 @@
-[flake8]
-exclude = .venv,.git,venv
-max-line-length = 120
-inline-quotes = double
