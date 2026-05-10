@@ -1,0 +1,73 @@
+{
+  "deviceType": [
+    "vsmart"
+  ],
+  "templateType": "logging",
+  "templateMinVersion": "20.1.0",
+  "lastUpdatedBy": "admin",
+  "editedTemplateDefinition": {
+    "disk": {
+      "enable": {
+        "vipObjectType": "object",
+        "vipValue": "true",
+        "vipType": "ignore"
+      },
+      "file": {
+        "size": {
+          "vipObjectType": "object",
+          "vipValue": 10,
+          "vipType": "ignore"
+        },
+        "rotate": {
+          "vipObjectType": "object",
+          "vipValue": 10,
+          "vipType": "ignore"
+        }
+      },
+      "priority": {
+        "vipObjectType": "object",
+        "vipValue": "information",
+        "vipType": "ignore"
+      }
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "disk": {
+      "enable": {
+        "vipObjectType": "object",
+        "vipValue": "true",
+        "vipType": "ignore"
+      },
+      "file": {
+        "size": {
+          "vipObjectType": "object",
+          "vipValue": 10,
+          "vipType": "ignore"
+        },
+        "rotate": {
+          "vipObjectType": "object",
+          "vipValue": 10,
+          "vipType": "ignore"
+        }
+      },
+      "priority": {
+        "vipObjectType": "object",
+        "vipValue": "information",
+        "vipType": "ignore"
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "44f060c2-1846-4dd8-8ec4-a7436f8928b3",
+  "createdOn": 1720174238090,
+  "@rid": 2384,
+  "factoryDefault": false,
+  "feature": "vmanage-default",
+  "createdBy": "admin",
+  "templateName": "controller_basic_logging",
+  "devicesAttached": 2,
+  "templateDescription": "Do not modify!",
+  "lastUpdatedOn": 1720174308930
+}

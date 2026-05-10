@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ipaddress
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -10,11 +11,13 @@ import typer
 from rich.logging import RichHandler
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from virl2_client import ClientLibrary
+from virl2_client.exceptions import APIError
 
 from catalyst_sdwan_lab import __version__
+from catalyst_sdwan_lab.tasks import deploy as _deploy
 from catalyst_sdwan_lab.tasks import images as _images
 from catalyst_sdwan_lab.tasks import setup as _setup
-from catalyst_sdwan_lab.tasks.utils import console
+from catalyst_sdwan_lab.tasks.utils import DEFAULT_SERIAL_FILE, console
 
 app = typer.Typer(no_args_is_help=True)
 images_app = typer.Typer(no_args_is_help=True)
@@ -42,6 +45,11 @@ def _configure_logging(verbose: bool, debug: bool) -> None:
     logging.basicConfig(level=level, handlers=[handler])
     logging.getLogger("virl2_client.virl2_client").addFilter(
         lambda r: "SSL Verification disabled" not in r.getMessage()
+        and "Unable to authenticate" not in r.getMessage()
+    )
+    logging.getLogger("urllib3.connectionpool").addFilter(
+        lambda r: "Max retries exceeded" not in r.getMessage()
+        and "Failed to establish a new connection" not in r.getMessage()
     )
     if not debug:
         logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -70,8 +78,12 @@ def _cml() -> ClientLibrary:
                     password=_state.cml_password,
                     ssl_verify=False,
                 )
+                _state._cml_client.system_info()
             except httpx.TransportError as e:
                 log.error("Cannot reach CML at %s: %s", _state.cml_host, e)
+                raise typer.Exit(1)
+            except APIError:
+                log.error("CML authentication failed. Check --user / --password.")
                 raise typer.Exit(1)
     return _state._cml_client
 
@@ -122,6 +134,117 @@ def _main(
 def setup() -> None:
     """Prepare CML for SD-WAN lab deployment. Run after install and after tool upgrades."""
     _setup.run(_cml())
+
+
+@app.command()
+def deploy(
+    version: Annotated[str, typer.Argument(help="SD-WAN software version (e.g. 20.15.1)")],
+    manager_ip: Annotated[
+        Optional[str],
+        typer.Option("--manager-ip", envvar="MANAGER_IP", help="Manager IP (direct mode)"),
+    ] = None,
+    manager_port: Annotated[
+        Optional[int],
+        typer.Option("--manager-port", envvar="MANAGER_PORT", help="PATty port; enables PATty"),
+    ] = None,
+    manager_user: Annotated[
+        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
+    ] = "admin",
+    manager_pass: Annotated[
+        str,
+        typer.Option(
+            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
+        ),
+    ] = ...,  # type: ignore[assignment]
+    manager_mask: Annotated[
+        Optional[str],
+        typer.Option("--manager-mask", envvar="MANAGER_MASK", help="Manager mask (direct mode)"),
+    ] = None,
+    manager_gateway: Annotated[
+        Optional[str],
+        typer.Option(
+            "--manager-gateway", envvar="MANAGER_GATEWAY", help="Manager gateway (direct mode)"
+        ),
+    ] = None,
+    lab_name: Annotated[
+        str,
+        typer.Option("--lab", envvar="LAB_NAME", help="CML lab name"),
+    ] = ...,  # type: ignore[assignment]
+    bridge: Annotated[
+        Optional[str], typer.Option("--bridge", help="CML bridge name (direct mode)")
+    ] = None,
+    dns_server: Annotated[
+        str, typer.Option("--dns", help="DNS server for lab nodes")
+    ] = "192.168.255.1",
+    ip_type: Annotated[
+        str, typer.Option("--ip-type", help="IP addressing: v4, v6, or dual")
+    ] = "v4",
+    retry: Annotated[
+        bool, typer.Option("--retry", help="Skip lab creation and resume Manager onboarding")
+    ] = False,
+    serial_file: Annotated[
+        Optional[Path],
+        typer.Option("--serial-file", help="Custom .viptela file (org name extracted for file)"),
+    ] = None,
+) -> None:
+    """Deploy a Catalyst SD-WAN lab in CML."""
+    if manager_ip and manager_ip.lower().startswith("pat:"):
+        log.error(
+            "The 'pat:<port>' syntax is no longer supported. "
+            "Use --manager-port <port> instead."
+        )
+        raise typer.Exit(1)
+    if manager_ip:
+        try:
+            ipaddress.ip_address(manager_ip)
+        except ValueError:
+            log.error("--manager-ip must be a valid IP address, got: %s", manager_ip)
+            raise typer.Exit(1)
+    patty = manager_port is not None
+    if patty:
+        if manager_ip or manager_mask or manager_gateway or bridge:
+            log.error(
+                "--manager-port (PATty mode) cannot be combined with "
+                "--manager-ip, --manager-mask, --manager-gateway, or --bridge."
+            )
+            raise typer.Exit(1)
+    elif not any([manager_ip, manager_mask, manager_gateway]):
+        log.error(
+            "Specify --manager-port for PATty mode, or "
+            "--manager-ip / --manager-mask / --manager-gateway for direct mode."
+        )
+        raise typer.Exit(1)
+    else:
+        missing = [
+            name
+            for name, val in [
+                ("--manager-ip", manager_ip),
+                ("--manager-mask", manager_mask),
+                ("--manager-gateway", manager_gateway),
+            ]
+            if not val
+        ]
+        if missing:
+            log.error("Direct mode requires: %s", ", ".join(missing))
+            raise typer.Exit(1)
+    cml = _cml()
+    _deploy.run(
+        cml=cml,
+        manager_ip=_state.cml_host or "" if patty else manager_ip or "",
+        manager_port=manager_port or 443,
+        manager_user=manager_user,
+        manager_password=manager_pass,
+        manager_mask=manager_mask or "",
+        manager_gateway=manager_gateway or "",
+        version=version,
+        lab_name=lab_name,
+        bridge=bridge or "System Bridge",
+        dns_server=dns_server,
+        ip_type=ip_type,
+        retry=retry,
+        patty=patty,
+        serial_file=serial_file or DEFAULT_SERIAL_FILE,
+    )
 
 
 @images_app.command(name="list")

@@ -1,0 +1,39 @@
+{
+  "deviceType": [
+    "vsmart"
+  ],
+  "templateType": "security-vsmart",
+  "templateMinVersion": "15.0.0",
+  "lastUpdatedBy": "admin",
+  "editedTemplateDefinition": {
+    "control": {
+      "protocol": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "dtls"
+      }
+    }
+  },
+  "gTemplateClass": "vedge",
+  "templateDefinition": {
+    "control": {
+      "protocol": {
+        "vipObjectType": "object",
+        "vipType": "ignore",
+        "vipValue": "dtls"
+      }
+    }
+  },
+  "configType": "xml",
+  "attachedMastersCount": 1,
+  "templateId": "cea02597-6e42-44d2-8cb9-5e49d385360a",
+  "createdOn": 1720174254766,
+  "@rid": 2385,
+  "factoryDefault": false,
+  "feature": "vmanage-default",
+  "createdBy": "admin",
+  "templateName": "controller_basic_security",
+  "devicesAttached": 2,
+  "templateDescription": "Do not modify!",
+  "lastUpdatedOn": 1720174314142
+}
