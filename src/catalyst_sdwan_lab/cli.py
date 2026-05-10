@@ -14,6 +14,7 @@ from virl2_client import ClientLibrary
 from virl2_client.exceptions import APIError
 
 from catalyst_sdwan_lab import __version__
+from catalyst_sdwan_lab.tasks import delete as _delete
 from catalyst_sdwan_lab.tasks import deploy as _deploy
 from catalyst_sdwan_lab.tasks import images as _images
 from catalyst_sdwan_lab.tasks import setup as _setup
@@ -245,6 +246,19 @@ def deploy(
         patty=patty,
         serial_file=serial_file or DEFAULT_SERIAL_FILE,
     )
+
+
+@app.command()
+def delete(
+    lab_name: Annotated[
+        str, typer.Option("--lab", envvar="LAB_NAME", help="CML lab name")
+    ] = ...,  # type: ignore[assignment]
+    force: Annotated[
+        bool, typer.Option("--force", "-f", help="Skip confirmation prompt")
+    ] = False,
+) -> None:
+    """Delete a Catalyst SD-WAN lab from CML."""
+    _delete.run(_cml(), lab_name, force=force)
 
 
 @images_app.command(name="list")
