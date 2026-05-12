@@ -18,12 +18,11 @@ from catalyst_sdwan_lab.tasks.deploy import (
     _extract_org_name,
     _find_lab,
     _import_controller_templates,
-    _load_certs,
     _onboard_control_components,
-    _resolve_image,
     _restore_basic_configuration,
     _template_post_body,
 )
+from catalyst_sdwan_lab.tasks.utils import load_certs, resolve_image
 
 
 def _make_serial_file(tmp_path: Path, org: str) -> Path:
@@ -83,25 +82,27 @@ class TestResolveImage:
 
     def test_exact_match(self) -> None:
         cml = self._make_cml(["cat-sdwan-manager-20.15.1"])
-        assert _resolve_image(cml, "cat-sdwan-manager", "20.15.1") == "cat-sdwan-manager-20.15.1"
+        assert resolve_image(cml, "cat-sdwan-manager", "20.15.1") == "cat-sdwan-manager-20.15.1"
 
     def test_controller_strips_trailing_1(self) -> None:
         cml = self._make_cml(["cat-sdwan-controller-20.15.1"])
-        assert _resolve_image(cml, "cat-sdwan-controller", "20.15.1.1") == "cat-sdwan-controller-20.15.1"
+        result = resolve_image(cml, "cat-sdwan-controller", "20.15.1.1")
+        assert result == "cat-sdwan-controller-20.15.1"
 
     def test_controller_decrements_patch(self) -> None:
         cml = self._make_cml(["cat-sdwan-controller-20.15.1"])
-        assert _resolve_image(cml, "cat-sdwan-controller", "20.15.2") == "cat-sdwan-controller-20.15.1"
+        result = resolve_image(cml, "cat-sdwan-controller", "20.15.2")
+        assert result == "cat-sdwan-controller-20.15.1"
 
     def test_manager_no_fallback_exits(self) -> None:
         cml = self._make_cml(["cat-sdwan-manager-20.15.1"])
         with pytest.raises(Exit):
-            _resolve_image(cml, "cat-sdwan-manager", "20.15.2")
+            resolve_image(cml, "cat-sdwan-manager", "20.15.2")
 
     def test_no_available_images_exits(self) -> None:
         cml = self._make_cml([])
         with pytest.raises(Exit):
-            _resolve_image(cml, "cat-sdwan-manager", "20.15.1")
+            resolve_image(cml, "cat-sdwan-manager", "20.15.1")
 
 
 class TestTemplatePostBody:
@@ -112,7 +113,10 @@ class TestTemplatePostBody:
             "templateName": "foo",
         }
         result = _template_post_body(raw)
-        for key in ("templateId", "@rid", "createdBy", "createdOn", "lastUpdatedBy", "lastUpdatedOn"):
+        stripped = (
+            "templateId", "@rid", "createdBy", "createdOn", "lastUpdatedBy", "lastUpdatedOn"
+        )
+        for key in stripped:
             assert key not in result
         assert result["templateName"] == "foo"
 
@@ -318,16 +322,16 @@ class TestLoadCerts:
     def test_exits_if_file_missing(self, tmp_path: Path) -> None:
         (tmp_path / "signCA.pem").write_text("cert")
         (tmp_path / "signCA.key").write_text("key")
-        with patch("catalyst_sdwan_lab.tasks.deploy.CERTS_DIR", tmp_path):
+        with patch("catalyst_sdwan_lab.tasks.utils.CERTS_DIR", tmp_path):
             with pytest.raises(Exit):
-                _load_certs()
+                load_certs()
 
     def test_loads_all_certs(self, tmp_path: Path) -> None:
         (tmp_path / "signCA.pem").write_text("cert-content")
         (tmp_path / "signCA.key").write_text("key-content")
         (tmp_path / "chainCA.pem").write_text("chain-content")
-        with patch("catalyst_sdwan_lab.tasks.deploy.CERTS_DIR", tmp_path):
-            certs = _load_certs()
+        with patch("catalyst_sdwan_lab.tasks.utils.CERTS_DIR", tmp_path):
+            certs = load_certs()
         assert certs.cert == "cert-content"
         assert certs.key == "key-content"
         assert certs.chain == "chain-content"

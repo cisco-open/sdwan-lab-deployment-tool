@@ -70,7 +70,9 @@ class TestSyncNodeDefinitions:
             "id: cat-sdwan-manager\ngeneral:\n  read_only: false\ndata: new\n"
         )
         existing = {
-            "cat-sdwan-manager": {"id": "cat-sdwan-manager", "general": {"read_only": False}, "data": "old"}
+            "cat-sdwan-manager": {
+                "id": "cat-sdwan-manager", "general": {"read_only": False}, "data": "old"
+            }
         }
         cml = MagicMock()
         progress, task = MagicMock(), MagicMock()
@@ -87,7 +89,9 @@ class TestSyncNodeDefinitions:
             "id: cat-sdwan-manager\ngeneral:\n  read_only: false\ndata: value\n"
         )
         existing = {
-            "cat-sdwan-manager": {"id": "cat-sdwan-manager", "general": {"read_only": False}, "data": "value"}
+            "cat-sdwan-manager": {
+                "id": "cat-sdwan-manager", "general": {"read_only": False}, "data": "value"
+            }
         }
         cml = MagicMock()
         progress, task = MagicMock(), MagicMock()
@@ -102,7 +106,9 @@ class TestSyncNodeDefinitions:
             "id: cat-sdwan-manager\ngeneral:\n  read_only: false\ndata: new\n"
         )
         existing = {
-            "cat-sdwan-manager": {"id": "cat-sdwan-manager", "general": {"read_only": True}, "data": "old"}
+            "cat-sdwan-manager": {
+                "id": "cat-sdwan-manager", "general": {"read_only": True}, "data": "old"
+            }
         }
         cml = MagicMock()
         progress, task = MagicMock(), MagicMock()
@@ -110,4 +116,6 @@ class TestSyncNodeDefinitions:
         with patch("catalyst_sdwan_lab.tasks.setup.CML_NODES_DEFINITION_DIR", tmp_path):
             _sync_node_definitions(cml, existing=existing, progress=progress, task=task)
 
-        cml.definitions.set_node_definition_read_only.assert_called_once_with("cat-sdwan-manager", False)
+        cml.definitions.set_node_definition_read_only.assert_called_once_with(
+            "cat-sdwan-manager", False
+        )

@@ -8,7 +8,6 @@ import re
 import subprocess
 import tarfile
 import time
-import uuid
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -18,8 +17,6 @@ from typing import Any
 import requests
 import typer
 from jinja2 import Environment, FileSystemLoader
-from OpenSSL import crypto
-from passlib.hash import sha512_crypt
 from rich.markup import escape
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from virl2_client import ClientLibrary
@@ -27,11 +24,15 @@ from virl2_client import ClientLibrary
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
 
 from .utils import (
-    CERTS_DIR,
     CML_DEPLOY_TEMPLATES_DIR,
     CONTROLLER_TEMPLATES_DIR,
+    Certs,
     basic_configuration_path,
     console,
+    load_certs,
+    resolve_image,
+    sha512_crypt,
+    sign_device_cert,
 )
 
 log = logging.getLogger(__name__)
@@ -41,13 +42,6 @@ _MANAGER_BOOT_RETRIES = 120
 _MANAGER_BOOT_INTERVAL = 30
 
 _NODE_TYPES = ("cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator")
-
-
-@dataclass
-class _Certs:
-    cert: str
-    key: str
-    chain: str
 
 
 @dataclass
@@ -85,7 +79,7 @@ def run(
         raise typer.Exit(1)
     log.info("Organization name: %s", org_name)
 
-    certs = _load_certs()
+    certs = load_certs()
 
     with Progress(
         SpinnerColumn(),
@@ -162,24 +156,9 @@ def run(
     console.print(f"[green]Deploy complete.[/green] Manager: https://{escape(manager_ip)}:{manager_port}")
 
 
-def _sign_csr(ca_cert_pem: str, ca_key_pem: str, csr_pem: str) -> str:
-    ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_cert_pem.encode())
-    ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_key_pem.encode())
-    csr = crypto.load_certificate_request(crypto.FILETYPE_PEM, csr_pem.encode())
-    cert = crypto.X509()
-    cert.set_serial_number(uuid.uuid4().int)
-    cert.gmtime_adj_notBefore(-86400)
-    cert.gmtime_adj_notAfter(2 * 365 * 86400)
-    cert.set_issuer(ca_cert.get_subject())
-    cert.set_subject(csr.get_subject())
-    cert.set_pubkey(csr.get_pubkey())
-    cert.sign(ca_key, "sha256")
-    return crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
-
-
 def _onboard_control_components(
     client: ManagerClient,
-    certs: _Certs,
+    certs: Certs,
     ip_type: str,
     on_status: Callable[[str], None],
 ) -> None:
@@ -210,17 +189,9 @@ def _onboard_control_components(
         if d.get("serialNumber") == "No certificate installed" and d.get("deviceIP")
     ]
     with ThreadPoolExecutor() as pool:
-        futures = [pool.submit(_sign_device_cert, client, certs, ip) for ip in pending]
+        futures = [pool.submit(sign_device_cert, client, certs, ip) for ip in pending]
         for f in futures:
             f.result()
-
-
-def _sign_device_cert(client: ManagerClient, certs: _Certs, device_ip: str) -> None:
-    csr = client.generate_csr(device_ip)
-    cert = _sign_csr(certs.cert, certs.key, csr)
-    task_id = client.install_signed_cert(cert)
-    client.wait_for_task(task_id)
-    log.info("Certificate installed for %s", device_ip)
 
 
 _UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
@@ -260,10 +231,18 @@ def _import_controller_templates(client: ManagerClient, ip_type: str) -> str:
     return template_id
 
 
-def _attach_controller_template(client: ManagerClient, ip_type: str, template_id: str) -> None:
+def _attach_controller_template(
+    client: ManagerClient,
+    ip_type: str,
+    template_id: str,
+    controller_ips: set[str] | None = None,
+) -> None:
+    all_controllers = client.get_controllers()
     controllers = [
-        d for d in client.get_controllers()
-        if d.get("personality") == "vsmart" and not d.get("template")
+        d for d in all_controllers
+        if d.get("personality") == "vsmart"
+        and not d.get("template")
+        and (controller_ips is None or d.get("deviceIP") in controller_ips)
     ]
     if not controllers:
         log.debug("All controllers already have a template — skipping attach")
@@ -419,7 +398,7 @@ def _query_boot_diagnostic(ip: str, port: int) -> tuple[int, int] | None:
 def _check_images(cml: ClientLibrary, version: str) -> _Images:
     results: dict[str, str] = {}
     for node_type in _NODE_TYPES:
-        image_id = _resolve_image(cml, node_type, version)
+        image_id = resolve_image(cml, node_type, version)
         results[node_type] = image_id
         log.info("Image OK: %s", image_id)
     return _Images(
@@ -427,50 +406,6 @@ def _check_images(cml: ClientLibrary, version: str) -> _Images:
         controller=results["cat-sdwan-controller"],
         validator=results["cat-sdwan-validator"],
     )
-
-
-def _resolve_image(cml: ClientLibrary, node_type: str, version: str) -> str:
-    available = [
-        img["id"]
-        for img in cml.definitions.image_definitions_for_node_definition(node_type)
-    ]
-    exact = f"{node_type}-{version}"
-    if exact in available:
-        return exact
-
-    # For controller/validator, try one patch version lower
-    # (e.g. Manager 20.15.1.1 paired with Controller 20.15.1)
-    if node_type in ("cat-sdwan-controller", "cat-sdwan-validator"):
-        parts = version.split(".")
-        if len(parts) == 4 and parts[-1] == "1":
-            fallback_version = ".".join(parts[:-1])
-        else:
-            parts[-1] = str(int(parts[-1]) - 1)
-            fallback_version = ".".join(parts)
-        fallback = f"{node_type}-{fallback_version}"
-        if fallback in available:
-            log.debug("%s: exact version not found, using %s", node_type, fallback)
-            return fallback
-
-    label = node_type.split("-")[2].title()
-    versions = [img_id[len(node_type) + 1:] for img_id in available]
-    log.error(
-        "%s image %s not found in CML. Available: %s",
-        label, version, ", ".join(versions) or "none",
-    )
-    raise typer.Exit(1)
-
-
-def _load_certs() -> _Certs:
-    names = {"cert": "signCA.pem", "key": "signCA.key", "chain": "chainCA.pem"}
-    loaded: dict[str, str] = {}
-    for attr, filename in names.items():
-        path = CERTS_DIR / filename
-        if not path.exists():
-            log.error("Certificate file not found: %s", path)
-            raise typer.Exit(1)
-        loaded[attr] = path.read_text()
-    return _Certs(**loaded)
 
 
 def _find_lab(cml: ClientLibrary, manager_ip: str, manager_port: int) -> None:
@@ -489,7 +424,7 @@ def _create_lab(
     cml: ClientLibrary,
     lab_name: str,
     images: _Images,
-    certs: _Certs,
+    certs: Certs,
     org_name: str,
     manager_ip: str,
     manager_port: int,
@@ -512,7 +447,7 @@ def _create_lab(
     if not patty:
         _check_ip_free(manager_ip)
 
-    encrypted_password = sha512_crypt.hash(manager_password, rounds=5000)
+    encrypted_password = sha512_crypt(manager_password, rounds=5000)
     env = Environment(loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True)
     topology = env.get_template("cml-base-topology.j2").render(
         title=lab_name,

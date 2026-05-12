@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import time
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,8 @@ import requests.packages.urllib3
 from requests import Response, Session
 
 requests.packages.urllib3.disable_warnings()  # type: ignore[attr-defined]
+
+log = logging.getLogger(__name__)
 
 
 class ManagerAPIError(Exception):
@@ -172,7 +175,9 @@ class ManagerClient:
             data = self._get(f"/dataservice/device/action/status/{task_id}")
             status = data.get("summary", {}).get("status", "")
             if status == "done":
-                if data.get("summary", {}).get("count", {}).get("Failure", 0) > 0:
+                count = data.get("summary", {}).get("count", {})
+                log.debug("Task %s done: %s", task_id, count)
+                if count.get("Failure", 0) > 0:
                     raise ManagerAPIError(f"Task {task_id} completed with failures")
                 return
             time.sleep(5)

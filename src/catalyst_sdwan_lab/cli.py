@@ -9,15 +9,16 @@ from typing import Annotated, Optional
 import httpx
 import typer
 from rich.logging import RichHandler
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from virl2_client import ClientLibrary
 from virl2_client.exceptions import APIError
 
 from catalyst_sdwan_lab import __version__
+from catalyst_sdwan_lab.tasks import add as _add
 from catalyst_sdwan_lab.tasks import delete as _delete
 from catalyst_sdwan_lab.tasks import deploy as _deploy
 from catalyst_sdwan_lab.tasks import images as _images
 from catalyst_sdwan_lab.tasks import setup as _setup
+from catalyst_sdwan_lab.tasks import sign as _sign
 from catalyst_sdwan_lab.tasks.utils import DEFAULT_SERIAL_FILE, console
 
 app = typer.Typer(no_args_is_help=True)
@@ -65,27 +66,20 @@ def _cml() -> ClientLibrary:
                 "or set CML_IP / CML_USER / CML_PASSWORD environment variables."
             )
             raise typer.Exit(1)
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-            transient=True,
-        ) as progress:
-            progress.add_task(f"Connecting to CML ({_state.cml_host})...")
-            try:
-                _state._cml_client = ClientLibrary(
-                    _state.cml_host,
-                    username=_state.cml_user,
-                    password=_state.cml_password,
-                    ssl_verify=False,
-                )
-                _state._cml_client.system_info()
-            except httpx.TransportError as e:
-                log.error("Cannot reach CML at %s: %s", _state.cml_host, e)
-                raise typer.Exit(1)
-            except APIError:
-                log.error("CML authentication failed. Check --user / --password.")
-                raise typer.Exit(1)
+        try:
+            _state._cml_client = ClientLibrary(
+                _state.cml_host,
+                username=_state.cml_user,
+                password=_state.cml_password,
+                ssl_verify=False,
+            )
+            _state._cml_client.system_info()
+        except httpx.TransportError as e:
+            log.error("Cannot reach CML at %s: %s", _state.cml_host, e)
+            raise typer.Exit(1)
+        except APIError:
+            log.error("CML authentication failed. Check --user / --password.")
+            raise typer.Exit(1)
     return _state._cml_client
 
 
@@ -259,6 +253,69 @@ def delete(
 ) -> None:
     """Delete a Catalyst SD-WAN lab from CML."""
     _delete.run(_cml(), lab_name, force=force)
+
+
+@app.command()
+def sign(
+    csr_file: Annotated[Path, typer.Argument(help="Path to CSR file (.txt or .pem)")],
+    output: Annotated[
+        Optional[Path], typer.Option("--output", "-o", help="Write signed certificate to file")
+    ] = None,
+) -> None:
+    """Sign a CSR with the lab CA and print the certificate to stdout."""
+    _sign.run(csr_file, output)
+
+
+_DEVICE_TYPES: dict[str, str] = {
+    "controller": "controller",
+    "controllers": "controller",
+    "validator": "validator",
+    "validators": "validator",
+    "edge": "edge",
+    "edges": "edge",
+    "sdrouting": "sdrouting",
+}
+
+
+@app.command()
+def add(
+    count: Annotated[int, typer.Argument(help="Number of devices to add")],
+    device_type: Annotated[
+        str, typer.Argument(help="Device type: controller(s), validator(s), edge(s), sdrouting")
+    ],
+    version: Annotated[str, typer.Argument(help="SD-WAN software version (e.g. 20.15.1)")],
+    lab_name: Annotated[
+        str, typer.Option("--lab", envvar="LAB_NAME", help="CML lab name")
+    ] = ...,  # type: ignore[assignment]
+    manager_user: Annotated[
+        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
+    ] = "admin",
+    manager_pass: Annotated[
+        str,
+        typer.Option(
+            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
+        ),
+    ] = ...,  # type: ignore[assignment]
+) -> None:
+    """Add devices to an existing SD-WAN lab."""
+    device = _DEVICE_TYPES.get(device_type.lower())
+    if device is None:
+        log.error(
+            "Unknown device type '%s'. Valid: controller, validator, edge, sdrouting.", device_type
+        )
+        raise typer.Exit(1)
+    if device == "controller":
+        _add.run_controller(
+            cml=_cml(),
+            lab_name=lab_name,
+            version=version,
+            manager_user=manager_user,
+            manager_password=manager_pass,
+            count=count,
+        )
+    else:
+        log.error("Device type '%s' not yet implemented.", device)
+        raise typer.Exit(1)
 
 
 @images_app.command(name="list")

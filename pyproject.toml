@@ -8,8 +8,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "jinja2>=3.1",
-    "passlib>=1.7",
-    "pyopenssl>=23.0",
+    "cryptography>=42.0",
     "pyyaml>=6.0",
     "requests>=2.32",
     "rich>=13.0",
