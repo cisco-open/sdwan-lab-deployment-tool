@@ -25,6 +25,7 @@ from .deploy import (
 )
 from .utils import (
     CML_DEPLOY_TEMPLATES_DIR,
+    connect_cml,
     console,
     load_certs,
     resolve_image,
@@ -46,16 +47,15 @@ _GATEWAY_VRF_NAMES = ("inet", "mpls", "vpn0")
 
 
 def run_controller(
-    cml: ClientLibrary,
+    cml_host: str,
+    cml_user: str,
+    cml_password: str,
     lab_name: str,
     version: str,
     manager_user: str,
     manager_password: str,
     count: int,
 ) -> None:
-    lab, manager_ip, manager_port = _find_lab(cml, lab_name)
-    ip_type = _detect_ip_type(lab)
-    image_id = resolve_image(cml, "cat-sdwan-controller", version)
     certs = load_certs()
 
     with Progress(
@@ -64,7 +64,14 @@ def run_controller(
         console=console,
         transient=True,
     ) as progress:
-        task = progress.add_task("Connecting to SD-WAN Manager...")
+        task = progress.add_task("Connecting to CML...")
+        cml = connect_cml(cml_host, cml_user, cml_password)
+        progress.update(task, description="Checking lab and images...")
+        lab, manager_ip, manager_port = _find_lab(cml, lab_name)
+        ip_type = _detect_ip_type(lab)
+        image_id = resolve_image(cml, "cat-sdwan-controller", version)
+
+        progress.update(task, description="Connecting to SD-WAN Manager...")
         client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
         client.login()
         try:
@@ -291,16 +298,15 @@ def _wait_for_controllers_ready(
 
 
 def run_validator(
-    cml: ClientLibrary,
+    cml_host: str,
+    cml_user: str,
+    cml_password: str,
     lab_name: str,
     version: str,
     manager_user: str,
     manager_password: str,
     count: int,
 ) -> None:
-    lab, manager_ip, manager_port = _find_lab(cml, lab_name)
-    ip_type = _detect_ip_type(lab)
-    image_id = resolve_image(cml, "cat-sdwan-validator", version)
     certs = load_certs()
 
     with Progress(
@@ -309,7 +315,14 @@ def run_validator(
         console=console,
         transient=True,
     ) as progress:
-        task = progress.add_task("Connecting to SD-WAN Manager...")
+        task = progress.add_task("Connecting to CML...")
+        cml = connect_cml(cml_host, cml_user, cml_password)
+        progress.update(task, description="Checking lab and images...")
+        lab, manager_ip, manager_port = _find_lab(cml, lab_name)
+        ip_type = _detect_ip_type(lab)
+        image_id = resolve_image(cml, "cat-sdwan-validator", version)
+
+        progress.update(task, description="Connecting to SD-WAN Manager...")
         client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
         client.login()
         try:

@@ -28,6 +28,7 @@ from .utils import (
     CONTROLLER_TEMPLATES_DIR,
     Certs,
     basic_configuration_path,
+    connect_cml,
     console,
     load_certs,
     resolve_image,
@@ -52,7 +53,9 @@ class _Images:
 
 
 def run(
-    cml: ClientLibrary,
+    cml_host: str,
+    cml_user: str,
+    cml_password: str,
     manager_ip: str,
     manager_port: int,
     manager_user: str,
@@ -87,7 +90,10 @@ def run(
         console=console,
         transient=True,
     ) as progress:
-        task = progress.add_task("Checking SD-WAN images...")
+        task = progress.add_task("Connecting to CML...")
+        cml = connect_cml(cml_host, cml_user, cml_password)
+
+        progress.update(task, description="Checking SD-WAN images...")
         images = _check_images(cml, version)
 
         if retry:

@@ -8,20 +8,22 @@ import yaml
 from rich.progress import Progress, SpinnerColumn, TaskID, TextColumn
 from virl2_client import ClientLibrary
 
-from .utils import CML_NODES_DEFINITION_DIR, console, verify_cml_version
+from .utils import CML_NODES_DEFINITION_DIR, connect_cml, console, verify_cml_version
 
 log = logging.getLogger(__name__)
 _IOL_NODE_IDS = ("iol-xe", "ioll2-xe")
 
 
-def run(cml: ClientLibrary) -> None:
+def run(cml_host: str, cml_user: str, cml_password: str) -> None:
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console,
         transient=True,
     ) as progress:
-        task = progress.add_task("Checking CML version...")
+        task = progress.add_task("Connecting to CML...")
+        cml = connect_cml(cml_host, cml_user, cml_password)
+        progress.update(task, description="Checking CML version...")
         verify_cml_version(cml)
         log.info("CML version OK")
 

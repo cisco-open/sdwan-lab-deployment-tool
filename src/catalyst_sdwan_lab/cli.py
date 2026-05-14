@@ -2,15 +2,12 @@ from __future__ import annotations
 
 import ipaddress
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, Optional
 
-import httpx
 import typer
 from rich.logging import RichHandler
-from virl2_client import ClientLibrary
-from virl2_client.exceptions import APIError
 
 from catalyst_sdwan_lab import __version__
 from catalyst_sdwan_lab.tasks import add as _add
@@ -33,7 +30,6 @@ class _State:
     cml_password: str | None = None
     verbose: bool = False
     debug: bool = False
-    _cml_client: ClientLibrary | None = field(default=None, repr=False)
 
 
 _state = _State()
@@ -58,29 +54,14 @@ def _configure_logging(verbose: bool, debug: bool) -> None:
     logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 
-def _cml() -> ClientLibrary:
-    if _state._cml_client is None:
-        if not _state.cml_host or not _state.cml_user or not _state.cml_password:
-            log.error(
-                "CML credentials required. Use --cml / --user / --password "
-                "or set CML_IP / CML_USER / CML_PASSWORD environment variables."
-            )
-            raise typer.Exit(1)
-        try:
-            _state._cml_client = ClientLibrary(
-                _state.cml_host,
-                username=_state.cml_user,
-                password=_state.cml_password,
-                ssl_verify=False,
-            )
-            _state._cml_client.system_info()
-        except httpx.TransportError as e:
-            log.error("Cannot reach CML at %s: %s", _state.cml_host, e)
-            raise typer.Exit(1)
-        except APIError:
-            log.error("CML authentication failed. Check --user / --password.")
-            raise typer.Exit(1)
-    return _state._cml_client
+def _cml_credentials() -> tuple[str, str, str]:
+    if not _state.cml_host or not _state.cml_user or not _state.cml_password:
+        log.error(
+            "CML credentials required. Use --cml / --user / --password "
+            "or set CML_IP / CML_USER / CML_PASSWORD environment variables."
+        )
+        raise typer.Exit(1)
+    return _state.cml_host, _state.cml_user, _state.cml_password
 
 
 def _version_callback(value: bool) -> None:
@@ -128,7 +109,7 @@ def _main(
 @app.command()
 def setup() -> None:
     """Prepare CML for SD-WAN lab deployment. Run after install and after tool upgrades."""
-    _setup.run(_cml())
+    _setup.run(*_cml_credentials())
 
 
 @app.command()
@@ -222,10 +203,12 @@ def deploy(
         if missing:
             log.error("Direct mode requires: %s", ", ".join(missing))
             raise typer.Exit(1)
-    cml = _cml()
+    cml_host, cml_user, cml_password = _cml_credentials()
     _deploy.run(
-        cml=cml,
-        manager_ip=_state.cml_host or "" if patty else manager_ip or "",
+        cml_host=cml_host,
+        cml_user=cml_user,
+        cml_password=cml_password,
+        manager_ip=cml_host if patty else manager_ip or "",
         manager_port=manager_port or 443,
         manager_user=manager_user,
         manager_password=manager_pass,
@@ -252,7 +235,7 @@ def delete(
     ] = False,
 ) -> None:
     """Delete a Catalyst SD-WAN lab from CML."""
-    _delete.run(_cml(), lab_name, force=force)
+    _delete.run(*_cml_credentials(), lab_name, force=force)
 
 
 @app.command()
@@ -306,7 +289,7 @@ def add(
         raise typer.Exit(1)
     if device == "controller":
         _add.run_controller(
-            cml=_cml(),
+            *_cml_credentials(),
             lab_name=lab_name,
             version=version,
             manager_user=manager_user,
@@ -315,7 +298,7 @@ def add(
         )
     elif device == "validator":
         _add.run_validator(
-            cml=_cml(),
+            *_cml_credentials(),
             lab_name=lab_name,
             version=version,
             manager_user=manager_user,
@@ -330,7 +313,7 @@ def add(
 @images_app.command(name="list")
 def images_list() -> None:
     """List SD-WAN software versions installed in CML."""
-    _images.list_versions(_cml())
+    _images.list_versions(*_cml_credentials())
 
 
 @images_app.command(name="upload")
@@ -340,7 +323,7 @@ def images_upload(
     ] = None,
 ) -> None:
     """Upload SD-WAN software images to CML."""
-    _images.upload(_cml(), images_dir or Path.cwd())
+    _images.upload(*_cml_credentials(), images_dir or Path.cwd())
 
 
 @images_app.command(name="delete")
@@ -353,4 +336,4 @@ def images_delete(
     ] = False,
 ) -> None:
     """Delete SD-WAN image definitions and files from CML."""
-    _images.delete(_cml(), versions, dry_run=dry_run)
+    _images.delete(*_cml_credentials(), versions, dry_run=dry_run)

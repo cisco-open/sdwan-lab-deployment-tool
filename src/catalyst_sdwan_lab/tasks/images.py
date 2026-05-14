@@ -17,12 +17,11 @@ from rich.progress import (
     TransferSpeedColumn,
 )
 from rich.table import Table
-from virl2_client import ClientLibrary
 from virl2_client.exceptions import APIError
 
 from catalyst_sdwan_lab.cml_client import upload_image_file
 
-from .utils import console
+from .utils import connect_cml, console
 
 log = logging.getLogger(__name__)
 
@@ -64,9 +63,7 @@ def _parse_filename(filename: str) -> tuple[str, str] | None:
     return None
 
 
-def upload(cml: ClientLibrary, images_dir: Path) -> None:
-    existing = {_normalize_id(img["id"]) for img in cml.definitions.image_definitions()}
-
+def upload(cml_host: str, cml_user: str, cml_password: str, images_dir: Path) -> None:
     candidates: list[tuple[Path, str, str]] = []
     for path in sorted(images_dir.glob("*.qcow2")):
         parsed = _parse_filename(path.name)
@@ -79,7 +76,6 @@ def upload(cml: ClientLibrary, images_dir: Path) -> None:
         return
 
     log.info("Found %d candidate image file(s) in %s", len(candidates), images_dir)
-    node_defs: dict[str, Any] | None = None
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -90,6 +86,13 @@ def upload(cml: ClientLibrary, images_dir: Path) -> None:
         console=console,
         transient=True,
     ) as progress:
+        status = progress.add_task("Connecting to CML...")
+        cml = connect_cml(cml_host, cml_user, cml_password)
+        progress.update(status, description="Checking existing images...")
+        existing = {_normalize_id(img["id"]) for img in cml.definitions.image_definitions()}
+        progress.remove_task(status)
+
+        node_defs: dict[str, Any] | None = None
         for path, node_type, version in candidates:
             norm_id = f"{node_type}-{version}"
             if norm_id in existing:
@@ -120,36 +123,29 @@ def upload(cml: ClientLibrary, images_dir: Path) -> None:
     console.print("[green]✓[/green] Upload complete.")
 
 
-def list_versions(cml: ClientLibrary) -> None:
-    table = Table(title="Catalyst SD-WAN Software Versions")
-    table.add_column("Node Type", style="cyan")
-    table.add_column("Versions")
-    for node_type in _NODE_TYPES:
-        versions = [
-            _normalize_id(img["id"])[len(node_type) + 1:]
-            for img in cml.definitions.image_definitions_for_node_definition(node_type)
-        ]
-        table.add_row(node_type, ", ".join(versions) if versions else "[dim]none[/dim]")
+def list_versions(cml_host: str, cml_user: str, cml_password: str) -> None:
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        task = progress.add_task("Connecting to CML...")
+        cml = connect_cml(cml_host, cml_user, cml_password)
+        progress.update(task, description="Fetching image definitions...")
+        table = Table(title="Catalyst SD-WAN Software Versions")
+        table.add_column("Node Type", style="cyan")
+        table.add_column("Versions")
+        for node_type in _NODE_TYPES:
+            versions = [
+                _normalize_id(img["id"])[len(node_type) + 1:]
+                for img in cml.definitions.image_definitions_for_node_definition(node_type)
+            ]
+            table.add_row(node_type, ", ".join(versions) if versions else "[dim]none[/dim]")
     console.print(table)
 
 
-def delete(cml: ClientLibrary, versions: list[str], dry_run: bool = False) -> None:
-    image_map = {
-        _normalize_id(img["id"]): img
-        for img in cml.definitions.image_definitions()
-    }
-    to_delete = [
-        (f"{node_type}-{version}", image_map[f"{node_type}-{version}"])
-        for version in versions
-        for node_type in _NODE_TYPES
-        if f"{node_type}-{version}" in image_map
-    ]
-    if not to_delete:
-        log.warning("No matching image definitions found.")
-        return
-
-    log.info("Deleting %d image definition(s)", len(to_delete))
-    files_to_delete: list[str] = []
+def delete(cml_host: str, cml_user: str, cml_password: str, versions: list[str], dry_run: bool = False) -> None:
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -158,6 +154,27 @@ def delete(cml: ClientLibrary, versions: list[str], dry_run: bool = False) -> No
         console=console,
         transient=True,
     ) as progress:
+        status = progress.add_task("Connecting to CML...")
+        cml = connect_cml(cml_host, cml_user, cml_password)
+        progress.update(status, description="Checking image definitions...")
+        image_map = {
+            _normalize_id(img["id"]): img
+            for img in cml.definitions.image_definitions()
+        }
+        to_delete = [
+            (f"{node_type}-{version}", image_map[f"{node_type}-{version}"])
+            for version in versions
+            for node_type in _NODE_TYPES
+            if f"{node_type}-{version}" in image_map
+        ]
+        progress.remove_task(status)
+
+        if not to_delete:
+            log.warning("No matching image definitions found.")
+            return
+
+        log.info("Deleting %d image definition(s)", len(to_delete))
+        files_to_delete: list[str] = []
         task = progress.add_task("Deleting images", total=len(to_delete))
         for norm_id, img in to_delete:
             progress.update(task, description=f"Deleting {norm_id}")

@@ -5,12 +5,14 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+import httpx
 import typer
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric.types import PrivateKeyTypes
+from cryptography.hazmat.primitives.asymmetric.types import CertificateIssuerPrivateKeyTypes
 from rich.console import Console
 from virl2_client import ClientLibrary
+from virl2_client.exceptions import APIError
 
 from catalyst_sdwan_lab.manager_client import ManagerClient
 
@@ -26,6 +28,19 @@ CML_NODES_DEFINITION_DIR = DATA_DIR / "cml_nodes_definition"
 MANAGER_CONFIGS_DIR = DATA_DIR / "manager_configs"
 CONTROLLER_TEMPLATES_DIR = MANAGER_CONFIGS_DIR / "controller_templates"
 DEFAULT_SERIAL_FILE = DATA_DIR / "serial_files" / "serialFile.viptela"
+
+
+def connect_cml(cml_host: str, cml_user: str, cml_password: str) -> ClientLibrary:
+    try:
+        cml = ClientLibrary(cml_host, username=cml_user, password=cml_password, ssl_verify=False)
+        cml.system_info()
+        return cml
+    except httpx.TransportError as e:
+        log.error("Cannot reach CML at %s: %s", cml_host, e)
+        raise typer.Exit(1)
+    except APIError:
+        log.error("CML authentication failed. Check --user / --password.")
+        raise typer.Exit(1)
 
 
 def basic_configuration_path(ip_type: str) -> Path:
@@ -140,7 +155,7 @@ def sign_device_cert(client: ManagerClient, certs: Certs, device_ip: str) -> Non
 
 def sign_csr(ca_cert_pem: str, ca_key_pem: str, csr_pem: str) -> str:
     ca_cert = x509.load_pem_x509_certificate(ca_cert_pem.encode())
-    ca_key: PrivateKeyTypes = serialization.load_pem_private_key(ca_key_pem.encode(), password=None)
+    ca_key: CertificateIssuerPrivateKeyTypes = serialization.load_pem_private_key(ca_key_pem.encode(), password=None)  # type: ignore[assignment]
     csr = x509.load_pem_x509_csr(csr_pem.encode())
     now = datetime.datetime.now(datetime.timezone.utc)
     cert = (
