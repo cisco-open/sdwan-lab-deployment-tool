@@ -333,13 +333,15 @@ def _update_gateway_dns(
         time.sleep(1)
         _gw_drain(ch)
         ch.send(f"open /{lab_name}/Gateway/0\n".encode())
-        _gw_recv(ch, ">", timeout=15)
-        _gw_drain(ch, duration=0.5)
-        ch.send(b"enable\r\n")
-        out = _gw_recv(ch, "#", timeout=10)
-        if "Password" in out:
-            ch.send(b"cisco\r\n")
-            _gw_recv(ch, "#", timeout=5)
+        _gw_drain(ch, duration=3)   # consume echo + wait for IOS console to attach
+        ch.send(b"\r\n")
+        out = _gw_recv(ch, ">", "#", timeout=15)
+        if ">" in out and "#" not in out:
+            ch.send(b"enable\r\n")
+            out = _gw_recv(ch, "#", "Password", timeout=30)
+            if "Password" in out and "#" not in out:
+                ch.send(b"cisco\r\n")
+                _gw_recv(ch, "#", timeout=10)
         ch.send(b"terminal length 0\r\n")
         _gw_recv(ch, "#")
 
@@ -374,7 +376,7 @@ def _update_gateway_dns(
         ssh.close()
 
 
-def _gw_recv(ch: paramiko.Channel, prompt: str, timeout: float = 10.0) -> str:
+def _gw_recv(ch: paramiko.Channel, *prompts: str, timeout: float = 10.0) -> str:
     buf = ""
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -382,11 +384,11 @@ def _gw_recv(ch: paramiko.Channel, prompt: str, timeout: float = 10.0) -> str:
             raise RuntimeError("Gateway console channel closed unexpectedly")
         if ch.recv_ready():
             buf += ch.recv(4096).decode("utf-8", errors="replace")
-            if prompt in buf:
+            if any(p in buf for p in prompts):
                 return buf
         else:
             time.sleep(0.1)
-    raise RuntimeError(f"Timed out waiting for {prompt!r} from Gateway console")
+    raise RuntimeError(f"Timed out waiting for any of {prompts!r} from Gateway console")
 
 
 def _gw_drain(ch: paramiko.Channel, duration: float = 1.0) -> None:
