@@ -373,7 +373,7 @@ def run_validator(
                     f.result()
 
             progress.update(task, description="Updating Gateway DNS entries...")
-            _update_gateway_dns(cml, lab, lab_name, validator_ips)
+            _update_gateway_dns(cml_host, cml_user, cml_password, lab, lab_name, validator_ips)
         finally:
             client.logout()
 
@@ -452,24 +452,24 @@ def _add_validator_retrying(client: ManagerClient, ip: str, *, timeout: int) -> 
 
 
 def _update_gateway_dns(
-    cml: ClientLibrary, lab: Lab, lab_name: str, new_ips: list[str]
+    cml_host: str, cml_user: str, cml_password: str,
+    lab: Lab, lab_name: str, new_ips: list[str],
 ) -> None:
     gateway = next((n for n in lab.nodes() if n.label == "Gateway"), None)
     if gateway is None:
         log.warning("Gateway node not found in lab; skipping DNS update.")
         return
 
-    cml_host = str(cml._session.base_url.host)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(cml_host, username=cml.username, password=cml.password, timeout=15)
+    ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
     ch = ssh.invoke_shell()
-    ch.settimeout(5.0)
     try:
         time.sleep(1)
         _gw_drain(ch)
         ch.send(f"open /{lab_name}/Gateway/0\n".encode())
         _gw_recv(ch, ">", timeout=15)
+        _gw_drain(ch, duration=0.5)
         ch.send(b"enable\r\n")
         out = _gw_recv(ch, "#", timeout=10)
         if "Password" in out:
@@ -513,16 +513,21 @@ def _gw_recv(ch: paramiko.Channel, prompt: str, timeout: float = 10.0) -> str:
     buf = ""
     deadline = time.time() + timeout
     while time.time() < deadline:
+        if ch.closed:
+            raise RuntimeError("Gateway console channel closed unexpectedly")
         if ch.recv_ready():
             buf += ch.recv(4096).decode("utf-8", errors="replace")
             if prompt in buf:
-                break
+                return buf
         else:
             time.sleep(0.1)
-    return buf
+    raise RuntimeError(f"Timed out waiting for {prompt!r} from Gateway console")
 
 
-def _gw_drain(ch: paramiko.Channel) -> None:
-    time.sleep(0.2)
-    while ch.recv_ready():
-        ch.recv(4096)
+def _gw_drain(ch: paramiko.Channel, duration: float = 1.0) -> None:
+    deadline = time.time() + duration
+    while time.time() < deadline:
+        if ch.recv_ready():
+            ch.recv(4096)
+        else:
+            time.sleep(0.05)
