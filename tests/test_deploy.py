@@ -179,13 +179,16 @@ class TestConfigureManager:
         client.get_workflows.assert_not_called()
 
 
+_PERSONALITY_IPS = {"vbond": "172.16.0.201", "vsmart": "172.16.0.101"}
+
+
 class TestOnboardControlComponents:
     def _make_client(
         self, personalities: list[str] = [], pending_ips: list[str] = []
     ) -> MagicMock:
         client = MagicMock()
         controllers = [
-            {"personality": p, "deviceIP": "172.16.0.1", "serialNumber": "OK"}
+            {"personality": p, "deviceIP": _PERSONALITY_IPS[p], "serialNumber": "OK"}
             for p in personalities
         ] + [
             {"personality": "vsmart", "deviceIP": ip, "serialNumber": "No certificate installed"}
@@ -194,7 +197,7 @@ class TestOnboardControlComponents:
         client.get_controllers.return_value = controllers
         return client
 
-    def test_skips_existing_personalities(self) -> None:
+    def test_skips_existing_ips(self) -> None:
         client = self._make_client(personalities=["vbond", "vsmart"])
         _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
         client.add_controller.assert_not_called()

@@ -37,6 +37,11 @@ python_version = "3.11"
 strict = true
 ignore_missing_imports = true
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--ignore=tests/integration"
+markers = ["integration: live-system workflow test (requires env vars; run with: pytest tests/integration/)"]
+
 [dependency-groups]
 dev = [
     "pytest>=8.0",
