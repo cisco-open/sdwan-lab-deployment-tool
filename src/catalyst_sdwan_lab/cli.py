@@ -287,23 +287,15 @@ def add(
             "Unknown device type '%s'. Valid: controller, validator, edge, sdrouting.", device_type
         )
         raise typer.Exit(1)
-    if device == "controller":
-        _add.run_controller(
+    if device in ("controller", "validator"):
+        _add.run_control_component(
             *_cml_credentials(),
             lab_name=lab_name,
             version=version,
             manager_user=manager_user,
             manager_password=manager_pass,
             count=count,
-        )
-    elif device == "validator":
-        _add.run_validator(
-            *_cml_credentials(),
-            lab_name=lab_name,
-            version=version,
-            manager_user=manager_user,
-            manager_password=manager_pass,
-            count=count,
+            device_type=device,  # type: ignore[arg-type]
         )
     else:
         log.error("Device type '%s' not yet implemented.", device)

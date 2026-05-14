@@ -4,6 +4,7 @@ import logging
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
+from typing import Literal
 
 import paramiko
 import typer
@@ -44,9 +45,10 @@ _CSR_POLL_TIMEOUT = 600
 _BOOT_TIMEOUT = 600
 _BOOT_INTERVAL = 10
 _GATEWAY_VRF_NAMES = ("inet", "mpls", "vpn0")
+_SDWAN_NODE_DEFS = {"cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator"}
 
 
-def run_controller(
+def run_control_component(
     cml_host: str,
     cml_user: str,
     cml_password: str,
@@ -55,7 +57,11 @@ def run_controller(
     manager_user: str,
     manager_password: str,
     count: int,
+    device_type: Literal["controller", "validator"],
 ) -> None:
+    is_ctrl = device_type == "controller"
+    label_prefix = "Controller" if is_ctrl else "Validator"
+    node_def = "cat-sdwan-controller" if is_ctrl else "cat-sdwan-validator"
     certs = load_certs()
 
     with Progress(
@@ -69,73 +75,96 @@ def run_controller(
         progress.update(task, description="Checking lab and images...")
         lab, manager_ip, manager_port = _find_lab(cml, lab_name)
         ip_type = _detect_ip_type(lab)
-        image_id = resolve_image(cml, "cat-sdwan-controller", version)
+        image_id = resolve_image(cml, node_def, version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
         client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
         client.login()
         try:
             org_name = client.get_organization() or ""
-            template_id = _import_controller_templates(client, ip_type)
+            template_id = _import_controller_templates(client, ip_type) if is_ctrl else None
+
+            ip_offset = "1" if is_ctrl else "2"
+            num_re = _CTRL_NUM_RE if is_ctrl else _VLDTR_NUM_RE
+            iface = "eth1" if is_ctrl else "ge0/0"
+            personality = "vsmart" if is_ctrl else "vbond"
 
             nodes: list[Node] = []
-            controller_ips: list[str] = []
+            device_ips: list[str] = []
             for i in range(count):
-                controller_num = _next_controller_num(lab)
+                num = _next_device_num(lab, num_re)
                 progress.update(
                     task,
-                    description=f"Adding Controller{controller_num} to CML ({i + 1}/{count})...",
+                    description=f"Adding {label_prefix}{num} to CML ({i + 1}/{count})...",
                 )
-                cloud_init = _render_cloud_init(
+                extra = (
+                    {"controller_num": num, "validator_fqdn": _VALIDATOR_FQDN}
+                    if is_ctrl
+                    else {"validator_num": num}
+                )
+                cloud_init = _render_device_cloud_init(
+                    f"{device_type}-cloud-init.j2",
                     org_name=org_name,
                     root_ca=certs.chain,
-                    controller_num=controller_num,
                     ip_type=ip_type,
+                    **extra,
                 )
-                node = _add_node(
-                    lab, f"Controller{controller_num}", image_id, cloud_init,
+                node = _add_sdwan_node(
+                    lab, f"{label_prefix}{num}", node_def, image_id, cloud_init, iface,
                 )
                 node.start()
                 nodes.append(node)
-                controller_ips.append(_controller_ip(controller_num, ip_type))
+                device_ips.append(
+                    f"fc00:172:16::{ip_offset}{num}"
+                    if ip_type == "v6"
+                    else f"172.16.0.{ip_offset}{num}"
+                )
 
-            for i, (node, ip) in enumerate(zip(nodes, controller_ips), 1):
+            for i, (node, ip) in enumerate(zip(nodes, device_ips), 1):
                 progress.update(
                     task,
-                    description=f"Waiting for controller to boot ({i}/{count})...",
+                    description=f"Waiting for {device_type} to boot ({i}/{count})...",
                 )
                 node.wait_until_converged()
                 progress.update(
                     task,
-                    description=f"Waiting for controller to be reachable ({i}/{count})...",
+                    description=f"Waiting for {device_type} to be reachable ({i}/{count})...",
                 )
-                _add_controller_retrying(client, ip, timeout=_BOOT_TIMEOUT)
+                _add_to_manager_retrying(client, ip, personality, timeout=_BOOT_TIMEOUT)
 
-            progress.update(task, description="Waiting for controller CSRs...")
-            _wait_for_csrs(client, controller_ips, timeout=_CSR_POLL_TIMEOUT)
+            progress.update(task, description=f"Waiting for {device_type} CSRs...")
+            _wait_for_csrs(client, device_ips, timeout=_CSR_POLL_TIMEOUT)
 
-            progress.update(task, description="Signing controller certificates...")
+            progress.update(task, description=f"Signing {device_type} certificates...")
             with ThreadPoolExecutor() as pool:
                 futures = [
-                    pool.submit(sign_device_cert, client, certs, ip) for ip in controller_ips
+                    pool.submit(sign_device_cert, client, certs, ip) for ip in device_ips
                 ]
                 for f in futures:
                     f.result()
 
-            system_ips = {
-                f"100.0.0.{ip.split('.')[-1] if '.' in ip else ip.split(':')[-1]}"
-                for ip in controller_ips
-            }
-            progress.update(task, description="Waiting for controllers to reconnect...")
-            _wait_for_controllers_ready(client, system_ips, timeout=_CSR_POLL_TIMEOUT)
-
-            progress.update(task, description="Attaching controller template...")
-            _attach_controller_template(client, ip_type, template_id, system_ips)
+            if is_ctrl:
+                system_ips = {
+                    f"100.0.0.{ip.split('.')[-1] if '.' in ip else ip.split(':')[-1]}"
+                    for ip in device_ips
+                }
+                progress.update(task, description="Waiting for controllers to reconnect...")
+                _wait_for_controllers_ready(client, system_ips, timeout=_CSR_POLL_TIMEOUT)
+                progress.update(task, description="Attaching controller template...")
+                assert template_id is not None
+                _attach_controller_template(client, ip_type, template_id, system_ips)
+            else:
+                progress.update(task, description="Updating Gateway DNS entries...")
+                _update_gateway_dns(
+                    cml_host, cml_user, cml_password, lab, lab_name, device_ips,
+                )
         finally:
             client.logout()
 
     label = (
-        f"Controller{controller_ips[0].split('.')[-1]}" if count == 1 else f"{count} controllers"
+        f"{label_prefix}{device_ips[0].split('.')[-1]}"
+        if count == 1
+        else f"{count} {device_type}s"
     )
     console.print(f"[green]Added.[/green] {label} added to lab '{escape(lab_name)}'.")
 
@@ -159,15 +188,6 @@ def _find_lab(cml: ClientLibrary, lab_name: str) -> tuple[Lab, str, int]:
     return lab, m.group(1), int(m.group(2))
 
 
-def _next_controller_num(lab: Lab) -> str:
-    nums = [
-        int(m.group(1))
-        for node in lab.nodes()
-        if (m := _CTRL_NUM_RE.match(node.label))
-    ]
-    return f"{(max(nums) + 1) if nums else 1:02d}"
-
-
 def _detect_ip_type(lab: Lab) -> str:
     ref = next(
         (n for n in lab.nodes() if _CTRL_NUM_RE.match(n.label) or _VLDTR_NUM_RE.match(n.label)),
@@ -185,33 +205,29 @@ def _detect_ip_type(lab: Lab) -> str:
     return "v4"
 
 
-def _controller_ip(controller_num: str, ip_type: str) -> str:
-    if ip_type == "v6":
-        return f"fc00:172:16::1{controller_num}"
-    return f"172.16.0.1{controller_num}"
+def _next_device_num(lab: Lab, num_re: re.Pattern[str]) -> str:
+    nums = [int(m.group(1)) for node in lab.nodes() if (m := num_re.match(node.label))]
+    return f"{(max(nums) + 1) if nums else 1:02d}"
 
 
-def _render_cloud_init(org_name: str, root_ca: str, controller_num: str, ip_type: str) -> str:
+def _render_device_cloud_init(
+    template_name: str, *, org_name: str, root_ca: str, ip_type: str, **kwargs: str
+) -> str:
     env = Environment(loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True)
-    return env.get_template("controller-cloud-init.j2").render(
-        root_ca=root_ca,
-        org_name=org_name,
-        validator_fqdn=_VALIDATOR_FQDN,
-        controller_num=controller_num,
-        ip_type=ip_type,
+    return env.get_template(template_name).render(
+        root_ca=root_ca, org_name=org_name, ip_type=ip_type, **kwargs,
     )
 
 
-_SDWAN_NODE_DEFS = {"cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator"}
-
-
-def _add_node(lab: Lab, label: str, image_id: str, configuration: str) -> Node:
+def _add_sdwan_node(
+    lab: Lab, label: str, node_def: str, image_id: str, configuration: str, iface: str,
+) -> Node:
     sdwan_nodes = [n for n in lab.nodes() if n.node_definition in _SDWAN_NODE_DEFS]
     x = max((n.x for n in sdwan_nodes), default=0) + 120
     y = max((n.y for n in sdwan_nodes), default=0)
     node = lab.create_node(
         label=label,
-        node_definition="cat-sdwan-controller",
+        node_definition=node_def,
         image_definition=image_id,
         configuration=configuration,
         x=x,
@@ -223,12 +239,12 @@ def _add_node(lab: Lab, label: str, image_id: str, configuration: str) -> Node:
     if vpn0 is None:
         log.error("VPN0 switch not found in lab.")
         raise typer.Exit(1)
-    eth1 = _sync_until_interface(lab, node, "eth1")
+    port = _sync_until_interface(lab, node, iface)
     free = vpn0.next_available_interface()
     if free is None:
         log.error("VPN0 switch has no free ports.")
         raise typer.Exit(1)
-    lab.create_link(eth1, free, wait=False)
+    lab.create_link(port, free, wait=False)
     return node
 
 
@@ -242,27 +258,31 @@ def _sync_until_interface(
             return node.get_interface_by_label(label)
         except InterfaceNotFound:
             if time.time() >= deadline:
-                log.error("Interface %s not available on %s after %ds.", label, node.label, timeout)
+                log.error(
+                    "Interface %s not available on %s after %ds.", label, node.label, timeout
+                )
                 raise typer.Exit(1)
             time.sleep(2)
 
 
-def _add_controller_retrying(client: ManagerClient, ip: str, *, timeout: int) -> None:
+def _add_to_manager_retrying(
+    client: ManagerClient, ip: str, personality: str, *, timeout: int
+) -> None:
     deadline = time.time() + timeout
     while True:
         try:
-            client.add_controller(ip, "vsmart", "admin", "admin")
+            client.add_controller(ip, personality, "admin", "admin")
             return
         except ManagerAPIError:
             remaining = deadline - time.time()
             if remaining <= 0:
-                log.error("Timed out waiting for controller %s to become reachable.", ip)
+                log.error("Timed out waiting for %s %s to become reachable.", personality, ip)
                 raise typer.Exit(1)
             time.sleep(min(_BOOT_INTERVAL, remaining))
 
 
-def _wait_for_csrs(client: ManagerClient, controller_ips: list[str], *, timeout: int) -> None:
-    pending = set(controller_ips)
+def _wait_for_csrs(client: ManagerClient, device_ips: list[str], *, timeout: int) -> None:
+    pending = set(device_ips)
     deadline = time.time() + timeout
     while pending and time.time() < deadline:
         for d in client.get_controllers():
@@ -272,14 +292,13 @@ def _wait_for_csrs(client: ManagerClient, controller_ips: list[str], *, timeout:
         if pending:
             time.sleep(_CSR_POLL_INTERVAL)
     if pending:
-        log.error("Timed out waiting for controllers: %s", ", ".join(sorted(pending)))
+        log.error("Timed out waiting for CSRs: %s", ", ".join(sorted(pending)))
         raise typer.Exit(1)
 
 
 def _wait_for_controllers_ready(
     client: ManagerClient, system_ips: set[str], *, timeout: int
 ) -> None:
-    """Poll until each newly added controller appears with its system IP (post-cert reconnect)."""
     pending = set(system_ips)
     deadline = time.time() + timeout
     while pending and time.time() < deadline:
@@ -295,160 +314,6 @@ def _wait_for_controllers_ready(
             "Timed out waiting for controllers to reconnect: %s", ", ".join(sorted(pending))
         )
         raise typer.Exit(1)
-
-
-def run_validator(
-    cml_host: str,
-    cml_user: str,
-    cml_password: str,
-    lab_name: str,
-    version: str,
-    manager_user: str,
-    manager_password: str,
-    count: int,
-) -> None:
-    certs = load_certs()
-
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Connecting to CML...")
-        cml = connect_cml(cml_host, cml_user, cml_password)
-        progress.update(task, description="Checking lab and images...")
-        lab, manager_ip, manager_port = _find_lab(cml, lab_name)
-        ip_type = _detect_ip_type(lab)
-        image_id = resolve_image(cml, "cat-sdwan-validator", version)
-
-        progress.update(task, description="Connecting to SD-WAN Manager...")
-        client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-        client.login()
-        try:
-            org_name = client.get_organization() or ""
-
-            nodes: list[Node] = []
-            validator_ips: list[str] = []
-            for i in range(count):
-                validator_num = _next_validator_num(lab)
-                progress.update(
-                    task,
-                    description=f"Adding Validator{validator_num} to CML ({i + 1}/{count})...",
-                )
-                cloud_init = _render_validator_cloud_init(
-                    org_name=org_name,
-                    root_ca=certs.chain,
-                    validator_num=validator_num,
-                    ip_type=ip_type,
-                )
-                node = _add_validator_node(
-                    lab, f"Validator{validator_num}", image_id, cloud_init,
-                )
-                node.start()
-                nodes.append(node)
-                validator_ips.append(_validator_ip(validator_num, ip_type))
-
-            for i, (node, ip) in enumerate(zip(nodes, validator_ips), 1):
-                progress.update(
-                    task,
-                    description=f"Waiting for validator to boot ({i}/{count})...",
-                )
-                node.wait_until_converged()
-                progress.update(
-                    task,
-                    description=f"Waiting for validator to be reachable ({i}/{count})...",
-                )
-                _add_validator_retrying(client, ip, timeout=_BOOT_TIMEOUT)
-
-            progress.update(task, description="Waiting for validator CSRs...")
-            _wait_for_csrs(client, validator_ips, timeout=_CSR_POLL_TIMEOUT)
-
-            progress.update(task, description="Signing validator certificates...")
-            with ThreadPoolExecutor() as pool:
-                futures = [
-                    pool.submit(sign_device_cert, client, certs, ip) for ip in validator_ips
-                ]
-                for f in futures:
-                    f.result()
-
-            progress.update(task, description="Updating Gateway DNS entries...")
-            _update_gateway_dns(cml_host, cml_user, cml_password, lab, lab_name, validator_ips)
-        finally:
-            client.logout()
-
-    label = (
-        f"Validator{validator_ips[0].split('.')[-1]}" if count == 1 else f"{count} validators"
-    )
-    console.print(f"[green]Added.[/green] {label} added to lab '{escape(lab_name)}'.")
-
-
-def _next_validator_num(lab: Lab) -> str:
-    nums = [
-        int(m.group(1))
-        for node in lab.nodes()
-        if (m := _VLDTR_NUM_RE.match(node.label))
-    ]
-    return f"{(max(nums) + 1) if nums else 1:02d}"
-
-
-def _validator_ip(validator_num: str, ip_type: str) -> str:
-    if ip_type == "v6":
-        return f"fc00:172:16::2{validator_num}"
-    return f"172.16.0.2{validator_num}"
-
-
-def _render_validator_cloud_init(
-    org_name: str, root_ca: str, validator_num: str, ip_type: str
-) -> str:
-    env = Environment(loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True)
-    return env.get_template("validator-cloud-init.j2").render(
-        root_ca=root_ca,
-        org_name=org_name,
-        validator_num=validator_num,
-        ip_type=ip_type,
-    )
-
-
-def _add_validator_node(lab: Lab, label: str, image_id: str, configuration: str) -> Node:
-    sdwan_nodes = [n for n in lab.nodes() if n.node_definition in _SDWAN_NODE_DEFS]
-    x = max((n.x for n in sdwan_nodes), default=0) + 120
-    y = max((n.y for n in sdwan_nodes), default=0)
-    node = lab.create_node(
-        label=label,
-        node_definition="cat-sdwan-validator",
-        image_definition=image_id,
-        configuration=configuration,
-        x=x,
-        y=y,
-        populate_interfaces=True,
-        wait=False,
-    )
-    vpn0 = next((n for n in lab.nodes() if n.label == "VPN0"), None)
-    if vpn0 is None:
-        log.error("VPN0 switch not found in lab.")
-        raise typer.Exit(1)
-    ge0_0 = _sync_until_interface(lab, node, "ge0/0")
-    free = vpn0.next_available_interface()
-    if free is None:
-        log.error("VPN0 switch has no free ports.")
-        raise typer.Exit(1)
-    lab.create_link(ge0_0, free, wait=False)
-    return node
-
-
-def _add_validator_retrying(client: ManagerClient, ip: str, *, timeout: int) -> None:
-    deadline = time.time() + timeout
-    while True:
-        try:
-            client.add_controller(ip, "vbond", "admin", "admin")
-            return
-        except ManagerAPIError:
-            remaining = deadline - time.time()
-            if remaining <= 0:
-                log.error("Timed out waiting for validator %s to become reachable.", ip)
-                raise typer.Exit(1)
-            time.sleep(min(_BOOT_INTERVAL, remaining))
 
 
 def _update_gateway_dns(
