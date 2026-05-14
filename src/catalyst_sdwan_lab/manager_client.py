@@ -157,7 +157,7 @@ class ManagerClient:
         )
 
     def generate_csr(self, ip: str) -> str:
-        data = self._post("/dataservice/certificate/generate/csr", {"deviceIP": ip})
+        data = self._post("/dataservice/certificate/generate/csr", {"deviceIP": ip}, timeout=120)
         return data["data"][0]["deviceCSR"]
 
     def install_signed_cert(self, cert_pem: str) -> str:
@@ -204,8 +204,10 @@ class ManagerClient:
         self._raise_for_status(response)
         return response.json()
 
-    def _post(self, path: str, body: Any = None) -> Any:
-        response = self._session.post(f"{self._base}{path}", json=body, timeout=self._TIMEOUT)
+    def _post(self, path: str, body: Any = None, *, timeout: int | None = None) -> Any:
+        response = self._session.post(
+            f"{self._base}{path}", json=body, timeout=timeout or self._TIMEOUT
+        )
         self._raise_for_status(response)
         return response.json() if response.text else None
 

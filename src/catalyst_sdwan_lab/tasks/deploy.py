@@ -174,12 +174,12 @@ def _onboard_control_components(
         components = [("172.16.0.201", "vbond"), ("172.16.0.101", "vsmart")]
 
     controllers = client.get_controllers()
-    existing = {d.get("personality") for d in controllers}
+    existing_ips = {d.get("deviceIP") for d in controllers}
     total = len(components)
     added = False
     for i, (ip, personality) in enumerate(components, 1):
-        if personality in existing:
-            log.debug("%s already in inventory — skipping", personality)
+        if ip in existing_ips:
+            log.debug("%s (%s) already in inventory — skipping", personality, ip)
             continue
         on_status(f"Adding control components ({i}/{total})...")
         client.add_controller(ip, personality, "admin", "admin")
