@@ -8,13 +8,17 @@ from click.exceptions import Exit
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
 from catalyst_sdwan_lab.tasks.add import (
     _CTRL_NUM_RE,
+    _EDGE_NUM_RE,
     _VLDTR_NUM_RE,
+    _add_edge_node,
+    _add_sdwan_node,
     _add_to_manager_retrying,
     _detect_ip_type,
     _find_lab,
     _next_device_num,
     _wait_for_controllers_ready,
     _wait_for_csrs,
+    _wait_for_edges_onboarded,
 )
 
 
@@ -116,6 +120,135 @@ class TestNextDeviceNum:
         lab = _make_lab([_make_node("Controller01"), _make_node("Validator02")])
         assert _next_device_num(lab, _VLDTR_NUM_RE) == "03"
 
+    def test_edge_regex_ignores_controllers_and_validators(self) -> None:
+        lab = _make_lab([_make_node("Controller01"), _make_node("Validator01"), _make_node("Edge03")])
+        assert _next_device_num(lab, _EDGE_NUM_RE) == "04"
+
+
+class TestAddSdwanNode:
+    def _make_sdwan_node(self, x: int, y: int) -> MagicMock:
+        node = MagicMock()
+        node.node_definition = "cat-sdwan-controller"
+        node.x = x
+        node.y = y
+        return node
+
+    def _make_vpn0(self) -> MagicMock:
+        sw = MagicMock()
+        sw.label = "VPN0"
+        return sw
+
+    def _make_lab(self, nodes: list[MagicMock]) -> MagicMock:
+        lab = MagicMock()
+        lab.nodes.return_value = nodes
+        lab.create_node.return_value = MagicMock()
+        return lab
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_first_node_placed_at_120_0(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([self._make_vpn0()])
+        _add_sdwan_node(lab, "Controller01", "cat-sdwan-controller", "img", "cfg", "eth1")
+        kwargs = lab.create_node.call_args[1]
+        assert kwargs["x"] == 120  # 0 + 120
+        assert kwargs["y"] == 0
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_extends_from_rightmost_sdwan_node(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([self._make_sdwan_node(300, 0), self._make_vpn0()])
+        _add_sdwan_node(lab, "Controller02", "cat-sdwan-controller", "img", "cfg", "eth1")
+        assert lab.create_node.call_args[1]["x"] == 420  # 300 + 120
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_exits_if_vpn0_not_found(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([])
+        with pytest.raises(Exit):
+            _add_sdwan_node(lab, "Controller01", "cat-sdwan-controller", "img", "cfg", "eth1")
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_exits_if_vpn0_has_no_free_ports(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        vpn0 = self._make_vpn0()
+        vpn0.next_available_interface.return_value = None
+        lab = self._make_lab([vpn0])
+        with pytest.raises(Exit):
+            _add_sdwan_node(lab, "Controller01", "cat-sdwan-controller", "img", "cfg", "eth1")
+
+
+class TestAddEdgeNode:
+    def _make_switch(self, label: str) -> MagicMock:
+        sw = MagicMock()
+        sw.label = label
+        sw.y = 0
+        return sw
+
+    def _make_edge_node(self, x: int) -> MagicMock:
+        node = MagicMock()
+        node.label = "Edge01"
+        node.y = 400
+        node.x = x
+        return node
+
+    def _make_lab(self, nodes: list[MagicMock]) -> MagicMock:
+        lab = MagicMock()
+        lab.nodes.return_value = nodes
+        lab.create_node.return_value = MagicMock()
+        return lab
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_first_edge_placed_at_y400_x_minus280(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([self._make_switch("INET"), self._make_switch("MPLS")])
+        _add_edge_node(lab, "Edge01", "img", "cfg")
+        kwargs = lab.create_node.call_args[1]
+        assert kwargs["y"] == 400
+        assert kwargs["x"] == -280  # -400 + 120
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_extends_from_rightmost_y400_node(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([
+            self._make_edge_node(200),
+            self._make_switch("INET"),
+            self._make_switch("MPLS"),
+        ])
+        _add_edge_node(lab, "Edge02", "img", "cfg")
+        assert lab.create_node.call_args[1]["x"] == 320  # 200 + 120
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_exits_if_inet_not_found(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([self._make_switch("MPLS")])
+        with pytest.raises(Exit):
+            _add_edge_node(lab, "Edge01", "img", "cfg")
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_exits_if_mpls_not_found(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([self._make_switch("INET")])
+        with pytest.raises(Exit):
+            _add_edge_node(lab, "Edge01", "img", "cfg")
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_exits_if_inet_has_no_free_ports(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        inet = self._make_switch("INET")
+        inet.next_available_interface.return_value = None
+        lab = self._make_lab([inet, self._make_switch("MPLS")])
+        with pytest.raises(Exit):
+            _add_edge_node(lab, "Edge01", "img", "cfg")
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_exits_if_mpls_has_no_free_ports(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        mpls = self._make_switch("MPLS")
+        mpls.next_available_interface.return_value = None
+        lab = self._make_lab([self._make_switch("INET"), mpls])
+        with pytest.raises(Exit):
+            _add_edge_node(lab, "Edge01", "img", "cfg")
+
 
 class TestWaitForCsrs:
     def _make_client(self, controllers: list[dict]) -> MagicMock:
@@ -192,7 +325,42 @@ class TestAddToManagerRetrying:
             _add_to_manager_retrying(client, "172.16.0.101", "vsmart", timeout=-1)
 
 
+class TestWaitForEdgesOnboarded:
+    def _make_client(self, vedges: list[dict]) -> MagicMock:
+        client = MagicMock()
+        client.get_vedges.return_value = vedges
+        return client
+
+    def test_resolves_when_all_onboarded(self) -> None:
+        client = self._make_client([
+            {"uuid": "uuid-1", "certInstallStatus": "Installed", "reachability": "reachable"},
+        ])
+        _wait_for_edges_onboarded(client, ["uuid-1"], timeout=10)
+        client.get_vedges.assert_called_once()
+
+    def test_requires_both_installed_and_reachable(self) -> None:
+        client = self._make_client([
+            {"uuid": "uuid-1", "certInstallStatus": "Installed", "reachability": "unreachable"},
+        ])
+        with pytest.raises(Exit):
+            _wait_for_edges_onboarded(client, ["uuid-1"], timeout=-1)
+
+    def test_ignores_other_uuids(self) -> None:
+        client = self._make_client([
+            {"uuid": "uuid-1", "certInstallStatus": "Installed", "reachability": "reachable"},
+            {"uuid": "uuid-2", "certInstallStatus": None, "reachability": "unreachable"},
+        ])
+        _wait_for_edges_onboarded(client, ["uuid-1"], timeout=10)
+        client.get_vedges.assert_called_once()
+
+    def test_exits_on_timeout(self) -> None:
+        client = self._make_client([])
+        with pytest.raises(Exit):
+            _wait_for_edges_onboarded(client, ["uuid-1"], timeout=-1)
+
+
 class TestWaitForTask:
+
     def _make_client(self, responses: list[dict]) -> tuple[ManagerClient, MagicMock]:
         client = ManagerClient.__new__(ManagerClient)
         mock_get = MagicMock(side_effect=responses)

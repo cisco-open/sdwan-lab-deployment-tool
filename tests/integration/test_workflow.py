@@ -17,4 +17,5 @@ def test_full_workflow(sdwan_version: str) -> None:
     _run(["csdwan", "deploy", sdwan_version])
     _run(["csdwan", "add", "2", "controller", sdwan_version], timeout=1200)
     _run(["csdwan", "add", "2", "validator", sdwan_version], timeout=1200)
+    _run(["csdwan", "add", "2", "edges", sdwan_version], timeout=1200)
     _run(["csdwan", "delete", "--force"], timeout=300)

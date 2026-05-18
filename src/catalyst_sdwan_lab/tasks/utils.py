@@ -117,6 +117,17 @@ def load_certs() -> Certs:
     return Certs(**loaded)
 
 
+def _normalize_version(version: str) -> str:
+    def _pad(seg: str) -> str:
+        i = 0
+        while i < len(seg) and seg[i].isdigit():
+            i += 1
+        num, suffix = seg[:i], seg[i:]
+        return f"{int(num):02d}{suffix}" if num else seg
+
+    return ".".join(_pad(s) for s in version.split("."))
+
+
 def resolve_image(cml: ClientLibrary, node_type: str, version: str) -> str:
     available = [
         img["id"]
@@ -125,6 +136,10 @@ def resolve_image(cml: ClientLibrary, node_type: str, version: str) -> str:
     exact = f"{node_type}-{version}"
     if exact in available:
         return exact
+    normalized = _normalize_version(version)
+    # CML image IDs sometimes use zero-padded segments (26.01.01); accept un-padded input too
+    if normalized != version and f"{node_type}-{normalized}" in available:
+        return f"{node_type}-{normalized}"
     if node_type in ("cat-sdwan-controller", "cat-sdwan-validator"):
         parts = version.split(".")
         if len(parts) == 4 and parts[-1] == "1":

@@ -281,6 +281,9 @@ def add(
     ] = ...,  # type: ignore[assignment]
 ) -> None:
     """Add devices to an existing SD-WAN lab."""
+    if count < 1:
+        log.error("Count must be at least 1.")
+        raise typer.Exit(1)
     device = _DEVICE_TYPES.get(device_type.lower())
     if device is None:
         log.error(
@@ -296,6 +299,15 @@ def add(
             manager_password=manager_pass,
             count=count,
             device_type=device,  # type: ignore[arg-type]
+        )
+    elif device == "edge":
+        _add.run_edge(
+            *_cml_credentials(),
+            lab_name=lab_name,
+            version=version,
+            manager_user=manager_user,
+            manager_password=manager_pass,
+            count=count,
         )
     else:
         log.error("Device type '%s' not yet implemented.", device)
