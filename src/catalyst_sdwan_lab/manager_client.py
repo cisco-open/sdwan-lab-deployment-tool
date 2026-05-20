@@ -139,12 +139,14 @@ class ManagerClient:
     def get_vedges(self) -> list[dict[str, Any]]:
         return self._get("/dataservice/system/device/vedges").get("data", [])
 
-    def get_bootstrap_config(self, uuid: str) -> str:
-        data = self._get(
+    def get_bootstrap_config(self, uuid: str, *, wanif: str | None = None) -> str:
+        url = (
             f"/dataservice/system/device/bootstrap/device/{uuid}"
             "?configtype=cloudinit&inclDefRootCert=false&version=v1"
         )
-        return data["bootstrapConfig"]
+        if wanif:
+            url += f"&wanif={wanif}"
+        return self._get(url)["bootstrapConfig"]
 
     def associate_config_group(self, config_group_id: str, uuids: list[str]) -> None:
         self._put(
@@ -153,11 +155,11 @@ class ManagerClient:
         )
 
     def set_config_group_variables(
-        self, config_group_id: str, devices: list[dict[str, Any]]
+        self, config_group_id: str, devices: list[dict[str, Any]], *, solution: str = "sdwan"
     ) -> None:
         self._put(
             f"/dataservice/v1/config-group/{config_group_id}/device/variables",
-            {"solution": "sdwan", "devices": devices},
+            {"solution": solution, "devices": devices},
         )
 
     def deploy_config_group(self, config_group_id: str, uuids: list[str]) -> str:

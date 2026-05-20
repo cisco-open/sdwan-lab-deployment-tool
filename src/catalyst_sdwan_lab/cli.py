@@ -309,6 +309,15 @@ def add(
             manager_password=manager_pass,
             count=count,
         )
+    elif device == "sdrouting":
+        _add.run_sdrouting(
+            *_cml_credentials(),
+            lab_name=lab_name,
+            version=version,
+            manager_user=manager_user,
+            manager_password=manager_pass,
+            count=count,
+        )
     else:
         log.error("Device type '%s' not yet implemented.", device)
         raise typer.Exit(1)

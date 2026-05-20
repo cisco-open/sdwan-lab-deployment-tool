@@ -9,13 +9,15 @@ from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
 from catalyst_sdwan_lab.tasks.add import (
     _CTRL_NUM_RE,
     _EDGE_NUM_RE,
+    _SDROUTING_NUM_RE,
     _VLDTR_NUM_RE,
-    _add_edge_node,
     _add_sdwan_node,
     _add_to_manager_retrying,
+    _add_wan_edge_node,
     _detect_ip_type,
     _find_lab,
     _next_device_num,
+    _next_system_ip_num,
     _wait_for_controllers_ready,
     _wait_for_csrs,
     _wait_for_edges_onboarded,
@@ -124,6 +126,43 @@ class TestNextDeviceNum:
         lab = _make_lab([_make_node("Controller01"), _make_node("Validator01"), _make_node("Edge03")])
         assert _next_device_num(lab, _EDGE_NUM_RE) == "04"
 
+    def test_sdrouting_regex_ignores_edges(self) -> None:
+        lab = _make_lab([_make_node("Edge01"), _make_node("SD-Edge02")])
+        assert _next_device_num(lab, _SDROUTING_NUM_RE) == "03"
+
+
+class TestNextSystemIpNum:
+    def test_no_devices_returns_1(self) -> None:
+        lab = _make_lab([])
+        assert _next_system_ip_num(lab, []) == 1
+
+    def test_uses_manager_system_ip(self) -> None:
+        lab = _make_lab([])
+        vedges = [{"system-ip": "10.0.0.3"}]
+        assert _next_system_ip_num(lab, vedges) == 4
+
+    def test_uses_cml_edge_label(self) -> None:
+        lab = _make_lab([_make_node("Edge05")])
+        assert _next_system_ip_num(lab, []) == 6
+
+    def test_uses_cml_sdrouting_label(self) -> None:
+        lab = _make_lab([_make_node("SD-Edge03")])
+        assert _next_system_ip_num(lab, []) == 4
+
+    def test_takes_max_of_manager_and_cml(self) -> None:
+        lab = _make_lab([_make_node("Edge02")])
+        vedges = [{"system-ip": "10.0.0.5"}]
+        assert _next_system_ip_num(lab, vedges) == 6
+
+    def test_ignores_malformed_system_ip(self) -> None:
+        lab = _make_lab([])
+        vedges = [{"system-ip": ""}, {"system-ip": "not-an-ip"}, {"system-ip": "10.0.0.2"}]
+        assert _next_system_ip_num(lab, vedges) == 3
+
+    def test_both_edge_and_sdrouting_labels_considered(self) -> None:
+        lab = _make_lab([_make_node("Edge03"), _make_node("SD-Edge05")])
+        assert _next_system_ip_num(lab, []) == 6
+
 
 class TestAddSdwanNode:
     def _make_sdwan_node(self, x: int, y: int) -> MagicMock:
@@ -201,7 +240,7 @@ class TestAddEdgeNode:
     def test_first_edge_placed_at_y400_x_minus280(self, mock_sync: MagicMock) -> None:
         mock_sync.return_value = MagicMock()
         lab = self._make_lab([self._make_switch("INET"), self._make_switch("MPLS")])
-        _add_edge_node(lab, "Edge01", "img", "cfg")
+        _add_wan_edge_node(lab, "Edge01", "img", "cfg", connect_mpls=True)
         kwargs = lab.create_node.call_args[1]
         assert kwargs["y"] == 400
         assert kwargs["x"] == -280  # -400 + 120
@@ -214,7 +253,7 @@ class TestAddEdgeNode:
             self._make_switch("INET"),
             self._make_switch("MPLS"),
         ])
-        _add_edge_node(lab, "Edge02", "img", "cfg")
+        _add_wan_edge_node(lab, "Edge02", "img", "cfg", connect_mpls=True)
         assert lab.create_node.call_args[1]["x"] == 320  # 200 + 120
 
     @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
@@ -222,14 +261,14 @@ class TestAddEdgeNode:
         mock_sync.return_value = MagicMock()
         lab = self._make_lab([self._make_switch("MPLS")])
         with pytest.raises(Exit):
-            _add_edge_node(lab, "Edge01", "img", "cfg")
+            _add_wan_edge_node(lab, "Edge01", "img", "cfg", connect_mpls=True)
 
     @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
     def test_exits_if_mpls_not_found(self, mock_sync: MagicMock) -> None:
         mock_sync.return_value = MagicMock()
         lab = self._make_lab([self._make_switch("INET")])
         with pytest.raises(Exit):
-            _add_edge_node(lab, "Edge01", "img", "cfg")
+            _add_wan_edge_node(lab, "Edge01", "img", "cfg", connect_mpls=True)
 
     @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
     def test_exits_if_inet_has_no_free_ports(self, mock_sync: MagicMock) -> None:
@@ -238,7 +277,7 @@ class TestAddEdgeNode:
         inet.next_available_interface.return_value = None
         lab = self._make_lab([inet, self._make_switch("MPLS")])
         with pytest.raises(Exit):
-            _add_edge_node(lab, "Edge01", "img", "cfg")
+            _add_wan_edge_node(lab, "Edge01", "img", "cfg", connect_mpls=True)
 
     @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
     def test_exits_if_mpls_has_no_free_ports(self, mock_sync: MagicMock) -> None:
@@ -247,7 +286,51 @@ class TestAddEdgeNode:
         mpls.next_available_interface.return_value = None
         lab = self._make_lab([self._make_switch("INET"), mpls])
         with pytest.raises(Exit):
-            _add_edge_node(lab, "Edge01", "img", "cfg")
+            _add_wan_edge_node(lab, "Edge01", "img", "cfg", connect_mpls=True)
+
+
+class TestAddSdroutingNode:
+    def _make_switch(self, label: str) -> MagicMock:
+        sw = MagicMock()
+        sw.label = label
+        sw.y = 0
+        return sw
+
+    def _make_lab(self, nodes: list[MagicMock]) -> MagicMock:
+        lab = MagicMock()
+        lab.nodes.return_value = nodes
+        lab.create_node.return_value = MagicMock()
+        return lab
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_connects_only_inet_not_mpls(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([self._make_switch("INET")])
+        _add_wan_edge_node(lab, "SD-Edge1", "img", "cfg", connect_mpls=False)
+        assert lab.create_link.call_count == 1
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_exits_if_inet_not_found(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([])
+        with pytest.raises(Exit):
+            _add_wan_edge_node(lab, "SD-Edge1", "img", "cfg", connect_mpls=False)
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_exits_if_inet_has_no_free_ports(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        inet = self._make_switch("INET")
+        inet.next_available_interface.return_value = None
+        lab = self._make_lab([inet])
+        with pytest.raises(Exit):
+            _add_wan_edge_node(lab, "SD-Edge1", "img", "cfg", connect_mpls=False)
+
+    @patch("catalyst_sdwan_lab.tasks.add._sync_until_interface")
+    def test_placed_at_y400(self, mock_sync: MagicMock) -> None:
+        mock_sync.return_value = MagicMock()
+        lab = self._make_lab([self._make_switch("INET")])
+        _add_wan_edge_node(lab, "SD-Edge1", "img", "cfg", connect_mpls=False)
+        assert lab.create_node.call_args[1]["y"] == 400
 
 
 class TestWaitForCsrs:

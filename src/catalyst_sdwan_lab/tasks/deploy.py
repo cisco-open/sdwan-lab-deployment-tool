@@ -173,21 +173,18 @@ def _onboard_control_components(
     else:
         components = [("172.16.0.201", "vbond"), ("172.16.0.101", "vsmart")]
 
-    controllers = client.get_controllers()
-    existing_ips = {d.get("deviceIP") for d in controllers}
     total = len(components)
-    added = False
     for i, (ip, personality) in enumerate(components, 1):
-        if ip in existing_ips:
-            log.debug("%s (%s) already in inventory — skipping", personality, ip)
-            continue
         on_status(f"Adding control components ({i}/{total})...")
-        client.add_controller(ip, personality, "admin", "admin")
-        added = True
+        try:
+            client.add_controller(ip, personality, "admin", "admin")
+        except ManagerAPIError as e:
+            if "already exists" in str(e):
+                log.debug("%s (%s) already exists — skipping", personality, ip)
+            else:
+                raise
 
-    if added:
-        controllers = client.get_controllers()
-
+    controllers = client.get_controllers()
     on_status("Signing certificates for control components...")
     pending = [
         d.get("deviceIP", "")
@@ -280,10 +277,8 @@ def _attach_controller_template(
 
 
 def _restore_basic_configuration(client: ManagerClient, ip_type: str) -> None:
-    already_imported = any(
-        g.get("name") == "edge_basic" for g in client.get_config_groups()
-    )
-    if already_imported:
+    existing = {g.get("name") for g in client.get_config_groups()}
+    if "edge_basic" in existing and "sdrouting_basic" in existing:
         log.debug("Basic configuration already imported — skipping")
         return
     task_id = client.import_configuration(basic_configuration_path(ip_type))

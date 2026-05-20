@@ -17,3 +17,8 @@ def sdwan_version() -> str:
             "Set MANAGER_PORT (PATty mode) or MANAGER_IP + MANAGER_MASK + MANAGER_GATEWAY (direct mode)"
         )
     return os.environ["SDWAN_VERSION"]
+
+
+@pytest.fixture(scope="session")
+def ip_type() -> str:
+    return os.environ.get("IP_TYPE", "v4")

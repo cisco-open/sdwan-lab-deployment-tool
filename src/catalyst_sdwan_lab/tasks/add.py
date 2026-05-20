@@ -35,10 +35,15 @@ from .utils import (
 
 log = logging.getLogger(__name__)
 
+_CLOUD_INIT_ENV = Environment(
+    loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True
+)
+
 _MANAGER_NOTE_RE = re.compile(r"manager_external_ip\s*=\s*(.+):(\d+)")
 _CTRL_NUM_RE = re.compile(r"^Controller(\d+)$")
 _VLDTR_NUM_RE = re.compile(r"^Validator(\d+)$")
 _EDGE_NUM_RE = re.compile(r"^Edge(\d+)$")
+_SDROUTING_NUM_RE = re.compile(r"^SD-Edge(\d+)$")
 _IP_HOST_RE = re.compile(r"^ip host vrf (\S+) validator\.sdwan\.local (.+)$")
 
 _CSR_POLL_INTERVAL = 15
@@ -198,9 +203,10 @@ def run_edge(
         client.login()
         try:
             progress.update(task, description="Checking available edge devices...")
+            vedges = client.get_vedges()
             free_uuids = [
                 v["uuid"]
-                for v in client.get_vedges()
+                for v in vedges
                 if v.get("deviceModel") == "vedge-C8000V" and v.get("certInstallStatus") is None
             ]
             if count > len(free_uuids):
@@ -218,10 +224,7 @@ def run_edge(
                 raise typer.Exit(1)
             config_group_id: str = cg["id"]
 
-            existing = [
-                int(m.group(1)) for n in lab.nodes() if (m := _EDGE_NUM_RE.match(n.label))
-            ]
-            start = (max(existing) + 1) if existing else 1
+            start = _next_system_ip_num(lab, vedges)
             nums = [f"{start + i:02d}" for i in range(count)]
             uuids = free_uuids[:count]
 
@@ -272,7 +275,9 @@ def run_edge(
                 progress.update(
                     task, description=f"Adding Edge{num} to CML ({i}/{count})..."
                 )
-                node = _add_edge_node(lab, f"Edge{num}", image_id, bootstrap_configs[uuid])
+                node = _add_wan_edge_node(
+                    lab, f"Edge{num}", image_id, bootstrap_configs[uuid], connect_mpls=True
+                )
                 node.start()
                 nodes.append(node)
 
@@ -295,6 +300,140 @@ def run_edge(
             client.logout()
 
     label = f"Edge{nums[0]}" if count == 1 else f"{count} edges"
+    console.print(f"[green]Added.[/green] {label} added to lab '{escape(lab_name)}'.")
+
+
+def run_sdrouting(
+    cml_host: str,
+    cml_user: str,
+    cml_password: str,
+    lab_name: str,
+    version: str,
+    manager_user: str,
+    manager_password: str,
+    count: int,
+) -> None:
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        task = progress.add_task("Connecting to CML...")
+        cml = connect_cml(cml_host, cml_user, cml_password)
+        progress.update(task, description="Checking lab and images...")
+        lab, manager_ip, manager_port = _find_lab(cml, lab_name)
+        ip_type = _detect_ip_type(lab)
+        image_id = resolve_image(cml, "cat-sdwan-edge", version)
+
+        progress.update(task, description="Connecting to SD-WAN Manager...")
+        client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
+        client.login()
+        try:
+            progress.update(task, description="Checking available SD-Routing devices...")
+            vedges = client.get_vedges()
+            free = [
+                v for v in vedges
+                if v.get("deviceModel") == "vedge-C8000V-SD-ROUTING"
+                and v.get("certInstallStatus") is None
+            ]
+            if count > len(free):
+                log.error(
+                    "Not enough free SD-Routing UUIDs: need %d, have %d.", count, len(free)
+                )
+                raise typer.Exit(1)
+            free_uuids = [v["uuid"] for v in free]
+
+            start = _next_system_ip_num(lab, vedges)
+            nums = [str(start + i) for i in range(count)]
+            uuids = free_uuids[:count]
+
+            progress.update(task, description="Looking up SD-Routing config group...")
+            cg = next(
+                (g for g in client.get_config_groups() if g.get("name") == "sdrouting_basic"),
+                None,
+            )
+            if cg is None:
+                log.error("Config group 'sdrouting_basic' not found in Manager.")
+                raise typer.Exit(1)
+            config_group_id: str = cg["id"]
+
+            devices_vars: list[dict[str, Any]] = []
+            for num, uuid in zip(nums, uuids):
+                n = int(num)
+                variables: list[dict[str, Any]] = [
+                    {"name": "system_ip", "value": f"10.0.0.{n}"},
+                    {"name": "host_name", "value": f"SD-Edge{num}"},
+                    {"name": "site_id", "value": n},
+                    {"name": "aaap", "value": "admin"},
+                ]
+                if ip_type in ("v4", "dual"):
+                    variables += [
+                        {"name": "global_vrf_gi1_inet_ip", "value": f"172.16.1.{n}"},
+                        {"name": "global_vrf_gi1_inet_mask", "value": "255.255.255.0"},
+                        {"name": "vrf1_gi3_lan_ip", "value": f"192.168.{n}.1"},
+                        {"name": "vrf1_gi3_lan_mask", "value": "255.255.255.0"},
+                        {"name": "vrf1_gi3_dhcp_mask", "value": "255.255.255.0"},
+                        {"name": "vrf1_gi3_dhcp_network", "value": f"192.168.{n}.0"},
+                        {"name": "vrf1_gi3_dhcp_address_exclude", "value": [f"192.168.{n}.1"]},
+                        {"name": "vrf1_gi3_dhcp_default_gateway", "value": f"192.168.{n}.1"},
+                    ]
+                if ip_type in ("v6", "dual"):
+                    variables += [
+                        {"name": "global_vrf_gi1_inet_ipv6", "value": f"fc00:172:16:1::{n}/64"},
+                        {"name": "vrf1_gi3_lan_ipv6", "value": f"fc00:192:168:{n}::1/64"},
+                    ]
+                devices_vars.append({"device-id": uuid, "variables": variables})
+
+            progress.update(task, description="Associating config group...")
+            client.associate_config_group(config_group_id, uuids)
+            progress.update(task, description="Setting device variables...")
+            client.set_config_group_variables(
+                config_group_id, devices_vars, solution="sd-routing"
+            )
+            progress.update(task, description="Deploying config group...")
+            task_id = client.deploy_config_group(config_group_id, uuids)
+            client.wait_for_task(task_id)
+
+            progress.update(task, description="Fetching bootstrap configs...")
+            bootstrap_configs = {
+                uuid: client.get_bootstrap_config(uuid, wanif="GigabitEthernet1")
+                for uuid in uuids
+            }
+
+            nodes: list[Node] = []
+            for i, (num, uuid) in enumerate(zip(nums, uuids), 1):
+                progress.update(
+                    task, description=f"Adding SD-Edge{num} to CML ({i}/{count})..."
+                )
+                node = _add_wan_edge_node(
+                    lab, f"SD-Edge{num}", image_id, bootstrap_configs[uuid], connect_mpls=False
+                )
+                node.start()
+                nodes.append(node)
+
+            for i, node in enumerate(nodes, 1):
+                progress.update(
+                    task, description=f"Waiting for SD-Routing edge to boot ({i}/{count})..."
+                )
+                node.wait_until_converged()
+
+            progress.update(
+                task, description=f"Waiting for SD-Routing edges to onboard (0/{count})..."
+            )
+            _wait_for_edges_onboarded(
+                client,
+                uuids,
+                timeout=_BOOT_TIMEOUT,
+                on_progress=lambda done, total: progress.update(
+                    task,
+                    description=f"Waiting for SD-Routing edges to onboard ({done}/{total})...",
+                ),
+            )
+        finally:
+            client.logout()
+
+    label = f"SD-Edge{nums[0]}" if count == 1 else f"{count} SD-Routing edges"
     console.print(f"[green]Added.[/green] {label} added to lab '{escape(lab_name)}'.")
 
 
@@ -339,11 +478,30 @@ def _next_device_num(lab: Lab, num_re: re.Pattern[str]) -> str:
     return f"{(max(nums) + 1) if nums else 1:02d}"
 
 
+def _next_system_ip_num(lab: Lab, vedges: list[dict[str, Any]]) -> int:
+    from_manager = max(
+        (
+            int(sip.split(".")[-1])
+            for v in vedges
+            if (sip := v.get("system-ip", "")).count(".") == 3
+        ),
+        default=0,
+    )
+    from_cml = max(
+        (
+            int(m.group(1))
+            for n in lab.nodes()
+            if (m := _EDGE_NUM_RE.match(n.label) or _SDROUTING_NUM_RE.match(n.label))
+        ),
+        default=0,
+    )
+    return max(from_manager, from_cml) + 1
+
+
 def _render_device_cloud_init(
     template_name: str, *, org_name: str, root_ca: str, ip_type: str, **kwargs: str
 ) -> str:
-    env = Environment(loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True)
-    return env.get_template(template_name).render(
+    return _CLOUD_INIT_ENV.get_template(template_name).render(
         root_ca=root_ca, org_name=org_name, ip_type=ip_type, **kwargs,
     )
 
@@ -377,7 +535,9 @@ def _add_sdwan_node(
     return node
 
 
-def _add_edge_node(lab: Lab, label: str, image_id: str, configuration: str) -> Node:
+def _add_wan_edge_node(
+    lab: Lab, label: str, image_id: str, configuration: str, *, connect_mpls: bool
+) -> Node:
     x = max((n.x for n in lab.nodes() if n.y == 400), default=-400) + 120
     node = lab.create_node(
         label=label,
@@ -393,22 +553,23 @@ def _add_edge_node(lab: Lab, label: str, image_id: str, configuration: str) -> N
     if inet is None:
         log.error("INET switch not found in lab.")
         raise typer.Exit(1)
-    mpls = next((n for n in lab.nodes() if n.label == "MPLS"), None)
-    if mpls is None:
-        log.error("MPLS switch not found in lab.")
-        raise typer.Exit(1)
     gi1 = _sync_until_interface(lab, node, "GigabitEthernet1")
     inet_free = inet.next_available_interface()
     if inet_free is None:
         log.error("INET switch has no free ports.")
         raise typer.Exit(1)
     lab.create_link(gi1, inet_free, wait=False)
-    gi2 = _sync_until_interface(lab, node, "GigabitEthernet2")
-    mpls_free = mpls.next_available_interface()
-    if mpls_free is None:
-        log.error("MPLS switch has no free ports.")
-        raise typer.Exit(1)
-    lab.create_link(gi2, mpls_free, wait=False)
+    if connect_mpls:
+        mpls = next((n for n in lab.nodes() if n.label == "MPLS"), None)
+        if mpls is None:
+            log.error("MPLS switch not found in lab.")
+            raise typer.Exit(1)
+        gi2 = _sync_until_interface(lab, node, "GigabitEthernet2")
+        mpls_free = mpls.next_available_interface()
+        if mpls_free is None:
+            log.error("MPLS switch has no free ports.")
+            raise typer.Exit(1)
+        lab.create_link(gi2, mpls_free, wait=False)
     return node
 
 

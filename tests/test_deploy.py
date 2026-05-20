@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.exceptions import Exit
 
+from catalyst_sdwan_lab.manager_client import ManagerAPIError
 from catalyst_sdwan_lab.tasks.deploy import (
     _attach_controller_template,
     _check_ip_free,
@@ -179,52 +180,61 @@ class TestConfigureManager:
         client.get_workflows.assert_not_called()
 
 
-_PERSONALITY_IPS = {"vbond": "172.16.0.201", "vsmart": "172.16.0.101"}
-
-
 class TestOnboardControlComponents:
-    def _make_client(
-        self, personalities: list[str] = [], pending_ips: list[str] = []
-    ) -> MagicMock:
+    def _make_client(self, pending_ips: list[str] = []) -> MagicMock:
         client = MagicMock()
         controllers = [
-            {"personality": p, "deviceIP": _PERSONALITY_IPS[p], "serialNumber": "OK"}
-            for p in personalities
-        ] + [
             {"personality": "vsmart", "deviceIP": ip, "serialNumber": "No certificate installed"}
             for ip in pending_ips
         ]
         client.get_controllers.return_value = controllers
         return client
 
-    def test_skips_existing_ips(self) -> None:
-        client = self._make_client(personalities=["vbond", "vsmart"])
+    def test_adds_both_components(self) -> None:
+        client = self._make_client()
         _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
-        client.add_controller.assert_not_called()
+        assert client.add_controller.call_count == 2
 
-    def test_adds_missing_personality(self) -> None:
-        client = self._make_client(personalities=["vbond"])
+    def test_skips_on_already_exists_error(self) -> None:
+        client = self._make_client()
+        client.add_controller.side_effect = ManagerAPIError("Device UUID already exists")
         _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
-        client.add_controller.assert_called_once()
-        assert client.add_controller.call_args[0][1] == "vsmart"
+        client.add_controller.assert_called()
 
-    def test_refetches_after_adding(self) -> None:
-        client = self._make_client(personalities=[])
-        _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
-        assert client.get_controllers.call_count == 2
+    def test_raises_on_other_api_error(self) -> None:
+        client = self._make_client()
+        client.add_controller.side_effect = ManagerAPIError("some other error")
+        with pytest.raises(ManagerAPIError):
+            _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
 
-    def test_no_refetch_if_nothing_added(self) -> None:
-        client = self._make_client(personalities=["vbond", "vsmart"])
+    def test_always_fetches_controllers_for_signing(self) -> None:
+        client = self._make_client()
         _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
-        assert client.get_controllers.call_count == 1
+        client.get_controllers.assert_called_once()
 
 
 class TestRestoreBasicConfiguration:
-    def test_skips_if_already_imported(self) -> None:
+    def test_skips_if_both_groups_present(self) -> None:
         client = MagicMock()
-        client.get_config_groups.return_value = [{"name": "edge_basic"}]
+        client.get_config_groups.return_value = [
+            {"name": "edge_basic"}, {"name": "sdrouting_basic"}
+        ]
         _restore_basic_configuration(client, "v4")
         client.import_configuration.assert_not_called()
+
+    def test_imports_if_edge_basic_missing(self) -> None:
+        client = MagicMock()
+        client.get_config_groups.return_value = [{"name": "sdrouting_basic"}]
+        client.import_configuration.return_value = "task-1"
+        _restore_basic_configuration(client, "v4")
+        client.import_configuration.assert_called_once()
+
+    def test_imports_if_sdrouting_basic_missing(self) -> None:
+        client = MagicMock()
+        client.get_config_groups.return_value = [{"name": "edge_basic"}]
+        client.import_configuration.return_value = "task-1"
+        _restore_basic_configuration(client, "v4")
+        client.import_configuration.assert_called_once()
 
     def test_imports_if_missing(self) -> None:
         client = MagicMock()
