@@ -213,6 +213,8 @@ csdwan add [OPTIONS] <count> <device-type> <version>
 | `--lab` | `LAB_NAME` | CML lab name |
 | `--manager-user` | `MANAGER_USER` | Manager username (default: `admin`) |
 | `--manager-pass` | `MANAGER_PASSWORD` | Manager password |
+| `--cpus` | | Override CPU count for each added node |
+| `--ram` | | Override RAM in MB for each added node |
 
 **Examples:**
 

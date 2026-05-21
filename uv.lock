@@ -96,7 +96,7 @@ wheels = [
 
 [[package]]
 name = "catalyst-sdwan-lab"
-version = "3.0.0"
+version = "3.0.0b1"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },
