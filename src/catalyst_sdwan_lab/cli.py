@@ -279,6 +279,12 @@ def add(
             "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
         ),
     ] = ...,  # type: ignore[assignment]
+    cpus: Annotated[
+        Optional[int], typer.Option("--cpus", help="Override number of CPUs for each node")
+    ] = None,
+    ram: Annotated[
+        Optional[int], typer.Option("--ram", help="Override RAM in MB for each node")
+    ] = None,
 ) -> None:
     """Add devices to an existing SD-WAN lab."""
     if count < 1:
@@ -299,6 +305,8 @@ def add(
             manager_password=manager_pass,
             count=count,
             device_type=device,  # type: ignore[arg-type]
+            cpus=cpus,
+            ram=ram,
         )
     elif device == "edge":
         _add.run_edge(
@@ -308,6 +316,8 @@ def add(
             manager_user=manager_user,
             manager_password=manager_pass,
             count=count,
+            cpus=cpus,
+            ram=ram,
         )
     elif device == "sdrouting":
         _add.run_sdrouting(
@@ -317,6 +327,8 @@ def add(
             manager_user=manager_user,
             manager_password=manager_pass,
             count=count,
+            cpus=cpus,
+            ram=ram,
         )
     else:
         log.error("Device type '%s' not yet implemented.", device)

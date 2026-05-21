@@ -64,6 +64,8 @@ def run_control_component(
     manager_password: str,
     count: int,
     device_type: Literal["controller", "validator"],
+    cpus: int | None = None,
+    ram: int | None = None,
 ) -> None:
     is_ctrl = device_type == "controller"
     label_prefix = "Controller" if is_ctrl else "Validator"
@@ -116,7 +118,7 @@ def run_control_component(
                     **extra,
                 )
                 node = _add_sdwan_node(
-                    lab, f"{label_prefix}{num}", node_def, image_id, cloud_init, iface,
+                    lab, f"{label_prefix}{num}", node_def, image_id, cloud_init, iface, cpus, ram,
                 )
                 node.start()
                 nodes.append(node)
@@ -184,6 +186,8 @@ def run_edge(
     manager_user: str,
     manager_password: str,
     count: int,
+    cpus: int | None = None,
+    ram: int | None = None,
 ) -> None:
     with Progress(
         SpinnerColumn(),
@@ -276,7 +280,7 @@ def run_edge(
                     task, description=f"Adding Edge{num} to CML ({i}/{count})..."
                 )
                 node = _add_wan_edge_node(
-                    lab, f"Edge{num}", image_id, bootstrap_configs[uuid], connect_mpls=True
+                    lab, f"Edge{num}", image_id, bootstrap_configs[uuid], True, cpus, ram,
                 )
                 node.start()
                 nodes.append(node)
@@ -312,6 +316,8 @@ def run_sdrouting(
     manager_user: str,
     manager_password: str,
     count: int,
+    cpus: int | None = None,
+    ram: int | None = None,
 ) -> None:
     with Progress(
         SpinnerColumn(),
@@ -407,7 +413,7 @@ def run_sdrouting(
                     task, description=f"Adding SD-Edge{num} to CML ({i}/{count})..."
                 )
                 node = _add_wan_edge_node(
-                    lab, f"SD-Edge{num}", image_id, bootstrap_configs[uuid], connect_mpls=False
+                    lab, f"SD-Edge{num}", image_id, bootstrap_configs[uuid], False, cpus, ram,
                 )
                 node.start()
                 nodes.append(node)
@@ -507,7 +513,14 @@ def _render_device_cloud_init(
 
 
 def _add_sdwan_node(
-    lab: Lab, label: str, node_def: str, image_id: str, configuration: str, iface: str,
+    lab: Lab,
+    label: str,
+    node_def: str,
+    image_id: str,
+    configuration: str,
+    iface: str,
+    cpus: int | None = None,
+    ram: int | None = None,
 ) -> Node:
     sdwan_nodes = [n for n in lab.nodes() if n.node_definition in _SDWAN_NODE_DEFS]
     x = max((n.x for n in sdwan_nodes), default=0) + 120
@@ -521,6 +534,8 @@ def _add_sdwan_node(
         y=y,
         populate_interfaces=True,
         wait=False,
+        cpus=cpus,
+        ram=ram,
     )
     vpn0 = next((n for n in lab.nodes() if n.label == "VPN0"), None)
     if vpn0 is None:
@@ -536,7 +551,13 @@ def _add_sdwan_node(
 
 
 def _add_wan_edge_node(
-    lab: Lab, label: str, image_id: str, configuration: str, *, connect_mpls: bool
+    lab: Lab,
+    label: str,
+    image_id: str,
+    configuration: str,
+    connect_mpls: bool,
+    cpus: int | None = None,
+    ram: int | None = None,
 ) -> Node:
     x = max((n.x for n in lab.nodes() if n.y == 400), default=-400) + 120
     node = lab.create_node(
@@ -548,6 +569,8 @@ def _add_wan_edge_node(
         y=400,
         populate_interfaces=True,
         wait=False,
+        cpus=cpus,
+        ram=ram,
     )
     inet = next((n for n in lab.nodes() if n.label == "INET"), None)
     if inet is None:
