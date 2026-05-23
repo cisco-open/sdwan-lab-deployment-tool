@@ -300,6 +300,12 @@ def get_cml_sdwan_image_definition(
     if requested_image_definition in existing_image_definitions:
         return requested_image_definition
     else:
+        # Fallback: match by version string in image ID.
+        # Handles cases where images were registered manually with viptela-* naming
+        # (e.g. viptela-vmanage-20.12.7.1) instead of the expected cat-sdwan-* convention.
+        version_matches = [img for img in existing_image_definitions if software_version in img]
+        if version_matches:
+            return version_matches[0]
         if node_definition in ["cat-sdwan-controller", "cat-sdwan-validator"]:
             # If there's no requested Controller image, try one version lower
             # For example sometimes Manager is 20.9.3.2 and Controller/Validator is 20.9.3.1
