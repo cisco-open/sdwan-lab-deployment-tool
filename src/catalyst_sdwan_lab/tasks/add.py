@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import re
 import time
@@ -11,13 +9,13 @@ import typer
 from jinja2 import Environment, FileSystemLoader
 from rich.markup import escape
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from virl2_client import ClientLibrary
 from virl2_client.exceptions import InterfaceNotFound
 from virl2_client.models.interface import Interface
 from virl2_client.models.lab import Lab
 from virl2_client.models.node import Node
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
+from catalyst_sdwan_lab.ssh_client import ssh_drain, ssh_recv
 
 from .deploy import (
     _VALIDATOR_FQDN,
@@ -28,6 +26,7 @@ from .utils import (
     CML_DEPLOY_TEMPLATES_DIR,
     connect_cml,
     console,
+    find_lab,
     load_certs,
     resolve_image,
     sign_device_cert,
@@ -39,7 +38,6 @@ _CLOUD_INIT_ENV = Environment(
     loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True
 )
 
-_MANAGER_NOTE_RE = re.compile(r"manager_external_ip\s*=\s*(.+):(\d+)")
 _CTRL_NUM_RE = re.compile(r"^Controller(\d+)$")
 _VLDTR_NUM_RE = re.compile(r"^Validator(\d+)$")
 _EDGE_NUM_RE = re.compile(r"^Edge(\d+)$")
@@ -81,7 +79,7 @@ def run_control_component(
         task = progress.add_task("Connecting to CML...")
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
-        lab, manager_ip, manager_port = _find_lab(cml, lab_name)
+        lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = _detect_ip_type(lab)
         image_id = resolve_image(cml, node_def, version)
 
@@ -198,7 +196,7 @@ def run_edge(
         task = progress.add_task("Connecting to CML...")
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
-        lab, manager_ip, manager_port = _find_lab(cml, lab_name)
+        lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = _detect_ip_type(lab)
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
@@ -328,7 +326,7 @@ def run_sdrouting(
         task = progress.add_task("Connecting to CML...")
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
-        lab, manager_ip, manager_port = _find_lab(cml, lab_name)
+        lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = _detect_ip_type(lab)
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
@@ -441,25 +439,6 @@ def run_sdrouting(
 
     label = f"SD-Edge{nums[0]}" if count == 1 else f"{count} SD-Routing edges"
     console.print(f"[green]Added.[/green] {label} added to lab '{escape(lab_name)}'.")
-
-
-def _find_lab(cml: ClientLibrary, lab_name: str) -> tuple[Lab, str, int]:
-    labs = cml.find_labs_by_title(lab_name)
-    if not labs:
-        log.error("No lab found with name '%s'.", lab_name)
-        raise typer.Exit(1)
-    if len(labs) > 1:
-        log.error("Multiple labs found with name '%s'. Ensure lab names are unique.", lab_name)
-        raise typer.Exit(1)
-    lab = labs[0]
-    if not lab.notes:
-        log.error("Lab '%s' has no notes — was it created by this tool?", lab_name)
-        raise typer.Exit(1)
-    m = _MANAGER_NOTE_RE.search(lab.notes)
-    if not m:
-        log.error("Cannot find Manager IP in lab notes — was this lab created by this tool?")
-        raise typer.Exit(1)
-    return lab, m.group(1), int(m.group(2))
 
 
 def _detect_ip_type(lab: Lab) -> str:
@@ -707,22 +686,22 @@ def _update_gateway_dns(
     ch = ssh.invoke_shell()
     try:
         time.sleep(1)
-        _gw_drain(ch)
+        ssh_drain(ch)
         ch.send(f"open /{lab_name}/Gateway/0\n".encode())
-        _gw_drain(ch, duration=3)   # consume echo + wait for IOS console to attach
+        ssh_drain(ch, duration=3)   # consume echo + wait for IOS console to attach
         ch.send(b"\r\n")
-        out = _gw_recv(ch, ">", "#", timeout=15)
+        out = ssh_recv(ch, ">", "#", timeout=15)
         if ">" in out and "#" not in out:
             ch.send(b"enable\r\n")
-            out = _gw_recv(ch, "#", "Password", timeout=30)
+            out = ssh_recv(ch, "#", "Password", timeout=30)
             if "Password" in out and "#" not in out:
                 ch.send(b"cisco\r\n")
-                _gw_recv(ch, "#", timeout=10)
+                ssh_recv(ch, "#", timeout=10)
         ch.send(b"terminal length 0\r\n")
-        _gw_recv(ch, "#")
+        ssh_recv(ch, "#")
 
         ch.send(b"show run | include ip host\r\n")
-        out = _gw_recv(ch, "#", timeout=10)
+        out = ssh_recv(ch, "#", timeout=10)
 
         vrf_ips: dict[str, list[str]] = {vrf: [] for vrf in _GATEWAY_VRF_NAMES}
         for line in out.splitlines():
@@ -736,41 +715,18 @@ def _update_gateway_dns(
                     vrf_ips[vrf].append(ip)
 
         ch.send(b"configure terminal\r\n")
-        _gw_recv(ch, "(config)#")
+        ssh_recv(ch, "(config)#")
         for vrf, ips in vrf_ips.items():
             ch.send(f"no ip host vrf {vrf} validator.sdwan.local\r\n".encode())
-            _gw_recv(ch, "(config)#")
+            ssh_recv(ch, "(config)#")
             ch.send(f"ip host vrf {vrf} validator.sdwan.local {' '.join(ips)}\r\n".encode())
-            _gw_recv(ch, "(config)#")
+            ssh_recv(ch, "(config)#")
         ch.send(b"end\r\n")
-        _gw_recv(ch, "#")
+        ssh_recv(ch, "#")
         ch.send(b"write memory\r\n")
-        _gw_recv(ch, "#", timeout=15)
+        ssh_recv(ch, "#", timeout=15)
         log.info("Gateway DNS updated for validators: %s", ", ".join(new_ips))
     finally:
         ch.close()
         ssh.close()
 
-
-def _gw_recv(ch: paramiko.Channel, *prompts: str, timeout: float = 10.0) -> str:
-    buf = ""
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        if ch.closed:
-            raise RuntimeError("Gateway console channel closed unexpectedly")
-        if ch.recv_ready():
-            buf += ch.recv(4096).decode("utf-8", errors="replace")
-            if any(p in buf for p in prompts):
-                return buf
-        else:
-            time.sleep(0.1)
-    raise RuntimeError(f"Timed out waiting for any of {prompts!r} from Gateway console")
-
-
-def _gw_drain(ch: paramiko.Channel, duration: float = 1.0) -> None:
-    deadline = time.time() + duration
-    while time.time() < deadline:
-        if ch.recv_ready():
-            ch.recv(4096)
-        else:
-            time.sleep(0.05)

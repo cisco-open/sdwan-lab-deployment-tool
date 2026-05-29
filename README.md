@@ -83,13 +83,13 @@ Available environment variables:
 | `CML_IP` | All commands |
 | `CML_USER` | All commands |
 | `CML_PASSWORD` | All commands |
-| `LAB_NAME` | `deploy`, `add`, `delete` |
+| `LAB_NAME` | `deploy`, `add`, `backup`, `delete` |
 | `MANAGER_IP` | `deploy` (direct mode) |
 | `MANAGER_PORT` | `deploy` (PATty mode) |
 | `MANAGER_MASK` | `deploy` (direct mode) |
 | `MANAGER_GATEWAY` | `deploy` (direct mode) |
-| `MANAGER_USER` | `deploy`, `add` |
-| `MANAGER_PASSWORD` | `deploy`, `add` |
+| `MANAGER_USER` | `deploy`, `add`, `backup` |
+| `MANAGER_PASSWORD` | `deploy`, `add`, `backup` |
 
 ---
 
@@ -187,6 +187,40 @@ csdwan deploy 20.15.1 \
 ```sh
 csdwan deploy 20.15.1 --manager-port 2000 --lab my-lab
 ```
+
+---
+
+### `backup`
+
+Backs up a running SD-WAN lab to a zip archive (or directory). Captures:
+
+- CML topology with running configs extracted via SSH from all nodes
+- SD-WAN Manager configuration (templates, config groups, policies, feature profiles) via Sastre
+- Network hierarchy (MRF regions)
+
+The lab must be running. Configs are extracted live over SSH — shut-down nodes are skipped with a warning.
+
+```
+csdwan backup [OPTIONS]
+```
+
+| Option | Env var | Description |
+|---|---|---|
+| `--lab` | `LAB_NAME` | CML lab name |
+| `--manager-user` | `MANAGER_USER` | Manager username (default: `admin`) |
+| `--manager-pass` | `MANAGER_PASSWORD` | Manager password |
+| `--output, -o` | | Output path (default: `<lab>-<YYYYMMDD>.zip`) |
+| `--directory, -d` | | Save as a directory instead of a zip |
+
+**Examples:**
+
+```sh
+csdwan backup --lab my-lab --manager-pass secret
+csdwan backup --lab my-lab --manager-pass secret -o /backups/my-lab.zip
+csdwan backup --lab my-lab --manager-pass secret --directory -o /backups/my-lab
+```
+
+> **Note:** If the lab was deployed with a custom serial file, restore requires the same serial file to re-authorise edge devices.
 
 ---
 

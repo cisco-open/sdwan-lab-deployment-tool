@@ -1,0 +1,38 @@
+Content-Type: multipart/mixed; boundary="==BOUNDARY=="
+MIME-Version: 1.0
+
+--==BOUNDARY==
+Content-Type: text/cloud-config; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="cloud-config"
+
+#cloud-config
+vinitparam:
+ - uuid : {{ uuid }}
+ - otp : 59aac1776710406abb086f8fd7311977
+ - vbond : {{ validator_fqdn }}
+ - org : {{ org_name }}
+ - SD-Routing : true
+ - wanif : GigabitEthernet1
+ - rcc : true
+ca-certs:
+  remove-defaults: false
+  trusted:
+  - |
+{% filter indent(width=3, first=True) %}
+{{ root_ca }}
+{% endfilter %}
+
+--==BOUNDARY==
+Content-Type: text/cloud-boothook; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="config-{{ uuid }}.txt"
+
+#cloud-boothook
+{% filter indent(width=2, first=True) %}
+{{ config }}
+{% endfilter %}
+
+--===============5751899709292676174==--

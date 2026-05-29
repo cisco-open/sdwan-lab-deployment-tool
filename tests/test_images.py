@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import pytest
 
 from catalyst_sdwan_lab.tasks.images import _normalize_id, _parse_filename

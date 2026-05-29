@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import ipaddress
 import logging
 from dataclasses import dataclass
@@ -11,6 +9,7 @@ from rich.logging import RichHandler
 
 from catalyst_sdwan_lab import __version__
 from catalyst_sdwan_lab.tasks import add as _add
+from catalyst_sdwan_lab.tasks import backup as _backup
 from catalyst_sdwan_lab.tasks import delete as _delete
 from catalyst_sdwan_lab.tasks import deploy as _deploy
 from catalyst_sdwan_lab.tasks import images as _images
@@ -333,6 +332,39 @@ def add(
     else:
         log.error("Device type '%s' not yet implemented.", device)
         raise typer.Exit(1)
+
+
+@app.command()
+def backup(
+    lab_name: Annotated[
+        str, typer.Option("--lab", envvar="LAB_NAME", help="CML lab name")
+    ] = ...,  # type: ignore[assignment]
+    manager_user: Annotated[
+        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
+    ] = "admin",
+    manager_pass: Annotated[
+        str,
+        typer.Option(
+            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
+        ),
+    ] = ...,  # type: ignore[assignment]
+    output: Annotated[
+        Optional[Path],
+        typer.Option("--output", "-o", help="Output path (default: <lab>-<date>.zip)"),
+    ] = None,
+    directory: Annotated[
+        bool, typer.Option("--directory", "-d", help="Save as directory instead of zip")
+    ] = False,
+) -> None:
+    """Back up a running SD-WAN lab (topology + Manager config)."""
+    _backup.run(
+        *_cml_credentials(),
+        lab_name=lab_name,
+        manager_user=manager_user,
+        manager_password=manager_pass,
+        output=output,
+        directory=directory,
+    )
 
 
 @images_app.command(name="list")

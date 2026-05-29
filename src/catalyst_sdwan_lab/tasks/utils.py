@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import logging
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from cryptography.hazmat.primitives.asymmetric.types import CertificateIssuerPri
 from rich.console import Console
 from virl2_client import ClientLibrary
 from virl2_client.exceptions import APIError
+from virl2_client.models.lab import Lab
 
 from catalyst_sdwan_lab.manager_client import ManagerClient
 
@@ -46,6 +48,8 @@ def connect_cml(cml_host: str, cml_user: str, cml_password: str) -> ClientLibrar
 def basic_configuration_path(ip_type: str) -> Path:
     return MANAGER_CONFIGS_DIR / f"basic_configuration_{ip_type}.tar.gz"
 
+
+_MANAGER_NOTE_RE = re.compile(r"manager_external_ip\s*=\s*(.+):(\d+)")
 
 _CRYPT64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 _SHA512_TRANSPOSE = (
@@ -191,3 +195,22 @@ def verify_cml_version(cml: ClientLibrary) -> None:
     if version is None or (version.major, version.minor) < (2, 7):
         log.error("CML 2.7 or later is required.")
         raise typer.Exit(1)
+
+
+def find_lab(cml: ClientLibrary, lab_name: str) -> tuple[Lab, str, int]:
+    labs = cml.find_labs_by_title(lab_name)
+    if not labs:
+        log.error("No lab found with name '%s'.", lab_name)
+        raise typer.Exit(1)
+    if len(labs) > 1:
+        log.error("Multiple labs found with name '%s'. Ensure lab names are unique.", lab_name)
+        raise typer.Exit(1)
+    lab = labs[0]
+    if not lab.notes:
+        log.error("Lab '%s' has no notes — was it created by this tool?", lab_name)
+        raise typer.Exit(1)
+    m = _MANAGER_NOTE_RE.search(lab.notes)
+    if not m:
+        log.error("Cannot find Manager IP in lab notes — was this lab created by this tool?")
+        raise typer.Exit(1)
+    return lab, m.group(1), int(m.group(2))

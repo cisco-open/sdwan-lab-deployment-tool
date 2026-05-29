@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import time
 from pathlib import Path
@@ -46,6 +44,10 @@ class ManagerClient:
     def get_organization(self) -> str | None:
         data = self._get("/dataservice/settings/configuration/organization").get("data", [])
         return data[0].get("org") if data else None
+
+    def get_validator_fqdn(self) -> str | None:
+        data = self._get("/dataservice/settings/configuration/device").get("data", [])
+        return data[0].get("domainIp") if data else None
 
     def settings_organization(self, org_name: str) -> None:
         self._put("/dataservice/settings/configuration/organization", {"org": org_name})
@@ -183,6 +185,9 @@ class ManagerClient:
 
     def get_controllers(self) -> list[dict[str, Any]]:
         return self._get("/dataservice/system/device/controllers").get("data", [])
+
+    def get_network_hierarchy(self) -> list[dict[str, Any]]:
+        return self._get("/dataservice/v1/network-hierarchy")
 
     def add_controller(self, ip: str, personality: str, username: str, password: str) -> None:
         self._post(
