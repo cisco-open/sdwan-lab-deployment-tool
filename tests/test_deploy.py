@@ -12,16 +12,19 @@ from catalyst_sdwan_lab.manager_client import ManagerAPIError
 from catalyst_sdwan_lab.tasks.deploy import (
     _attach_controller_template,
     _check_ip_free,
-    _complete_initial_setup_workflow,
-    _configure_manager,
-    _extract_org_name,
     _find_lab,
     _import_controller_templates,
-    _onboard_control_components,
     _restore_basic_configuration,
     _template_post_body,
 )
-from catalyst_sdwan_lab.tasks.utils import load_certs, resolve_image
+from catalyst_sdwan_lab.tasks.utils import (
+    _complete_initial_setup_workflow,
+    configure_manager,
+    extract_org_name,
+    load_certs,
+    onboard_control_components,
+    resolve_image,
+)
 
 
 def _make_serial_file(tmp_path: Path, org: str) -> Path:
@@ -39,7 +42,7 @@ def _make_serial_file(tmp_path: Path, org: str) -> Path:
 
 class TestExtractOrgName:
     def test_valid_file_returns_org(self, tmp_path: Path) -> None:
-        assert _extract_org_name(_make_serial_file(tmp_path, "MyOrg")) == "MyOrg"
+        assert extract_org_name(_make_serial_file(tmp_path, "MyOrg")) == "MyOrg"
 
     def test_missing_member_raises(self, tmp_path: Path) -> None:
         buf = io.BytesIO()
@@ -49,7 +52,7 @@ class TestExtractOrgName:
         with gzip.open(path, "wb") as gz:
             gz.write(buf.getvalue())
         with pytest.raises(ValueError, match="viptela_serial_file not found"):
-            _extract_org_name(path)
+            extract_org_name(path)
 
     def test_missing_org_field_raises(self, tmp_path: Path) -> None:
         data = json.dumps({"other": "field"}).encode()
@@ -62,13 +65,13 @@ class TestExtractOrgName:
         with gzip.open(path, "wb") as gz:
             gz.write(buf.getvalue())
         with pytest.raises(ValueError, match="organization field missing"):
-            _extract_org_name(path)
+            extract_org_name(path)
 
     def test_invalid_gzip_raises(self, tmp_path: Path) -> None:
         path = tmp_path / "bad.viptela"
         path.write_bytes(b"not gzip data")
         with pytest.raises(ValueError):
-            _extract_org_name(path)
+            extract_org_name(path)
 
 
 class TestResolveImage:
@@ -155,30 +158,32 @@ class TestConfigureManager:
     def test_skips_org_if_already_set(self) -> None:
         client = MagicMock()
         client.get_organization.return_value = "ExistingOrg"
-        _configure_manager(client, "20.15.1", "NewOrg", "chain")
+        configure_manager(client, "20.15.1", "NewOrg", "chain")
         client.settings_organization.assert_not_called()
 
     def test_sets_org_if_none(self) -> None:
         client = MagicMock()
         client.get_organization.return_value = None
-        _configure_manager(client, "20.15.1", "NewOrg", "chain")
+        configure_manager(client, "20.15.1", "NewOrg", "chain")
         client.settings_organization.assert_called_once_with("NewOrg")
 
     def test_initial_setup_called_for_v26(self) -> None:
         client = MagicMock()
         client.get_organization.return_value = "Org"
         client.get_workflows.return_value = [{"id": "wf", "userContext": {"complete": True}}]
-        _configure_manager(client, "26.1.1", "Org", "chain")
+        configure_manager(client, "26.1.1", "Org", "chain")
         client.get_workflows.assert_called_once()
 
     def test_initial_setup_skipped_below_v26(self) -> None:
         client = MagicMock()
         client.get_organization.return_value = "Org"
-        _configure_manager(client, "20.15.1", "Org", "chain")
+        configure_manager(client, "20.15.1", "Org", "chain")
         client.get_workflows.assert_not_called()
 
 
 class TestOnboardControlComponents:
+    _V4_COMPONENTS = [("172.16.0.201", "vbond"), ("172.16.0.101", "vsmart")]
+
     def _make_client(self, pending_ips: list[str] = []) -> MagicMock:
         client = MagicMock()
         controllers = [
@@ -190,24 +195,24 @@ class TestOnboardControlComponents:
 
     def test_adds_both_components(self) -> None:
         client = self._make_client()
-        _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
+        onboard_control_components(client, MagicMock(), self._V4_COMPONENTS, on_status=MagicMock())
         assert client.add_controller.call_count == 2
 
     def test_skips_on_already_exists_error(self) -> None:
         client = self._make_client()
         client.add_controller.side_effect = ManagerAPIError("Device UUID already exists")
-        _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
+        onboard_control_components(client, MagicMock(), self._V4_COMPONENTS, on_status=MagicMock())
         client.add_controller.assert_called()
 
     def test_raises_on_other_api_error(self) -> None:
         client = self._make_client()
         client.add_controller.side_effect = ManagerAPIError("some other error")
         with pytest.raises(ManagerAPIError):
-            _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
+            onboard_control_components(client, MagicMock(), self._V4_COMPONENTS, on_status=MagicMock())
 
     def test_always_fetches_controllers_for_signing(self) -> None:
         client = self._make_client()
-        _onboard_control_components(client, MagicMock(), "v4", on_status=MagicMock())
+        onboard_control_components(client, MagicMock(), self._V4_COMPONENTS, on_status=MagicMock())
         client.get_controllers.assert_called_once()
 
 

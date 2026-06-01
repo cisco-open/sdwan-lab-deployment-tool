@@ -12,20 +12,19 @@ from catalyst_sdwan_lab.tasks.add import (
     _add_sdwan_node,
     _add_to_manager_retrying,
     _add_wan_edge_node,
-    _detect_ip_type,
-    _find_lab,
     _next_device_num,
     _next_system_ip_num,
     _wait_for_controllers_ready,
     _wait_for_csrs,
-    _wait_for_edges_onboarded,
 )
+from catalyst_sdwan_lab.tasks.utils import detect_ip_type, find_lab as _find_lab, wait_for_edges_onboarded
 
 
-def _make_node(label: str, configuration: str = "") -> MagicMock:
+def _make_node(label: str, configuration: str = "", node_definition: str = "") -> MagicMock:
     node = MagicMock()
     node.label = label
     node.configuration = configuration
+    node.node_definition = node_definition
     return node
 
 
@@ -75,32 +74,33 @@ class TestFindLab:
 
 
 class TestDetectIpType:
-    def test_no_reference_node_defaults_to_v4(self) -> None:
+    def test_no_controller_node_defaults_to_v4(self) -> None:
         lab = _make_lab([_make_node("Manager"), _make_node("Gateway")])
-        assert _detect_ip_type(lab) == "v4"
+        assert detect_ip_type(lab) == "v4"
 
     def test_v4_config(self) -> None:
-        node = _make_node("Controller01", configuration="ip address 172.16.0.101/24")
-        assert _detect_ip_type(_make_lab([node])) == "v4"
+        node = _make_node("ctrl", configuration="ip address 172.16.0.101/24", node_definition="cat-sdwan-controller")
+        assert detect_ip_type(_make_lab([node])) == "v4"
 
     def test_v6_config(self) -> None:
-        node = _make_node("Controller01", configuration="ipv6 address fc00:172:16::101/64")
-        assert _detect_ip_type(_make_lab([node])) == "v6"
+        node = _make_node("ctrl", configuration="ipv6 address fc00:172:16::101/64", node_definition="cat-sdwan-controller")
+        assert detect_ip_type(_make_lab([node])) == "v6"
 
     def test_dual_config(self) -> None:
         node = _make_node(
-            "Validator01",
-            configuration="172.16.0.201/24\nfc00:172:16::201/64",
+            "ctrl",
+            configuration="172.16.0.101/24\nfc00:172:16::101/64",
+            node_definition="cat-sdwan-controller",
         )
-        assert _detect_ip_type(_make_lab([node])) == "dual"
+        assert detect_ip_type(_make_lab([node])) == "dual"
 
-    def test_validator_node_used_as_reference(self) -> None:
-        node = _make_node("Validator01", configuration="fc00:172:16::201/64")
-        assert _detect_ip_type(_make_lab([node])) == "v6"
+    def test_validator_node_not_used_as_reference(self) -> None:
+        node = _make_node("vldtr", configuration="fc00:172:16::201/64", node_definition="cat-sdwan-validator")
+        assert detect_ip_type(_make_lab([node])) == "v4"
 
     def test_none_configuration_treated_as_v4(self) -> None:
-        node = _make_node("Controller01", configuration=None)  # type: ignore[arg-type]
-        assert _detect_ip_type(_make_lab([node])) == "v4"
+        node = _make_node("ctrl", configuration=None, node_definition="cat-sdwan-controller")  # type: ignore[arg-type]
+        assert detect_ip_type(_make_lab([node])) == "v4"
 
 
 class TestNextDeviceNum:
@@ -416,7 +416,7 @@ class TestWaitForEdgesOnboarded:
         client = self._make_client([
             {"uuid": "uuid-1", "certInstallStatus": "Installed", "reachability": "reachable"},
         ])
-        _wait_for_edges_onboarded(client, ["uuid-1"], timeout=10)
+        wait_for_edges_onboarded(client, ["uuid-1"], timeout=10)
         client.get_vedges.assert_called_once()
 
     def test_requires_both_installed_and_reachable(self) -> None:
@@ -424,20 +424,20 @@ class TestWaitForEdgesOnboarded:
             {"uuid": "uuid-1", "certInstallStatus": "Installed", "reachability": "unreachable"},
         ])
         with pytest.raises(Exit):
-            _wait_for_edges_onboarded(client, ["uuid-1"], timeout=-1)
+            wait_for_edges_onboarded(client, ["uuid-1"], timeout=-1)
 
     def test_ignores_other_uuids(self) -> None:
         client = self._make_client([
             {"uuid": "uuid-1", "certInstallStatus": "Installed", "reachability": "reachable"},
             {"uuid": "uuid-2", "certInstallStatus": None, "reachability": "unreachable"},
         ])
-        _wait_for_edges_onboarded(client, ["uuid-1"], timeout=10)
+        wait_for_edges_onboarded(client, ["uuid-1"], timeout=10)
         client.get_vedges.assert_called_once()
 
     def test_exits_on_timeout(self) -> None:
         client = self._make_client([])
         with pytest.raises(Exit):
-            _wait_for_edges_onboarded(client, ["uuid-1"], timeout=-1)
+            wait_for_edges_onboarded(client, ["uuid-1"], timeout=-1)
 
 
 class TestWaitForTask:
