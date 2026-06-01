@@ -133,15 +133,9 @@ def run_control_component(
                 )
 
             for i, (node, ip) in enumerate(zip(nodes, device_ips), 1):
-                progress.update(
-                    task,
-                    description=f"Waiting for {device_type} to boot ({i}/{count})...",
-                )
+                progress.update(task, description=f"Waiting for {device_type}{'s' if count > 1 else ''} to boot...")
                 node.wait_until_converged()
-                progress.update(
-                    task,
-                    description=f"Waiting for {device_type} to be reachable ({i}/{count})...",
-                )
+                progress.update(task, description=f"Waiting for {device_type} to be reachable ({i}/{count})...")
                 _add_to_manager_retrying(client, ip, personality, timeout=_BOOT_TIMEOUT)
 
             progress.update(task, description=f"Waiting for {device_type} CSRs...")
@@ -298,7 +292,7 @@ def run_edge(
 
             for i, node in enumerate(nodes, 1):
                 progress.update(
-                    task, description=f"Waiting for edge to boot ({i}/{count})..."
+                    task, description=f"Waiting for {'edges' if count > 1 else 'edge'} to boot..."
                 )
                 node.wait_until_converged()
 
@@ -438,7 +432,7 @@ def run_sdrouting(
 
             for i, node in enumerate(nodes, 1):
                 progress.update(
-                    task, description=f"Waiting for SD-Routing edge to boot ({i}/{count})..."
+                    task, description=f"Waiting for {'SD-Routing edges' if count > 1 else 'SD-Routing edge'} to boot..."
                 )
                 node.wait_until_converged()
 

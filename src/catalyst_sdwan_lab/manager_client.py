@@ -204,7 +204,7 @@ class ManagerClient:
         response = self._session.post(
             f"{self._base}/dataservice/certificate/install/signedCert",
             data=cert_pem,
-            timeout=self._TIMEOUT,
+            timeout=120,
         )
         self._raise_for_status(response)
         return response.json()["id"]

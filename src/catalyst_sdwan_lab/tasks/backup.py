@@ -86,27 +86,40 @@ def run(
                     raise typer.Exit(1)
 
                 nodes = list(lab.nodes())
-                for node in nodes:
-                    if not node.is_active():
-                        log.warning("Node '%s' is not active — skipping config extraction.", node.label)
-                        continue
-                    if node.node_definition not in _CTRL_NODE_DEFS and node.node_definition != "cat-sdwan-edge":
-                        try:
-                            node.extract_configuration()
-                            log.info("Extracted config from %s via CML.", node.label)
-                        except Exception:
-                            log.debug("Node '%s' does not support config extract — skipping.", node.label)
+                cml_extract_nodes = [
+                    n for n in nodes
+                    if n.is_active()
+                    and n.node_definition not in _CTRL_NODE_DEFS
+                    and n.node_definition != "cat-sdwan-edge"
+                ]
+                for i, node in enumerate(cml_extract_nodes, 1):
+                    progress.update(task, description=f"Extracting CML node configurations ({i}/{len(cml_extract_nodes)})...")
+                    try:
+                        node.extract_configuration()
+                        log.info("Extracted config from %s via CML.", node.label)
+                    except Exception:
+                        log.debug("Node '%s' does not support config extract — skipping.", node.label)
 
                 progress.update(task, description="Downloading CML topology...")
                 topology_str = lab.download()
                 topology: Any = yaml.safe_load(topology_str)
 
+                extract_nodes = [
+                    n for n in nodes
+                    if n.is_active() and (
+                        n.node_definition in _CTRL_NODE_DEFS
+                        or n.node_definition == "cat-sdwan-edge"
+                    )
+                ]
+                total = len(extract_nodes)
+                i = 0
                 for node in nodes:
                     node_def = node.node_definition
                     if not node.is_active():
                         continue
                     if node_def in _CTRL_NODE_DEFS:
-                        progress.update(task, description=f"Extracting config from {node.label}...")
+                        i += 1
+                        progress.update(task, description=f"Extracting config from {node.label} ({i}/{total})...")
                         if node_def == "cat-sdwan-manager":
                             node_user, node_pass = manager_user, manager_password
                         else:
@@ -123,7 +136,8 @@ def run(
                         cloud_init = _render_cloud_init(node_def, certs.chain, config_xml)
                         _update_node_configuration(topology, node.label, cloud_init)
                     elif node_def == "cat-sdwan-edge":
-                        progress.update(task, description=f"Extracting config from {node.label}...")
+                        i += 1
+                        progress.update(task, description=f"Extracting config from {node.label} ({i}/{total})...")
                         try:
                             edge_type, config_text, uuid = extract_edge_config(
                                 cml_host, cml_user, cml_password, lab_name, node.label,

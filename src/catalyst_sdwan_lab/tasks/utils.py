@@ -174,10 +174,13 @@ def resolve_image(cml: ClientLibrary, node_type: str, version: str) -> str:
 
 
 def sign_device_cert(client: ManagerClient, certs: Certs, device_ip: str) -> None:
-    csr = client.generate_csr(device_ip)
-    cert = sign_csr(certs.cert, certs.key, csr)
-    task_id = client.install_signed_cert(cert)
-    client.wait_for_task(task_id)
+    try:
+        csr = client.generate_csr(device_ip)
+        cert = sign_csr(certs.cert, certs.key, csr)
+        task_id = client.install_signed_cert(cert)
+        client.wait_for_task(task_id)
+    except requests.exceptions.RequestException as e:
+        raise ManagerAPIError(f"Certificate signing failed for {device_ip}: {e}") from e
     log.info("Certificate installed for %s", device_ip)
 
 
@@ -262,7 +265,7 @@ def check_serial_file_match(topology: dict[str, Any], serial_file: Path) -> None
                 data = json.loads(member.read())
     except Exception:
         return
-    serial_uuids = {d["uuid"] for d in data.get("vEdge List", []) if "uuid" in d}
+    serial_uuids = {d["chassis"] for d in data.get("chassis_list", []) if "chassis" in d}
     missing = backup_uuids - serial_uuids
     if missing:
         log.error(

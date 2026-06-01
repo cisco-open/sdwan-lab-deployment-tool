@@ -145,8 +145,15 @@ def run(
                 edge_uuids = _inject_otps_and_start_edges(lab, client)
 
                 if edge_uuids:
-                    progress.update(task, description="Waiting for edges to onboard...")
-                    wait_for_edges_onboarded(client, edge_uuids)
+                    total_edges = len(edge_uuids)
+                    progress.update(task, description=f"Waiting for edges to onboard... (0/{total_edges})")
+                    wait_for_edges_onboarded(
+                        client,
+                        edge_uuids,
+                        on_progress=lambda done, total: progress.update(
+                            task, description=f"Waiting for edges to onboard... ({done}/{total})"
+                        ),
+                    )
 
             except ManagerAPIError as e:
                 log.error("%s", e)
@@ -340,6 +347,9 @@ def _run_sastre_restore(
     log.info("Sastre restore completed from %s", workdir)
 
 
+_MRF_SERVER_FIELDS = frozenset({"uuid", "id", "directChildCount", "hierarchyPath"})
+
+
 def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
     regions = [e for e in mrf_data if e.get("data", {}).get("label") == "REGION"]
     subregions = [e for e in mrf_data if e.get("data", {}).get("label") == "SUB_REGION"]
@@ -370,19 +380,21 @@ def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
         if entry["name"] in existing_names:
             log.debug("MRF region '%s' already exists — skipping", entry["name"])
             continue
-        payload = {k: v for k, v in entry.items() if k != "uuid"}
+        payload = {k: v for k, v in entry.items() if k not in _MRF_SERVER_FIELDS}
         payload["data"]["parentUuid"] = global_id
         result = client._post("/dataservice/v1/network-hierarchy", payload)
-        old_to_new[entry["uuid"]] = result["Network Hierarchy UUID"]
+        new_uuid = (result or {}).get("Network Hierarchy UUID") or (result or {}).get("id", "")
+        old_to_new[entry["uuid"]] = new_uuid
 
     for entry in subregions:
         if entry["name"] in existing_names:
             continue
-        payload = {k: v for k, v in entry.items() if k != "uuid"}
+        payload = {k: v for k, v in entry.items() if k not in _MRF_SERVER_FIELDS}
         old_parent = entry["data"].get("parentUuid", "")
         payload["data"]["parentUuid"] = old_to_new.get(old_parent, old_parent)
         result = client._post("/dataservice/v1/network-hierarchy", payload)
-        old_to_new[entry["uuid"]] = result["Network Hierarchy UUID"]
+        new_uuid = (result or {}).get("Network Hierarchy UUID") or (result or {}).get("id", "")
+        old_to_new[entry["uuid"]] = new_uuid
 
     log.info("MRF regions restored: %d regions, %d subregions", len(regions), len(subregions))
 
