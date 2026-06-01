@@ -1,12 +1,20 @@
 import datetime
+import gzip
 import hashlib
+import json
 import logging
 import os
 import re
+import tarfile
+import time
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import httpx
+import requests
 import typer
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
@@ -16,7 +24,7 @@ from virl2_client import ClientLibrary
 from virl2_client.exceptions import APIError
 from virl2_client.models.lab import Lab
 
-from catalyst_sdwan_lab.manager_client import ManagerClient
+from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -36,13 +44,14 @@ def connect_cml(cml_host: str, cml_user: str, cml_password: str) -> ClientLibrar
     try:
         cml = ClientLibrary(cml_host, username=cml_user, password=cml_password, ssl_verify=False)
         cml.system_info()
-        return cml
     except httpx.TransportError as e:
         log.error("Cannot reach CML at %s: %s", cml_host, e)
         raise typer.Exit(1)
     except APIError:
         log.error("CML authentication failed. Check --user / --password.")
         raise typer.Exit(1)
+    verify_cml_version(cml)
+    return cml
 
 
 def basic_configuration_path(ip_type: str) -> Path:
@@ -197,6 +206,23 @@ def verify_cml_version(cml: ClientLibrary) -> None:
         raise typer.Exit(1)
 
 
+def detect_ip_type(lab: Lab) -> str:
+    ctrl = next(
+        (n for n in lab.nodes() if n.node_definition == "cat-sdwan-controller"),
+        None,
+    )
+    if ctrl is None:
+        return "v4"
+    cfg = ctrl.configuration or ""
+    has_v4 = "172.16.0." in cfg
+    has_v6 = "fc00:172:16::" in cfg
+    if has_v4 and has_v6:
+        return "dual"
+    if has_v6:
+        return "v6"
+    return "v4"
+
+
 def find_lab(cml: ClientLibrary, lab_name: str) -> tuple[Lab, str, int]:
     labs = cml.find_labs_by_title(lab_name)
     if not labs:
@@ -214,3 +240,222 @@ def find_lab(cml: ClientLibrary, lab_name: str) -> tuple[Lab, str, int]:
         log.error("Cannot find Manager IP in lab notes — was this lab created by this tool?")
         raise typer.Exit(1)
     return lab, m.group(1), int(m.group(2))
+
+
+def check_serial_file_match(topology: dict[str, Any], serial_file: Path) -> None:
+    nodes = topology.get("nodes", topology.get("lab", {}).get("nodes", []))
+    backup_uuids = {
+        m.group(1)
+        for node in nodes
+        if node.get("node_definition") == "cat-sdwan-edge"
+        for cfg in [node.get("configuration", "")]
+        if (m := re.search(r"uuid\s*:\s*([\w-]+)", cfg))
+    }
+    if not backup_uuids:
+        return
+    try:
+        with gzip.open(serial_file, "rb") as gz:
+            with tarfile.open(fileobj=gz) as tar:
+                member = tar.extractfile("viptela_serial_file")
+                if member is None:
+                    return
+                data = json.loads(member.read())
+    except Exception:
+        return
+    serial_uuids = {d["uuid"] for d in data.get("vEdge List", []) if "uuid" in d}
+    missing = backup_uuids - serial_uuids
+    if missing:
+        log.error(
+            "Serial file mismatch: backup edge UUIDs not in serial file: %s. "
+            "Restore requires the same serial file used at deploy time.",
+            ", ".join(sorted(missing)),
+        )
+        raise typer.Exit(1)
+
+
+def wait_for_edges_onboarded(
+    client: ManagerClient,
+    uuids: list[str],
+    *,
+    timeout: int = 600,
+    on_progress: Callable[[int, int], None] | None = None,
+) -> None:
+    pending = set(uuids)
+    total = len(uuids)
+    deadline = time.time() + timeout
+    while pending and time.time() < deadline:
+        for v in client.get_vedges():
+            uuid = v.get("uuid", "")
+            if (
+                uuid in pending
+                and v.get("certInstallStatus") == "Installed"
+                and v.get("reachability") == "reachable"
+            ):
+                pending.discard(uuid)
+                log.info("Edge %s onboarded", uuid)
+                if on_progress:
+                    on_progress(total - len(pending), total)
+        if pending:
+            time.sleep(10)
+    if pending:
+        log.error("Timed out waiting for edges to onboard: %s", ", ".join(sorted(pending)))
+        raise typer.Exit(1)
+
+VALIDATOR_FQDN = "validator.sdwan.local"
+_MANAGER_BOOT_RETRIES = 120
+_MANAGER_BOOT_INTERVAL = 30
+
+
+def extract_org_name(path: Path) -> str:
+    try:
+        with gzip.open(path, "rb") as gz:
+            with tarfile.open(fileobj=gz) as tar:
+                try:
+                    member = tar.extractfile("viptela_serial_file")
+                except KeyError:
+                    raise ValueError("viptela_serial_file not found in archive")
+                if member is None:
+                    raise ValueError("viptela_serial_file not found in archive")
+                data = json.loads(member.read())
+                if "organization" not in data:
+                    raise ValueError("organization field missing from serial file")
+                return data["organization"]
+    except (OSError, gzip.BadGzipFile, tarfile.TarError, json.JSONDecodeError) as e:
+        raise ValueError(str(e)) from e
+
+
+def wait_for_manager(
+    manager_ip: str,
+    manager_port: int,
+    manager_user: str,
+    manager_password: str,
+    version: str,
+    on_status: Callable[[str], None],
+) -> ManagerClient:
+    use_diagnostic = int(version.split(".")[0]) >= 26
+    client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
+    for _ in range(_MANAGER_BOOT_RETRIES):
+        if use_diagnostic:
+            boot = _query_boot_diagnostic(manager_ip, manager_port)
+            if boot:
+                active, total = boot
+                on_status(f"SD-WAN Manager booting ({active}/{total} services)...")
+        try:
+            client.login()
+            log.info("SD-WAN Manager login successful")
+            return client
+        except (ManagerAPIError, requests.exceptions.RequestException):
+            pass
+        time.sleep(_MANAGER_BOOT_INTERVAL)
+    log.error("SD-WAN Manager did not become available within 60 minutes.")
+    raise typer.Exit(1)
+
+
+def _query_boot_diagnostic(ip: str, port: int) -> tuple[int, int] | None:
+    try:
+        response = requests.get(
+            f"https://{ip}:{port}/diagnostic/api/v1/boot",
+            verify=False,
+            timeout=5,
+        )
+        if response.status_code == 200:
+            data = response.json()
+            return data["activeServices"], data["totalServices"]
+    except Exception:
+        pass
+    return None
+
+
+def configure_manager(
+    client: ManagerClient, version: str, org_name: str, ca_chain: str
+) -> None:
+    if client.get_organization() is None:
+        client.settings_organization(org_name)
+    client.settings_device(VALIDATOR_FQDN)
+    client.settings_vedge_cloud("vmanage")
+    client.settings_certificate("enterprise")
+    client.settings_enterprise_rootca(ca_chain)
+    client.settings_data_stream(enable=True, ip_type="systemIp", server_hostname="systemIp", vpn=0)
+    client.settings_cloudx("on")
+    log.info("SD-WAN Manager settings configured")
+
+    if int(version.split(".")[0]) >= 26:
+        _complete_initial_setup_workflow(client)
+
+
+def _complete_initial_setup_workflow(client: ManagerClient) -> None:
+    existing = client.get_workflows("ux_initial_setup")
+    if existing:
+        workflow = existing[0]
+        if workflow.get("userContext", {}).get("complete"):
+            return
+        workflow_id = workflow["id"]
+    else:
+        workflow_id = client.create_workflow(
+            "ux_initial_setup",
+            {
+                "currentStep": 1,
+                "complete": False,
+                "type": "express",
+                "stepsRemaining": 7,
+                "version": 1,
+                "id": None,
+                "navigate": True,
+            },
+        )
+    completed_context: dict[str, Any] = {
+        "complete": True,
+        "type": "none",
+        "currentStep": 0,
+        "stepsRemaining": 0,
+        "version": 1,
+        "id": workflow_id,
+        "navigate": True,
+    }
+    client.update_workflow(workflow_id, "ux_initial_setup", completed_context)
+    log.info("Initial setup workflow marked complete")
+
+
+def collect_control_components(lab: Any) -> list[tuple[str, str]]:
+    components: list[tuple[str, str]] = []
+    for node in lab.nodes():
+        cfg = node.configuration or ""
+        if node.node_definition == "cat-sdwan-controller":
+            m = re.search(r"<address>((?:172\.16\.0\.1\d+)|(?:fc00:172:16::1\d+))", cfg)
+            if m:
+                components.append((m.group(1), "vsmart"))
+        elif node.node_definition == "cat-sdwan-validator":
+            m = re.search(r"<address>((?:172\.16\.0\.2\d+)|(?:fc00:172:16::2\d+))", cfg)
+            if m:
+                components.append((m.group(1), "vbond"))
+    return components
+
+
+def onboard_control_components(
+    client: ManagerClient,
+    certs: Certs,
+    components: list[tuple[str, str]],
+    on_status: Callable[[str], None],
+) -> None:
+    total = len(components)
+    for i, (ip, personality) in enumerate(components, 1):
+        on_status(f"Adding control components ({i}/{total})...")
+        try:
+            client.add_controller(ip, personality, "admin", "admin")
+        except ManagerAPIError as e:
+            if "already exists" in str(e):
+                log.debug("%s (%s) already exists — skipping", personality, ip)
+            else:
+                raise
+
+    controllers = client.get_controllers()
+    on_status("Signing certificates for control components...")
+    pending = [
+        d.get("deviceIP", "")
+        for d in controllers
+        if d.get("serialNumber") == "No certificate installed" and d.get("deviceIP")
+    ]
+    with ThreadPoolExecutor() as pool:
+        futures = [pool.submit(sign_device_cert, client, certs, ip) for ip in pending]
+        for f in futures:
+            f.result()

@@ -18,18 +18,20 @@ from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
 from catalyst_sdwan_lab.ssh_client import ssh_drain, ssh_recv
 
 from .deploy import (
-    _VALIDATOR_FQDN,
     _attach_controller_template,
     _import_controller_templates,
 )
 from .utils import (
     CML_DEPLOY_TEMPLATES_DIR,
+    VALIDATOR_FQDN,
     connect_cml,
     console,
+    detect_ip_type,
     find_lab,
     load_certs,
     resolve_image,
     sign_device_cert,
+    wait_for_edges_onboarded,
 )
 
 log = logging.getLogger(__name__)
@@ -80,12 +82,16 @@ def run_control_component(
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
-        ip_type = _detect_ip_type(lab)
+        ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, node_def, version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
         client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-        client.login()
+        try:
+            client.login()
+        except ManagerAPIError as e:
+            log.error("%s", e)
+            raise typer.Exit(1)
         try:
             org_name = client.get_organization() or ""
             template_id = _import_controller_templates(client, ip_type) if is_ctrl else None
@@ -104,7 +110,7 @@ def run_control_component(
                     description=f"Adding {label_prefix}{num} to CML ({i + 1}/{count})...",
                 )
                 extra = (
-                    {"controller_num": num, "validator_fqdn": _VALIDATOR_FQDN}
+                    {"controller_num": num, "validator_fqdn": VALIDATOR_FQDN}
                     if is_ctrl
                     else {"validator_num": num}
                 )
@@ -164,6 +170,9 @@ def run_control_component(
                 _update_gateway_dns(
                     cml_host, cml_user, cml_password, lab, lab_name, device_ips,
                 )
+        except ManagerAPIError as e:
+            log.error("%s", e)
+            raise typer.Exit(1)
         finally:
             client.logout()
 
@@ -197,12 +206,16 @@ def run_edge(
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
-        ip_type = _detect_ip_type(lab)
+        ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
         client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-        client.login()
+        try:
+            client.login()
+        except ManagerAPIError as e:
+            log.error("%s", e)
+            raise typer.Exit(1)
         try:
             progress.update(task, description="Checking available edge devices...")
             vedges = client.get_vedges()
@@ -290,7 +303,7 @@ def run_edge(
                 node.wait_until_converged()
 
             progress.update(task, description=f"Waiting for edges to onboard (0/{count})...")
-            _wait_for_edges_onboarded(
+            wait_for_edges_onboarded(
                 client,
                 uuids,
                 timeout=_BOOT_TIMEOUT,
@@ -298,6 +311,9 @@ def run_edge(
                     task, description=f"Waiting for edges to onboard ({done}/{total})..."
                 ),
             )
+        except ManagerAPIError as e:
+            log.error("%s", e)
+            raise typer.Exit(1)
         finally:
             client.logout()
 
@@ -327,12 +343,16 @@ def run_sdrouting(
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
-        ip_type = _detect_ip_type(lab)
+        ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
         client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-        client.login()
+        try:
+            client.login()
+        except ManagerAPIError as e:
+            log.error("%s", e)
+            raise typer.Exit(1)
         try:
             progress.update(task, description="Checking available SD-Routing devices...")
             vedges = client.get_vedges()
@@ -425,7 +445,7 @@ def run_sdrouting(
             progress.update(
                 task, description=f"Waiting for SD-Routing edges to onboard (0/{count})..."
             )
-            _wait_for_edges_onboarded(
+            wait_for_edges_onboarded(
                 client,
                 uuids,
                 timeout=_BOOT_TIMEOUT,
@@ -434,28 +454,14 @@ def run_sdrouting(
                     description=f"Waiting for SD-Routing edges to onboard ({done}/{total})...",
                 ),
             )
+        except ManagerAPIError as e:
+            log.error("%s", e)
+            raise typer.Exit(1)
         finally:
             client.logout()
 
     label = f"SD-Edge{nums[0]}" if count == 1 else f"{count} SD-Routing edges"
     console.print(f"[green]Added.[/green] {label} added to lab '{escape(lab_name)}'.")
-
-
-def _detect_ip_type(lab: Lab) -> str:
-    ref = next(
-        (n for n in lab.nodes() if _CTRL_NUM_RE.match(n.label) or _VLDTR_NUM_RE.match(n.label)),
-        None,
-    )
-    if ref is None:
-        return "v4"
-    cfg = ref.configuration or ""
-    has_v4 = "172.16.0." in cfg
-    has_v6 = "fc00:172:16::" in cfg
-    if has_v4 and has_v6:
-        return "dual"
-    if has_v6:
-        return "v6"
-    return "v4"
 
 
 def _next_device_num(lab: Lab, num_re: re.Pattern[str]) -> str:
@@ -573,34 +579,6 @@ def _add_wan_edge_node(
             raise typer.Exit(1)
         lab.create_link(gi2, mpls_free, wait=False)
     return node
-
-
-def _wait_for_edges_onboarded(
-    client: ManagerClient,
-    uuids: list[str],
-    *,
-    timeout: int,
-    on_progress: Callable[[int, int], None] | None = None,
-) -> None:
-    pending = set(uuids)
-    total = len(uuids)
-    deadline = time.time() + timeout
-    while pending and time.time() < deadline:
-        for v in client.get_vedges():
-            uuid = v.get("uuid", "")
-            if (
-                uuid in pending
-                and v.get("certInstallStatus") == "Installed"
-                and v.get("reachability") == "reachable"
-            ):
-                pending.discard(uuid)
-                if on_progress:
-                    on_progress(total - len(pending), total)
-        if pending:
-            time.sleep(_BOOT_INTERVAL)
-    if pending:
-        log.error("Timed out waiting for edges to onboard: %s", ", ".join(sorted(pending)))
-        raise typer.Exit(1)
 
 
 def _sync_until_interface(

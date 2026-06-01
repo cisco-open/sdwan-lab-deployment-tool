@@ -13,6 +13,7 @@ from catalyst_sdwan_lab.tasks import backup as _backup
 from catalyst_sdwan_lab.tasks import delete as _delete
 from catalyst_sdwan_lab.tasks import deploy as _deploy
 from catalyst_sdwan_lab.tasks import images as _images
+from catalyst_sdwan_lab.tasks import restore as _restore
 from catalyst_sdwan_lab.tasks import setup as _setup
 from catalyst_sdwan_lab.tasks import sign as _sign
 from catalyst_sdwan_lab.tasks.utils import DEFAULT_SERIAL_FILE, console
@@ -364,6 +365,106 @@ def backup(
         manager_password=manager_pass,
         output=output,
         directory=directory,
+    )
+
+
+@app.command()
+def restore(
+    backup: Annotated[Path, typer.Argument(help="Backup zip file or directory")],
+    lab_name: Annotated[
+        str, typer.Option("--lab", envvar="LAB_NAME", help="CML lab name")
+    ] = ...,  # type: ignore[assignment]
+    manager_ip: Annotated[
+        Optional[str],
+        typer.Option("--manager-ip", envvar="MANAGER_IP", help="Manager IP (direct mode)"),
+    ] = None,
+    manager_port: Annotated[
+        Optional[int],
+        typer.Option("--manager-port", envvar="MANAGER_PORT", help="PATty port; enables PATty mode"),
+    ] = None,
+    manager_user: Annotated[
+        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
+    ] = "admin",
+    manager_pass: Annotated[
+        str,
+        typer.Option(
+            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
+        ),
+    ] = ...,  # type: ignore[assignment]
+    manager_mask: Annotated[
+        Optional[str],
+        typer.Option("--manager-mask", envvar="MANAGER_MASK", help="Manager mask (direct mode)"),
+    ] = None,
+    manager_gateway: Annotated[
+        Optional[str],
+        typer.Option("--manager-gateway", envvar="MANAGER_GATEWAY", help="Manager gateway (direct mode)"),
+    ] = None,
+    serial_file: Annotated[
+        Optional[Path],
+        typer.Option("--serial-file", help="Custom .viptela serial file"),
+    ] = None,
+    control_version: Annotated[
+        Optional[str],
+        typer.Option("--contr-version", help="Override control plane version (must not be older than backup)"),
+    ] = None,
+    edge_version: Annotated[
+        Optional[str],
+        typer.Option("--edge-version", help="Override edge version (must not be older than backup)"),
+    ] = None,
+    delete_existing: Annotated[
+        bool, typer.Option("--delete-existing", help="Delete existing lab with same name before restoring")
+    ] = False,
+    retry: Annotated[
+        bool, typer.Option("--retry", help="Resume from Manager boot, skipping lab import")
+    ] = False,
+) -> None:
+    """Restore a Catalyst SD-WAN lab from a backup archive."""
+    patty = manager_port is not None
+    if patty:
+        if manager_ip or manager_mask or manager_gateway:
+            log.error(
+                "--manager-port (PATty mode) cannot be combined with "
+                "--manager-ip, --manager-mask, or --manager-gateway."
+            )
+            raise typer.Exit(1)
+    elif not any([manager_ip, manager_mask, manager_gateway]):
+        log.error(
+            "Specify --manager-port for PATty mode, or "
+            "--manager-ip / --manager-mask / --manager-gateway for direct mode."
+        )
+        raise typer.Exit(1)
+    else:
+        missing = [
+            name
+            for name, val in [
+                ("--manager-ip", manager_ip),
+                ("--manager-mask", manager_mask),
+                ("--manager-gateway", manager_gateway),
+            ]
+            if not val
+        ]
+        if missing:
+            log.error("Direct mode requires: %s", ", ".join(missing))
+            raise typer.Exit(1)
+    cml_host, cml_user, cml_password = _cml_credentials()
+    _restore.run(
+        cml_host=cml_host,
+        cml_user=cml_user,
+        cml_password=cml_password,
+        lab_name=lab_name,
+        manager_user=manager_user,
+        manager_password=manager_pass,
+        manager_ip=cml_host if patty else manager_ip or "",
+        manager_port=manager_port or 443,
+        manager_mask=manager_mask or "",
+        manager_gateway=manager_gateway or "",
+        backup=backup,
+        serial_file=serial_file or DEFAULT_SERIAL_FILE,
+        control_version=control_version,
+        edge_version=edge_version,
+        delete_existing=delete_existing,
+        retry=retry,
+        patty=patty,
     )
 
 
