@@ -127,7 +127,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cisco-sdwan", specifier = ">=1.27" },
+    { name = "cisco-sdwan", git = "https://github.com/tzarski0/sastre?branch=sdrouting-basic" },
     { name = "cryptography", specifier = ">=42.0" },
     { name = "jinja2", specifier = ">=3.1" },
     { name = "paramiko", specifier = ">=5.0.0" },
@@ -315,15 +315,11 @@ wheels = [
 [[package]]
 name = "cisco-sdwan"
 version = "1.27"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/tzarski0/sastre?branch=sdrouting-basic#2ad047e9220c56ea4a83ecfc694c51eaa579e4fb" }
 dependencies = [
     { name = "pydantic" },
     { name = "pyyaml" },
     { name = "requests" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f1/a4/8b7150f7ac933b672c9c79650ecd4047daf9f7ceb13212d6612cbf1b142b/cisco_sdwan-1.27.tar.gz", hash = "sha256:c3fb4c77e315bf89572ae7216a5bee08ba96b05c4e5661a3456dcc2664693281", size = 136530, upload-time = "2026-02-11T22:23:50.346Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/3f/35fe70a4d86be9f24b5022cc8d28f4af99eaf365799ec7c9a7c4e88f3212/cisco_sdwan-1.27-py3-none-any.whl", hash = "sha256:5f0094c2ec35945300d9803c488c783cf946261a850a10b3f7efdf257b8b546e", size = 140801, upload-time = "2026-02-11T22:23:48.593Z" },
 ]
 
 [[package]]

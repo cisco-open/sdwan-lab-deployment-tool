@@ -189,6 +189,12 @@ class ManagerClient:
     def get_network_hierarchy(self) -> list[dict[str, Any]]:
         return self._get("/dataservice/v1/network-hierarchy")
 
+    def get_sync_status(self) -> list[dict[str, Any]]:
+        return self._get("/dataservice/device/sync_status?groupId=all").get("data", [])
+
+    def rediscover_devices(self, devices: list[dict[str, Any]]) -> None:
+        self._post("/dataservice/device/action/rediscover", {"action": "rediscover", "devices": devices})
+
     def add_controller(self, ip: str, personality: str, username: str, password: str) -> None:
         self._post(
             "/dataservice/system/device",

@@ -27,6 +27,7 @@ from .utils import (
     onboard_control_components,
     resolve_image,
     sha512_crypt,
+    trigger_rediscovery,
     wait_for_edges_onboarded,
     wait_for_manager,
 )
@@ -133,6 +134,9 @@ def run(
                 progress.update(task, description="Patching Sastre controller UUIDs...")
                 _patch_sastre_controller_uuids(manager_configs_dir, client)
 
+                progress.update(task, description="Patching config group passwords...")
+                _patch_config_group_passwords(manager_configs_dir)
+
                 progress.update(task, description="Restoring Manager configuration...")
                 _run_sastre_restore(manager_ip, manager_port, manager_user, manager_password, manager_configs_dir)
 
@@ -154,6 +158,9 @@ def run(
                             task, description=f"Waiting for edges to onboard... ({done}/{total})"
                         ),
                     )
+
+                progress.update(task, description="Triggering network rediscovery...")
+                trigger_rediscovery(client)
 
             except ManagerAPIError as e:
                 log.error("%s", e)
@@ -248,7 +255,7 @@ def _patch_topology(
             cfg: str = node.get("configuration", "")
             encrypted = sha512_crypt(manager_password)
             cfg = re.sub(r"<password>(\S+)</password>", f"<password>{encrypted}</password>", cfg)
-            if manager_user != "admin":
+            if manager_user != "admin" and f"<name>{manager_user}</name>" not in cfg:
                 cfg = re.sub(
                     r"(<user>[\s\S]+?<name>)admin(</name>)",
                     rf"\g<1>{manager_user}\2",
@@ -287,6 +294,23 @@ def _start_control_plane(lab: Any) -> None:
             continue
         node.start()
         log.info("Started %s", node.label)
+
+
+def _patch_config_group_passwords(manager_configs_dir: Path) -> None:
+    values_dir = manager_configs_dir / "config_groups" / "values"
+    if not values_dir.exists():
+        return
+    for path in values_dir.glob("*.json"):
+        data = json.loads(path.read_text())
+        changed = False
+        for device in data.get("devices", []):
+            for var in device.get("variables", []):
+                if var.get("value") == "$cRYPT_CLUSTER1":
+                    var["value"] = "admin"
+                    changed = True
+        if changed:
+            path.write_text(json.dumps(data, indent=2))
+            log.info("Patched encrypted passwords in %s", path.name)
 
 
 def _patch_sastre_controller_uuids(manager_configs_dir: Path, client: ManagerClient) -> None:

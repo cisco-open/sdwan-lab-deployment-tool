@@ -1,8 +1,10 @@
+import logging
 import re
 import time
 
 import paramiko
 
+log = logging.getLogger(__name__)
 SSH_TIMEOUT = 30.0
 CONFIG_TIMEOUT = 60.0
 
@@ -14,12 +16,14 @@ def ssh_recv(ch: paramiko.Channel, *prompts: str, timeout: float = SSH_TIMEOUT) 
         if ch.closed:
             raise RuntimeError("SSH channel closed unexpectedly")
         if ch.recv_ready():
-            buf += ch.recv(4096).decode("utf-8", errors="replace")
+            chunk = ch.recv(4096).decode("utf-8", errors="replace")
+            buf += chunk
+            log.debug("ssh_recv << %r", chunk)
             if any(p in buf for p in prompts):
                 return buf
         else:
             time.sleep(0.1)
-    raise RuntimeError(f"Timed out waiting for any of {prompts!r}")
+    raise RuntimeError(f"Timed out waiting for any of {prompts!r}, last received: {buf[-500:]!r}")
 
 
 def ssh_drain(ch: paramiko.Channel, duration: float = 1.0) -> None:
@@ -48,8 +52,18 @@ def extract_control_config(
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/{node_label}/0\n".encode())
         ssh_drain(ch, duration=3)
-        ch.send(b"\r\n")
-        out = ssh_recv(ch, "login:", "Username:", "#")
+        # Ctrl+C breaks out of any in-progress wizard; Enter solicits a fresh prompt
+        ch.send(b"\x03\r\n")
+        out = ssh_recv(ch, "login:", "Username:", "#", "Password:", "Re-enter password:")
+        # Navigate through a stuck password-change wizard (max 4 rounds)
+        for _ in range(4):
+            if "login:" in out or "Username:" in out or "#" in out:
+                break
+            if "Password:" in out or "Re-enter password:" in out:
+                ch.send(f"{node_password}\r\n".encode())
+                out = ssh_recv(ch, "login:", "Username:", "#", "Password:", "Re-enter password:")
+            else:
+                break
         if "login:" in out or "Username:" in out:
             ch.send(f"{node_user}\r\n".encode())
             out = ssh_recv(ch, "Password:", "#")
@@ -143,7 +157,7 @@ def _strip_sdrouting_config(raw: str) -> str:
     start = 0
     for i, line in enumerate(lines):
         s = line.strip()
-        if s.startswith("Building configuration") or s.startswith("!") or s.startswith("version"):
+        if s.startswith("!") or s.startswith("version"):
             start = i
             break
     end = len(lines)
@@ -152,4 +166,14 @@ def _strip_sdrouting_config(raw: str) -> str:
     config = "\n".join(lines[start:end])
     config = re.sub(r"\ncrypto pki[\s\S]+?!", "!", config)
     config = re.sub(r"\nlicense udi[\s\S]+?\n", "\n", config, flags=re.DOTALL | re.MULTILINE)
+    # Remove commands ConfD rejects on a fresh SD-Routing boot
+    config = re.sub(r"\nspanning-tree[^\n]*", "", config)
+    config = re.sub(r"\ntelemetry ietf subscription[\s\S]+?(?=\n\S|\Z)", "", config)
+    config = re.sub(r"\ntelemetry receiver[\s\S]+?(?=\n\S|\Z)", "", config)
+    config = re.sub(r"\n[ \t]+login local", "", config)
+    config = re.sub(r"\nnetconf-yang feature candidate-datastore[^\n]*", "", config)
+    config = re.sub(r"\nmgcp[\s\S]+?(?=\n\S|\Z)", "", config)
+    config = re.sub(r"\nsubscriber templating[^\n]*", "", config)
+    config = re.sub(r"\nservice password-encryption[^\n]*", "", config)
+    config = re.sub(r"\naaa new-model[^\n]*", "", config)
     return config.strip()

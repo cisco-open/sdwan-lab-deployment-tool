@@ -29,7 +29,7 @@ from .utils import (
     onboard_control_components,
     resolve_image,
     sha512_crypt,
-    sign_device_cert,
+    trigger_rediscovery,
     wait_for_manager,
 )
 
@@ -146,6 +146,9 @@ def run(
 
                 progress.update(task, description="Attaching controller template...")
                 _attach_controller_template(client, ip_type, template_id)
+
+                progress.update(task, description="Triggering network rediscovery...")
+                trigger_rediscovery(client)
             except ManagerAPIError as e:
                 log.error("%s", e)
                 raise typer.Exit(1)

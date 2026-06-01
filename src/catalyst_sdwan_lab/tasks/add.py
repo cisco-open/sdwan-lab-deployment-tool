@@ -31,6 +31,7 @@ from .utils import (
     load_certs,
     resolve_image,
     sign_device_cert,
+    trigger_rediscovery,
     wait_for_edges_onboarded,
 )
 
@@ -164,6 +165,8 @@ def run_control_component(
                 _update_gateway_dns(
                     cml_host, cml_user, cml_password, lab, lab_name, device_ips,
                 )
+            progress.update(task, description="Triggering network rediscovery...")
+            trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
             raise typer.Exit(1)
@@ -305,12 +308,13 @@ def run_edge(
                     task, description=f"Waiting for edges to onboard ({done}/{total})..."
                 ),
             )
+            progress.update(task, description="Triggering network rediscovery...")
+            trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
             raise typer.Exit(1)
         finally:
             client.logout()
-
     label = f"Edge{nums[0]}" if count == 1 else f"{count} edges"
     console.print(f"[green]Added.[/green] {label} added to lab '{escape(lab_name)}'.")
 
@@ -448,6 +452,8 @@ def run_sdrouting(
                     description=f"Waiting for SD-Routing edges to onboard ({done}/{total})...",
                 ),
             )
+            progress.update(task, description="Triggering network rediscovery...")
+            trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
             raise typer.Exit(1)

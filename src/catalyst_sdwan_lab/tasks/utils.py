@@ -462,3 +462,14 @@ def onboard_control_components(
         futures = [pool.submit(sign_device_cert, client, certs, ip) for ip in pending]
         for f in futures:
             f.result()
+
+
+def trigger_rediscovery(client: ManagerClient) -> None:
+    reachable = [
+        {"deviceId": d["uuid"], "deviceIP": d["local-system-ip"]}
+        for d in client.get_sync_status()
+        if d.get("reachability") == "reachable"
+    ]
+    if reachable:
+        client.rediscover_devices(reachable)
+        log.info("Network rediscovery triggered for %d devices", len(reachable))
