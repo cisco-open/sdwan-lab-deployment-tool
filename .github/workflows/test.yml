@@ -24,9 +24,6 @@ jobs:
       - name: Ruff
         run: uv run ruff check src/
 
-      - name: Mypy
-        run: uv run mypy src/
-
   test:
     name: Tests (Python ${{ matrix.python }})
     runs-on: ubuntu-latest

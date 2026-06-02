@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Any
 
 import requests
-import requests.packages.urllib3
+import urllib3
 from requests import Response, Session
 
-requests.packages.urllib3.disable_warnings()  # type: ignore[attr-defined]
+urllib3.disable_warnings()
 
 log = logging.getLogger(__name__)
 
