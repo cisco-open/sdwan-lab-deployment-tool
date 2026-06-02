@@ -21,20 +21,22 @@ def run(cml_host: str, cml_user: str, cml_password: str) -> None:
     ) as progress:
         task = progress.add_task("Connecting to CML...")
         cml = connect_cml(cml_host, cml_user, cml_password)
+        try:
+            progress.update(task, description="Checking license...")
+            _check_license(cml)
+            log.info("License OK")
 
-        progress.update(task, description="Checking license...")
-        _check_license(cml)
-        log.info("License OK")
+            progress.update(task, description="Loading node definitions...")
+            existing = {nd["id"]: nd for nd in cml.definitions.node_definitions()}
+            log.debug("Loaded %d node definitions from CML", len(existing))
 
-        progress.update(task, description="Loading node definitions...")
-        existing = {nd["id"]: nd for nd in cml.definitions.node_definitions()}
-        log.debug("Loaded %d node definitions from CML", len(existing))
+            progress.update(task, description="Checking IOL definitions...")
+            _check_iol_definitions(existing)
+            log.info("IOL definitions found")
 
-        progress.update(task, description="Checking IOL definitions...")
-        _check_iol_definitions(existing)
-        log.info("IOL definitions found")
-
-        _sync_node_definitions(cml, existing, progress, task)
+            _sync_node_definitions(cml, existing, progress, task)
+        finally:
+            cml.logout()
 
     console.print("[green]✓[/green] Setup complete.")
 

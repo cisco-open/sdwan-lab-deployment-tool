@@ -25,25 +25,27 @@ def run(cml_host: str, cml_user: str, cml_password: str, lab_name: str, *, force
     ) as progress:
         task = progress.add_task("Connecting to CML...")
         cml = connect_cml(cml_host, cml_user, cml_password)
+        try:
+            progress.update(task, description="Finding lab...")
+            labs = cml.find_labs_by_title(lab_name)
+            if not labs:
+                log.error("No lab found with name '%s'.", lab_name)
+                raise typer.Exit(1)
+            if len(labs) > 1:
+                log.error(
+                    "Multiple labs found with name '%s'. Ensure lab names are unique.", lab_name
+                )
+                raise typer.Exit(1)
+            lab = labs[0]
 
-        progress.update(task, description="Finding lab...")
-        labs = cml.find_labs_by_title(lab_name)
-        if not labs:
-            log.error("No lab found with name '%s'.", lab_name)
-            raise typer.Exit(1)
-        if len(labs) > 1:
-            log.error(
-                "Multiple labs found with name '%s'. Ensure lab names are unique.", lab_name
-            )
-            raise typer.Exit(1)
-        lab = labs[0]
-
-        progress.update(task, description="Stopping lab...")
-        lab.stop()
-        progress.update(task, description="Wiping lab...")
-        lab.wipe()
-        progress.update(task, description="Removing lab...")
-        lab.remove()
+            progress.update(task, description="Stopping lab...")
+            lab.stop()
+            progress.update(task, description="Wiping lab...")
+            lab.wipe()
+            progress.update(task, description="Removing lab...")
+            lab.remove()
+        finally:
+            cml.logout()
 
     log.info("Lab '%s' deleted.", lab_name)
     console.print(f"[green]Deleted.[/green] Lab '{escape(lab_name)}' removed.")
