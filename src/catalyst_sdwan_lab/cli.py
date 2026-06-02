@@ -36,6 +36,53 @@ _state = _State()
 log = logging.getLogger(__name__)
 
 
+def _validate_manager_mode(
+    manager_ip: Optional[str],
+    manager_port: Optional[int],
+    manager_mask: Optional[str],
+    manager_gateway: Optional[str],
+    bridge: Optional[str] = None,
+) -> bool:
+    patty = manager_port is not None
+    if patty:
+        forbidden = [
+            name
+            for name, val in [
+                ("--manager-ip", manager_ip),
+                ("--manager-mask", manager_mask),
+                ("--manager-gateway", manager_gateway),
+                ("--bridge", bridge),
+            ]
+            if val
+        ]
+        if forbidden:
+            log.error(
+                "--manager-port (PATty mode) cannot be combined with %s.",
+                ", ".join(forbidden),
+            )
+            raise typer.Exit(1)
+    elif not any([manager_ip, manager_mask, manager_gateway]):
+        log.error(
+            "Specify --manager-port for PATty mode, or "
+            "--manager-ip / --manager-mask / --manager-gateway for direct mode."
+        )
+        raise typer.Exit(1)
+    else:
+        missing = [
+            name
+            for name, val in [
+                ("--manager-ip", manager_ip),
+                ("--manager-mask", manager_mask),
+                ("--manager-gateway", manager_gateway),
+            ]
+            if not val
+        ]
+        if missing:
+            log.error("Direct mode requires: %s", ", ".join(missing))
+            raise typer.Exit(1)
+    return patty
+
+
 def _configure_logging(verbose: bool, debug: bool) -> None:
     level = logging.DEBUG if debug else logging.INFO if verbose else logging.WARNING
     handler = RichHandler(console=console, show_time=False, show_path=False)
@@ -176,33 +223,7 @@ def deploy(
         except ValueError:
             log.error("--manager-ip must be a valid IP address, got: %s", manager_ip)
             raise typer.Exit(1)
-    patty = manager_port is not None
-    if patty:
-        if manager_ip or manager_mask or manager_gateway or bridge:
-            log.error(
-                "--manager-port (PATty mode) cannot be combined with "
-                "--manager-ip, --manager-mask, --manager-gateway, or --bridge."
-            )
-            raise typer.Exit(1)
-    elif not any([manager_ip, manager_mask, manager_gateway]):
-        log.error(
-            "Specify --manager-port for PATty mode, or "
-            "--manager-ip / --manager-mask / --manager-gateway for direct mode."
-        )
-        raise typer.Exit(1)
-    else:
-        missing = [
-            name
-            for name, val in [
-                ("--manager-ip", manager_ip),
-                ("--manager-mask", manager_mask),
-                ("--manager-gateway", manager_gateway),
-            ]
-            if not val
-        ]
-        if missing:
-            log.error("Direct mode requires: %s", ", ".join(missing))
-            raise typer.Exit(1)
+    patty = _validate_manager_mode(manager_ip, manager_port, manager_mask, manager_gateway, bridge)
     cml_host, cml_user, cml_password = _cml_credentials()
     _deploy.run(
         cml_host=cml_host,
@@ -423,33 +444,7 @@ def restore(
     ] = False,
 ) -> None:
     """Restore a Catalyst SD-WAN lab from a backup archive."""
-    patty = manager_port is not None
-    if patty:
-        if manager_ip or manager_mask or manager_gateway:
-            log.error(
-                "--manager-port (PATty mode) cannot be combined with "
-                "--manager-ip, --manager-mask, or --manager-gateway."
-            )
-            raise typer.Exit(1)
-    elif not any([manager_ip, manager_mask, manager_gateway]):
-        log.error(
-            "Specify --manager-port for PATty mode, or "
-            "--manager-ip / --manager-mask / --manager-gateway for direct mode."
-        )
-        raise typer.Exit(1)
-    else:
-        missing = [
-            name
-            for name, val in [
-                ("--manager-ip", manager_ip),
-                ("--manager-mask", manager_mask),
-                ("--manager-gateway", manager_gateway),
-            ]
-            if not val
-        ]
-        if missing:
-            log.error("Direct mode requires: %s", ", ".join(missing))
-            raise typer.Exit(1)
+    patty = _validate_manager_mode(manager_ip, manager_port, manager_mask, manager_gateway)
     cml_host, cml_user, cml_password = _cml_credentials()
     _restore.run(
         cml_host=cml_host,
