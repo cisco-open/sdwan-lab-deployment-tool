@@ -19,16 +19,9 @@ from virl2_client.exceptions import APIError
 
 from catalyst_sdwan_lab.cml_client import upload_image_file
 
-from .utils import connect_cml, console
+from .utils import SDWAN_ALL_NODE_DEFS, connect_cml, console
 
 log = logging.getLogger(__name__)
-
-_NODE_TYPES = (
-    "cat-sdwan-manager",
-    "cat-sdwan-controller",
-    "cat-sdwan-validator",
-    "cat-sdwan-edge",
-)
 
 _VIPTELA_TYPE_MAP = {
     "vmanage": "cat-sdwan-manager",
@@ -43,7 +36,7 @@ _C8000V_RE = re.compile(r"c8000v-universalk9_\d+G_serial\.([\w.]+)\.qcow2$")
 
 def _normalize_id(image_id: str) -> str:
     # CML stores image IDs with dashes (e.g. cat-sdwan-manager-20-13-1); normalize to dots.
-    for node_type in _NODE_TYPES:
+    for node_type in SDWAN_ALL_NODE_DEFS:
         prefix = f"{node_type}-"
         if image_id.startswith(prefix):
             version = image_id[len(prefix):]
@@ -138,7 +131,7 @@ def list_versions(cml_host: str, cml_user: str, cml_password: str) -> None:
             table = Table(title="Catalyst SD-WAN Software Versions")
             table.add_column("Node Type", style="cyan")
             table.add_column("Versions")
-            for node_type in _NODE_TYPES:
+            for node_type in SDWAN_ALL_NODE_DEFS:
                 versions = [
                     _normalize_id(img["id"])[len(node_type) + 1:]
                     for img in cml.definitions.image_definitions_for_node_definition(node_type)
@@ -169,7 +162,7 @@ def delete(cml_host: str, cml_user: str, cml_password: str, versions: list[str],
             to_delete = [
                 (f"{node_type}-{version}", image_map[f"{node_type}-{version}"])
                 for version in versions
-                for node_type in _NODE_TYPES
+                for node_type in SDWAN_ALL_NODE_DEFS
                 if f"{node_type}-{version}" in image_map
             ]
             progress.remove_task(status)

@@ -18,6 +18,7 @@ from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
 from .utils import (
     CML_DEPLOY_TEMPLATES_DIR,
     CONTROLLER_TEMPLATES_DIR,
+    SDWAN_CTRL_NODE_DEFS,
     VALIDATOR_FQDN,
     Certs,
     basic_configuration_path,
@@ -34,8 +35,6 @@ from .utils import (
 )
 
 log = logging.getLogger(__name__)
-
-_NODE_TYPES = ("cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator")
 
 
 @dataclass
@@ -255,7 +254,7 @@ def _restore_basic_configuration(client: ManagerClient, ip_type: str) -> None:
 
 def _check_images(cml: ClientLibrary, version: str) -> _Images:
     results: dict[str, str] = {}
-    for node_type in _NODE_TYPES:
+    for node_type in SDWAN_CTRL_NODE_DEFS:
         image_id = resolve_image(cml, node_type, version)
         results[node_type] = image_id
         log.info("Image OK: %s", image_id)

@@ -18,6 +18,7 @@ from catalyst_sdwan_lab.ssh_client import extract_control_config, extract_edge_c
 
 from .utils import (
     CML_BACKUP_TEMPLATES_DIR,
+    SDWAN_CTRL_NODE_DEFS,
     connect_cml,
     connect_manager,
     console,
@@ -27,8 +28,6 @@ from .utils import (
 )
 
 log = logging.getLogger(__name__)
-
-_CTRL_NODE_DEFS = frozenset({"cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator"})
 
 _CTRL_XML_PERSONALITIES = {
     "cat-sdwan-manager": "    <personality>vmanage</personality>\n    <device-model>vmanage</device-model>",
@@ -86,7 +85,7 @@ def run(
                 cml_extract_nodes = [
                     n for n in nodes
                     if n.is_active()
-                    and n.node_definition not in _CTRL_NODE_DEFS
+                    and n.node_definition not in SDWAN_CTRL_NODE_DEFS
                     and n.node_definition != "cat-sdwan-edge"
                 ]
                 for i, node in enumerate(cml_extract_nodes, 1):
@@ -104,14 +103,14 @@ def run(
                 extract_nodes = [
                     n for n in nodes
                     if n.is_active() and (
-                        n.node_definition in _CTRL_NODE_DEFS
+                        n.node_definition in SDWAN_CTRL_NODE_DEFS
                         or n.node_definition == "cat-sdwan-edge"
                     )
                 ]
                 total = len(extract_nodes)
                 for i, node in enumerate(extract_nodes, 1):
                     node_def = node.node_definition
-                    if node_def in _CTRL_NODE_DEFS:
+                    if node_def in SDWAN_CTRL_NODE_DEFS:
                         progress.update(task, description=f"Extracting config from {node.label} ({i}/{total})...")
                         if node_def == "cat-sdwan-manager":
                             node_user, node_pass = manager_user, manager_password

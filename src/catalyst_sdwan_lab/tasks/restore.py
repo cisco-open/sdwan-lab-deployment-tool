@@ -27,6 +27,7 @@ from .utils import (
     onboard_control_components,
     resolve_image,
     sha512_crypt,
+    SDWAN_CTRL_NODE_DEFS,
     topology_nodes,
     trigger_rediscovery,
     wait_for_edges_onboarded,
@@ -196,12 +197,11 @@ def _check_images(
     control_version: str | None,
     edge_version: str | None,
 ) -> None:
-    _CTRL_DEFS = ("cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator")
     nodes = topology_nodes(topology)
     checked: set[str] = set()
     for node in nodes:
         node_def = node.get("node_definition", "")
-        if node_def not in _CTRL_DEFS and node_def != "cat-sdwan-edge":
+        if node_def not in SDWAN_CTRL_NODE_DEFS and node_def != "cat-sdwan-edge":
             continue
         is_edge = node_def == "cat-sdwan-edge"
         override = edge_version if is_edge else control_version
@@ -285,7 +285,7 @@ def _patch_topology(
                 pat_tag = f"pat:{manager_port}:443"
                 if pat_tag not in node["tags"]:
                     node["tags"].append(pat_tag)
-        if control_version and node_def in ("cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator"):
+        if control_version and node_def in SDWAN_CTRL_NODE_DEFS:
             node["image_definition"] = f"{node_def}-{control_version}"
         if edge_version and node_def == "cat-sdwan-edge":
             node["image_definition"] = f"cat-sdwan-edge-{edge_version}"

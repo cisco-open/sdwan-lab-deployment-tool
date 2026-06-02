@@ -22,6 +22,7 @@ from .deploy import (
 )
 from .utils import (
     CML_DEPLOY_TEMPLATES_DIR,
+    SDWAN_CTRL_NODE_DEFS,
     VALIDATOR_FQDN,
     connect_cml,
     connect_manager,
@@ -52,7 +53,6 @@ _CSR_POLL_TIMEOUT = 600
 _BOOT_TIMEOUT = 600
 _BOOT_INTERVAL = 10
 _GATEWAY_VRF_NAMES = ("inet", "mpls", "vpn0")
-_SDWAN_NODE_DEFS = {"cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator"}
 
 
 def run_control_component(
@@ -492,7 +492,7 @@ def _add_sdwan_node(
     cpus: int | None = None,
     ram: int | None = None,
 ) -> Node:
-    sdwan_nodes = [n for n in lab.nodes() if n.node_definition in _SDWAN_NODE_DEFS]
+    sdwan_nodes = [n for n in lab.nodes() if n.node_definition in SDWAN_CTRL_NODE_DEFS]
     x = max((n.x for n in sdwan_nodes), default=0) + 120
     y = max((n.y for n in sdwan_nodes), default=0)
     node = lab.create_node(

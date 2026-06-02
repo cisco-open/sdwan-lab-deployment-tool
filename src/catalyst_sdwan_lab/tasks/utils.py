@@ -39,6 +39,18 @@ MANAGER_CONFIGS_DIR = DATA_DIR / "manager_configs"
 CONTROLLER_TEMPLATES_DIR = MANAGER_CONFIGS_DIR / "controller_templates"
 DEFAULT_SERIAL_FILE = DATA_DIR / "serial_files" / "serialFile.viptela"
 
+SDWAN_CTRL_NODE_DEFS: frozenset[str] = frozenset({
+    "cat-sdwan-manager",
+    "cat-sdwan-controller",
+    "cat-sdwan-validator",
+})
+SDWAN_ALL_NODE_DEFS: tuple[str, ...] = (
+    "cat-sdwan-manager",
+    "cat-sdwan-controller",
+    "cat-sdwan-validator",
+    "cat-sdwan-edge",
+)
+
 
 def connect_cml(cml_host: str, cml_user: str, cml_password: str) -> ClientLibrary:
     try:
