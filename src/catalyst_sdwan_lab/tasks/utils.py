@@ -54,6 +54,16 @@ def connect_cml(cml_host: str, cml_user: str, cml_password: str) -> ClientLibrar
     return cml
 
 
+def connect_manager(host: str, port: int, username: str, password: str) -> ManagerClient:
+    client = ManagerClient(host, port, username, password)
+    try:
+        client.login()
+    except ManagerAPIError as e:
+        log.error("Cannot connect to SD-WAN Manager: %s", e)
+        raise typer.Exit(1)
+    return client
+
+
 def basic_configuration_path(ip_type: str) -> Path:
     return MANAGER_CONFIGS_DIR / f"basic_configuration_{ip_type}.tar.gz"
 

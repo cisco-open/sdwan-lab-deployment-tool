@@ -24,6 +24,7 @@ from .utils import (
     CML_DEPLOY_TEMPLATES_DIR,
     VALIDATOR_FQDN,
     connect_cml,
+    connect_manager,
     console,
     detect_ip_type,
     find_lab,
@@ -86,12 +87,7 @@ def run_control_component(
         image_id = resolve_image(cml, node_def, version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
-        client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-        try:
-            client.login()
-        except ManagerAPIError as e:
-            log.error("%s", e)
-            raise typer.Exit(1)
+        client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
             org_name = client.get_organization() or ""
             template_id = _import_controller_templates(client, ip_type) if is_ctrl else None
@@ -206,12 +202,7 @@ def run_edge(
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
-        client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-        try:
-            client.login()
-        except ManagerAPIError as e:
-            log.error("%s", e)
-            raise typer.Exit(1)
+        client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
             progress.update(task, description="Checking available edge devices...")
             vedges = client.get_vedges()
@@ -344,12 +335,7 @@ def run_sdrouting(
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
-        client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-        try:
-            client.login()
-        except ManagerAPIError as e:
-            log.error("%s", e)
-            raise typer.Exit(1)
+        client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
             progress.update(task, description="Checking available SD-Routing devices...")
             vedges = client.get_vedges()

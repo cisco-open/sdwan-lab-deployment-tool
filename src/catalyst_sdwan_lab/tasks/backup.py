@@ -13,12 +13,13 @@ from jinja2 import Environment, FileSystemLoader
 from rich.markup import escape
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
+from catalyst_sdwan_lab.manager_client import ManagerAPIError
 from catalyst_sdwan_lab.ssh_client import extract_control_config, extract_edge_config
 
 from .utils import (
     CML_BACKUP_TEMPLATES_DIR,
     connect_cml,
+    connect_manager,
     console,
     find_lab,
     load_certs,
@@ -71,12 +72,7 @@ def run(
                 raise typer.Exit(1)
 
             progress.update(task, description="Connecting to SD-WAN Manager...")
-            client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-            try:
-                client.login()
-            except ManagerAPIError as e:
-                log.error("Cannot connect to SD-WAN Manager: %s", e)
-                raise typer.Exit(1)
+            client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
 
             try:
                 org_name = client.get_organization()
