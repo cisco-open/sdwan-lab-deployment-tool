@@ -16,9 +16,8 @@ def cml_shell(
     cml_host: str, cml_user: str, cml_password: str
 ) -> Generator[paramiko.Channel, None, None]:
     ssh = paramiko.SSHClient()
-    # CML lab instances use ephemeral SSH host keys that cannot be pre-validated —
-    # AutoAddPolicy is intentional here (equivalent to ssh -o StrictHostKeyChecking=no).
-    ssh.set_missing_host_key_policy(  # lgtm[py/paramiko-missing-host-key-validation]
+    # CML lab instances use ephemeral SSH host keys that cannot be pre-validated
+    ssh.set_missing_host_key_policy(
         paramiko.AutoAddPolicy()
     )
     ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
