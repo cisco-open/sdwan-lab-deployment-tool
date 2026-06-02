@@ -5,10 +5,25 @@ from collections.abc import Generator
 from contextlib import contextmanager
 
 import paramiko
+import typer
 
 log = logging.getLogger(__name__)
 SSH_TIMEOUT = 30.0
 CONFIG_TIMEOUT = 60.0
+
+
+class _InteractiveHostKeyPolicy(paramiko.MissingHostKeyPolicy):
+    def missing_host_key(
+        self, client: paramiko.SSHClient, hostname: str, key: paramiko.PKey
+    ) -> None:
+        fingerprint = ":".join(f"{b:02x}" for b in key.get_fingerprint())
+        answer = input(
+            f"The authenticity of host '{hostname}' cannot be established.\n"
+            f"{key.get_name()} key fingerprint is {fingerprint}.\n"
+            "Are you sure you want to continue connecting (yes/no)? "
+        )
+        if answer.strip().lower() != "yes":
+            raise paramiko.SSHException(f"Host key verification failed for {hostname}.")
 
 
 @contextmanager
@@ -16,11 +31,17 @@ def cml_shell(
     cml_host: str, cml_user: str, cml_password: str
 ) -> Generator[paramiko.Channel, None, None]:
     ssh = paramiko.SSHClient()
-    # CML lab instances use ephemeral SSH host keys that cannot be pre-validated
-    ssh.set_missing_host_key_policy(
-        paramiko.AutoAddPolicy()
-    )
-    ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
+    ssh.load_system_host_keys()
+    ssh.set_missing_host_key_policy(_InteractiveHostKeyPolicy())
+    try:
+        ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
+    except paramiko.BadHostKeyException:
+        log.error(
+            "SSH host key for %s has changed. If this is expected (CML reinstall/upgrade), "
+            "remove the old entry with: ssh-keygen -R %s",
+            cml_host, cml_host,
+        )
+        raise typer.Exit(1)
     try:
         ch = ssh.invoke_shell()
         try:

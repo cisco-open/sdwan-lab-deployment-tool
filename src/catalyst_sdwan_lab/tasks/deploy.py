@@ -308,7 +308,7 @@ def _create_lab(
     if not patty:
         _check_ip_free(manager_ip)
 
-    encrypted_password = sha512_crypt(manager_password, rounds=5000)
+    encrypted_password = sha512_crypt(manager_password)
     topology = _TOPOLOGY_ENV.get_template("cml-base-topology.j2").render(
         title=lab_name,
         manager_image=images.manager,
