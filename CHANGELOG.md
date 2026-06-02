@@ -1,37 +1,27 @@
-# Catalyst SD-WAN Lab 3.0.0b1 [unreleased]
+# Catalyst SD-WAN Lab 3.0.0b1 [2026-06-02]
 
-Complete rewrite of the tool. Dropped heavy SDK dependencies in favour of a lightweight, maintainable architecture.
-
-#### New Features
-
-- Add support for SD-WAN Edge (C8000V) onboarding via config-group-based flow (Manager >= 20.15)
-- Add support for SD-Routing (C8000V-SD-ROUTING) onboarding via config-group-based flow
-- Add `images` subcommand for managing SD-WAN software images in CML (`images list`, `images upload`, `images delete`)
-- In deploy task, add `--manager-port` option for PATty mode (replaces legacy `pat:<port>` syntax)
-- In deploy task, add `--serial-file` option to supply a custom `.viptela` serial file
-- In sign task, add `--output / -o` option to write the signed certificate to a file
-- Add `--debug` global flag for HTTP-level logging
-- Accept un-padded software versions (e.g. `26.1.1` resolved to `26.01.01` automatically)
-
-#### Changes
-
-- Raise minimum Python version to 3.11
-- Raise minimum SD-WAN Manager version to 20.15
-- `setup --list` and `setup --delete` moved to `images list` and `images delete`
-- Rename CLI options for consistency: `--manager` → `--manager-ip`, `--muser` → `--manager-user`, `--mpassword` → `--manager-pass`, `--mmask` → `--manager-mask`, `--mgateway` → `--manager-gateway`, `--ip_type` → `--ip-type`
-- Migrate packaging from Poetry to `uv`
-
-#### Removals
+Complete rewrite. The tool is now dependency-minimal with no catalystwan SDK, no pyATS, and no pyOpenSSL.
 
 - Drop `catalystwan` SDK — replaced with a thin `requests`-based Manager HTTP client
-- Drop `pyats` / `unicon` — replaced with `paramiko` for SSH
-- Drop `pyOpenSSL` — replaced with `cryptography` directly
-
-# Catalyst SD-WAN Lab 2.2.0 [unreleased]
-
+- Drop `pyats` / `unicon` — replaced with `paramiko` for SSH access to CML nodes
+- Drop `pyOpenSSL` — replaced with direct use of `cryptography`
+- Migrate packaging from Poetry to `uv`
+- Raise minimum Python version to 3.11
+- Raise minimum SD-WAN Manager version to 20.15
+- Raise minimum CML version to 2.7
+- Add `images` subcommand with `list`, `upload`, and `delete` — moves image management out of `setup`
+- Add SD-Routing Edge onboarding via config-group-based flow
+- Add `--manager-port` option to `deploy` and `restore` for PATty mode (replaces `pat:<port>` syntax)
+- Add `--serial-file` option to `deploy` and `restore` for custom `.viptela` serial files and org name
+- Add `--output / -o` option to `sign` to write the signed certificate to a file
+- Add `--debug` global flag for HTTP-level request/response logging
+- Add `--directory` flag to `backup` to save as an unpacked directory instead of a zip archive
 - Add support for Catalyst SD-WAN release 26.1.1
-- In deploy and restore tasks, add progress status for SD-WAN Manager boot (>26.1.1)
-- In deploy and restore tasks, skip initial setup workflow on first UI login (>26.1.1)
+- Add progress status for SD-WAN Manager boot in `deploy` and `restore` (Manager >= 26.1.1)
+- Skip initial setup workflow on first UI login in `deploy` and `restore` (Manager >= 26.1.1)
+- Accept un-padded software versions (`26.1.1` resolved to `26.01.01` automatically)
+- Move `setup --list` to `images list` and `setup --delete` to `images delete`
+- Rename `--manager` → `--manager-ip`, `--muser` → `--manager-user`, `--mpassword` → `--manager-pass`, `--mmask` → `--manager-mask`, `--mgateway` → `--manager-gateway`, `--ip_type` → `--ip-type`, `--deleteexisting` → `--delete-existing`, `--contr_version` → `--contr-version`, `--edge_version` → `--edge-version`
 
 # Catalyst SD-WAN Lab 2.1.8 [Mar 5, 2026]
 

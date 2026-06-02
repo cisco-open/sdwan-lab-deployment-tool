@@ -77,10 +77,4 @@ uv run pytest tests/integration/ -v -s
 
 The `-s` flag disables output capture so you can watch the progress of each `csdwan` step in real time. The full workflow test (deploy → add → backup → restore → delete) takes 30–60 minutes depending on your environment.
 
-To run only the backup/restore test:
-
-```sh
-uv run pytest tests/integration/ -v -s -k "backup_restore"
-```
-
 If any required environment variable is missing, the tests are automatically skipped rather than failing.

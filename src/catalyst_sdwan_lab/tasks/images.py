@@ -114,7 +114,7 @@ def upload(cml_host: str, cml_user: str, cml_password: str, images_dir: Path) ->
                     console.print(f"  [green]UPLOADED[/green] {norm_id}")
         finally:
             cml.logout()
-    console.print("[green]✓[/green] Upload complete.")
+    console.print("[green]Upload complete.[/green]")
 
 
 def list_versions(cml_host: str, cml_user: str, cml_password: str) -> None:
@@ -128,13 +128,15 @@ def list_versions(cml_host: str, cml_user: str, cml_password: str) -> None:
         cml = connect_cml(cml_host, cml_user, cml_password)
         try:
             progress.update(task, description="Fetching image definitions...")
+            all_images = cml.definitions.image_definitions()
             table = Table(title="Catalyst SD-WAN Software Versions")
             table.add_column("Node Type", style="cyan")
             table.add_column("Versions")
             for node_type in SDWAN_ALL_NODE_DEFS:
                 versions = [
                     _normalize_id(img["id"])[len(node_type) + 1:]
-                    for img in cml.definitions.image_definitions_for_node_definition(node_type)
+                    for img in all_images
+                    if img.get("node_definition_id") == node_type
                 ]
                 table.add_row(node_type, ", ".join(versions) if versions else "[dim]none[/dim]")
         finally:
@@ -197,4 +199,4 @@ def delete(cml_host: str, cml_user: str, cml_password: str, versions: list[str],
     if dry_run:
         console.print("[dim]Dry run — nothing was deleted.[/dim]")
     else:
-        console.print("[green]✓[/green] Delete complete.")
+        console.print("[green]Delete complete.[/green]")

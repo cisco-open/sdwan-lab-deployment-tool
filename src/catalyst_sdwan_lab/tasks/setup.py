@@ -38,7 +38,7 @@ def run(cml_host: str, cml_user: str, cml_password: str) -> None:
         finally:
             cml.logout()
 
-    console.print("[green]✓[/green] Setup complete.")
+    console.print("[green]Setup complete.[/green]")
 
 
 def _check_license(cml: ClientLibrary) -> None:

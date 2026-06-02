@@ -26,6 +26,7 @@ from .utils import (
     load_certs,
     onboard_control_components,
     resolve_image,
+    run_sastre_task,
     sha512_crypt,
     SDWAN_CTRL_NODE_DEFS,
     topology_nodes,
@@ -288,7 +289,7 @@ def _patch_topology(
         if control_version and node_def in SDWAN_CTRL_NODE_DEFS:
             node["image_definition"] = f"{node_def}-{control_version}"
         if edge_version and node_def == "cat-sdwan-edge":
-            node["image_definition"] = f"cat-sdwan-edge-{edge_version}"
+            node["image_definition"] = f"{node_def}-{edge_version}"
 
 
 def _start_control_plane(lab: Any) -> None:
@@ -358,19 +359,13 @@ def _patch_sastre_controller_uuids(manager_configs_dir: Path, client: ManagerCli
 def _run_sastre_restore(
     manager_ip: str, manager_port: int, manager_user: str, manager_password: str, workdir: Path
 ) -> None:
-    from cisco_sdwan.base.rest_api import Rest  # type: ignore[import-untyped]
     from cisco_sdwan.tasks.implementation import RestoreArgs, TaskRestore  # type: ignore[import-untyped]
 
-    task_args = RestoreArgs(workdir=str(workdir), attach=True, tag="all")
-    with Rest(
-        base_url=f"https://{manager_ip}:{manager_port}",
-        username=manager_user,
-        password=manager_password,
-    ) as api:
-        task_output = TaskRestore().runner(task_args, api)
-        if task_output:
-            for entry in task_output:
-                log.debug("Sastre: %s", entry)
+    run_sastre_task(
+        manager_ip, manager_port, manager_user, manager_password,
+        TaskRestore(),
+        RestoreArgs(workdir=str(workdir), attach=True, tag="all"),
+    )
     log.info("Sastre restore completed from %s", workdir)
 
 

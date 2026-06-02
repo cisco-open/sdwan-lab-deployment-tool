@@ -333,6 +333,7 @@ def wait_for_edges_onboarded(
         raise typer.Exit(1)
 
 VALIDATOR_FQDN = "validator.sdwan.local"
+
 _MANAGER_BOOT_RETRIES = 120
 _MANAGER_BOOT_INTERVAL = 30
 
@@ -519,3 +520,24 @@ _TopologyDumper.add_representer(str, _literal_str)
 
 def dump_topology(topology: Any) -> str:
     return yaml.dump(topology, Dumper=_TopologyDumper, allow_unicode=True, default_flow_style=False)
+
+
+def run_sastre_task(
+    manager_ip: str,
+    manager_port: int,
+    manager_user: str,
+    manager_password: str,
+    task: Any,
+    task_args: Any,
+) -> None:
+    from cisco_sdwan.base.rest_api import Rest  # type: ignore[import-untyped]
+
+    with Rest(
+        base_url=f"https://{manager_ip}:{manager_port}",
+        username=manager_user,
+        password=manager_password,
+    ) as api:
+        output = task.runner(task_args, api)
+        if output:
+            for entry in output:
+                log.debug("Sastre: %s", entry)

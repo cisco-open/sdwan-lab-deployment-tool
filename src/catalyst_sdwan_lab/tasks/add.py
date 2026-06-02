@@ -277,7 +277,7 @@ def run_edge(
                 node.start()
                 nodes.append(node)
 
-            for i, node in enumerate(nodes, 1):
+            for node in nodes:
                 progress.update(
                     task, description=f"Waiting for {'edges' if count > 1 else 'edge'} to boot..."
                 )
@@ -333,17 +333,17 @@ def run_sdrouting(
         try:
             progress.update(task, description="Checking available SD-Routing devices...")
             vedges = client.get_vedges()
-            free = [
-                v for v in vedges
+            free_uuids = [
+                v["uuid"]
+                for v in vedges
                 if v.get("deviceModel") == "vedge-C8000V-SD-ROUTING"
                 and v.get("certInstallStatus") is None
             ]
-            if count > len(free):
+            if count > len(free_uuids):
                 log.error(
-                    "Not enough free SD-Routing UUIDs: need %d, have %d.", count, len(free)
+                    "Not enough free SD-Routing UUIDs: need %d, have %d.", count, len(free_uuids)
                 )
                 raise typer.Exit(1)
-            free_uuids = [v["uuid"] for v in free]
 
             start = _next_system_ip_num(lab, vedges)
             nums = [str(start + i) for i in range(count)]
@@ -406,7 +406,7 @@ def run_sdrouting(
                 node.start()
                 nodes.append(node)
 
-            for i, node in enumerate(nodes, 1):
+            for node in nodes:
                 progress.update(
                     task, description=f"Waiting for {'SD-Routing edges' if count > 1 else 'SD-Routing edge'} to boot..."
                 )

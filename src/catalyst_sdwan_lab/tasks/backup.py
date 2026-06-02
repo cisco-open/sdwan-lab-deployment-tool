@@ -25,6 +25,7 @@ from .utils import (
     dump_topology,
     find_lab,
     load_certs,
+    run_sastre_task,
     topology_nodes,
 )
 
@@ -126,7 +127,7 @@ def run(
                         except Exception as e:
                             log.error("Failed to extract config from %s: %s", node.label, e)
                             raise typer.Exit(1)
-                        cloud_init = _render_cloud_init(node_def, certs.chain, config_xml)
+                        cloud_init = _render_cloud_init(node_def, root_ca=certs.chain, config=config_xml)
                         _update_node_configuration(topology, node.label, cloud_init)
                     elif node_def == "cat-sdwan-edge":
                         progress.update(task, description=f"Extracting config from {node.label} ({i}/{total})...")
@@ -139,8 +140,9 @@ def run(
                             log.error("Failed to extract config from %s: %s", node.label, e)
                             raise typer.Exit(1)
                         template_key = "cat-sdwan-edge" if edge_type == "sdwan" else "cat-sdwan-edge-sdrouting"
-                        cloud_init = _render_edge_cloud_init(
-                            template_key, certs.chain, org_name, validator_fqdn, config_text, uuid,
+                        cloud_init = _render_cloud_init(
+                            template_key, root_ca=certs.chain, org_name=org_name,
+                            validator_fqdn=validator_fqdn, config=config_text, uuid=uuid,
                         )
                         _update_node_configuration(topology, node.label, cloud_init)
 
@@ -184,19 +186,8 @@ def _inject_xml_personality(config_xml: str, node_def: str) -> str:
     )
 
 
-def _render_cloud_init(node_def: str, root_ca: str, config: str) -> str:
-    template = _env.get_template(_TEMPLATE_NAMES[node_def])
-    return template.render(root_ca=root_ca, config=config)
-
-
-def _render_edge_cloud_init(
-    template_key: str, root_ca: str, org_name: str, validator_fqdn: str, config: str, uuid: str,
-) -> str:
-    template = _env.get_template(_TEMPLATE_NAMES[template_key])
-    return template.render(
-        root_ca=root_ca, org_name=org_name, validator_fqdn=validator_fqdn,
-        config=config, uuid=uuid,
-    )
+def _render_cloud_init(node_def: str, **kwargs: str) -> str:
+    return _env.get_template(_TEMPLATE_NAMES[node_def]).render(**kwargs)
 
 
 def _update_node_configuration(topology: Any, node_label: str, cloud_init: str) -> None:
@@ -211,21 +202,13 @@ def _update_node_configuration(topology: Any, node_label: str, cloud_init: str) 
 def _run_sastre_backup(
     manager_ip: str, manager_port: int, manager_user: str, manager_password: str, workdir: Path
 ) -> None:
-    from cisco_sdwan.base.rest_api import Rest  # type: ignore[import-untyped]
     from cisco_sdwan.tasks.implementation import BackupArgs, TaskBackup  # type: ignore[import-untyped]
 
-    task_args = BackupArgs(
-        save_running=False, no_rollover=True, workdir=str(workdir), tags=["all"]
+    run_sastre_task(
+        manager_ip, manager_port, manager_user, manager_password,
+        TaskBackup(),
+        BackupArgs(save_running=False, no_rollover=True, workdir=str(workdir), tags=["all"]),
     )
-    with Rest(
-        base_url=f"https://{manager_ip}:{manager_port}",
-        username=manager_user,
-        password=manager_password,
-    ) as api:
-        task_output = TaskBackup().runner(task_args, api)
-        if task_output:
-            for entry in task_output:
-                log.debug("Sastre: %s", entry)
     log.info("Sastre backup completed to %s", workdir)
 
 

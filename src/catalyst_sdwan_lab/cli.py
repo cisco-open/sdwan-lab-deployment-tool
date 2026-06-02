@@ -351,9 +351,6 @@ def add(
             cpus=cpus,
             ram=ram,
         )
-    else:
-        log.error("Device type '%s' not yet implemented.", device)
-        raise typer.Exit(1)
 
 
 @app.command()

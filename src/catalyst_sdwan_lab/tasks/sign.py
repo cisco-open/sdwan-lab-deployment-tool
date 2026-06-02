@@ -2,23 +2,15 @@ import logging
 import sys
 from pathlib import Path
 
-import typer
-
-from .utils import CERTS_DIR, sign_csr
+from .utils import load_certs, sign_csr
 
 log = logging.getLogger(__name__)
 
 
 def run(csr_file: Path, output: Path | None) -> None:
-    cert_path = CERTS_DIR / "signCA.pem"
-    key_path = CERTS_DIR / "signCA.key"
-    for path in (cert_path, key_path):
-        if not path.exists():
-            log.error("Certificate file not found: %s", path)
-            raise typer.Exit(1)
-
+    certs = load_certs()
     csr_pem = csr_file.read_text()
-    cert_pem = sign_csr(cert_path.read_text(), key_path.read_text(), csr_pem)
+    cert_pem = sign_csr(certs.cert, certs.key, csr_pem)
 
     if output:
         output.write_text(cert_pem)

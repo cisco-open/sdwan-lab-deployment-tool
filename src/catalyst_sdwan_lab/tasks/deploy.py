@@ -36,6 +36,8 @@ from .utils import (
 
 log = logging.getLogger(__name__)
 
+_TOPOLOGY_ENV = Environment(loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True)
+
 
 @dataclass
 class _Images:
@@ -305,8 +307,7 @@ def _create_lab(
         _check_ip_free(manager_ip)
 
     encrypted_password = sha512_crypt(manager_password, rounds=5000)
-    env = Environment(loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True)
-    topology = env.get_template("cml-base-topology.j2").render(
+    topology = _TOPOLOGY_ENV.get_template("cml-base-topology.j2").render(
         title=lab_name,
         manager_image=images.manager,
         controller_image=images.controller,

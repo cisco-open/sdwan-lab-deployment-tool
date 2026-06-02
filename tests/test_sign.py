@@ -65,13 +65,13 @@ class TestSignCsr:
 class TestRun:
     def test_exits_if_cert_missing(self, tmp_path: Path) -> None:
         (tmp_path / "signCA.key").write_text("key")
-        with patch("catalyst_sdwan_lab.tasks.sign.CERTS_DIR", tmp_path):
+        with patch("catalyst_sdwan_lab.tasks.utils.CERTS_DIR", tmp_path):
             with pytest.raises(Exit):
                 run(tmp_path / "csr.txt", None)
 
     def test_exits_if_key_missing(self, tmp_path: Path) -> None:
         (tmp_path / "signCA.pem").write_text("cert")
-        with patch("catalyst_sdwan_lab.tasks.sign.CERTS_DIR", tmp_path):
+        with patch("catalyst_sdwan_lab.tasks.utils.CERTS_DIR", tmp_path):
             with pytest.raises(Exit):
                 run(tmp_path / "csr.txt", None)
 
@@ -79,9 +79,10 @@ class TestRun:
         ca_cert, ca_key = _make_ca()
         (tmp_path / "signCA.pem").write_text(ca_cert)
         (tmp_path / "signCA.key").write_text(ca_key)
+        (tmp_path / "chainCA.pem").write_text(ca_cert)
         csr_file = tmp_path / "csr.txt"
         csr_file.write_text(_make_csr())
-        with patch("catalyst_sdwan_lab.tasks.sign.CERTS_DIR", tmp_path):
+        with patch("catalyst_sdwan_lab.tasks.utils.CERTS_DIR", tmp_path):
             run(csr_file, None)
         assert "-----BEGIN CERTIFICATE-----" in capsys.readouterr().out
 
@@ -89,9 +90,10 @@ class TestRun:
         ca_cert, ca_key = _make_ca()
         (tmp_path / "signCA.pem").write_text(ca_cert)
         (tmp_path / "signCA.key").write_text(ca_key)
+        (tmp_path / "chainCA.pem").write_text(ca_cert)
         csr_file = tmp_path / "csr.txt"
         csr_file.write_text(_make_csr())
         output = tmp_path / "cert.pem"
-        with patch("catalyst_sdwan_lab.tasks.sign.CERTS_DIR", tmp_path):
+        with patch("catalyst_sdwan_lab.tasks.utils.CERTS_DIR", tmp_path):
             run(csr_file, output)
         assert "-----BEGIN CERTIFICATE-----" in output.read_text()

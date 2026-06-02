@@ -26,5 +26,3 @@ def test_full_workflow(sdwan_version: str, ip_type: str) -> None:
         assert backup_path.exists(), "Backup zip was not created"
         _run(["csdwan", "delete", "--force"], timeout=300)
         _run(["csdwan", "restore", str(backup_path)], timeout=3600)
-
-    _run(["csdwan", "delete", "--force"], timeout=300)
