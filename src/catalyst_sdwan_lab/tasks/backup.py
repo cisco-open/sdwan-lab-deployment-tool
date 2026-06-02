@@ -112,13 +112,9 @@ def run(
                     )
                 ]
                 total = len(extract_nodes)
-                i = 0
-                for node in nodes:
+                for i, node in enumerate(extract_nodes, 1):
                     node_def = node.node_definition
-                    if not node.is_active():
-                        continue
                     if node_def in _CTRL_NODE_DEFS:
-                        i += 1
                         progress.update(task, description=f"Extracting config from {node.label} ({i}/{total})...")
                         if node_def == "cat-sdwan-manager":
                             node_user, node_pass = manager_user, manager_password
@@ -136,7 +132,6 @@ def run(
                         cloud_init = _render_cloud_init(node_def, certs.chain, config_xml)
                         _update_node_configuration(topology, node.label, cloud_init)
                     elif node_def == "cat-sdwan-edge":
-                        i += 1
                         progress.update(task, description=f"Extracting config from {node.label} ({i}/{total})...")
                         try:
                             edge_type, config_text, uuid = extract_edge_config(
