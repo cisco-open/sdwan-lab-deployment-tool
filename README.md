@@ -83,13 +83,13 @@ Available environment variables:
 | `CML_IP` | All commands |
 | `CML_USER` | All commands |
 | `CML_PASSWORD` | All commands |
-| `LAB_NAME` | `deploy`, `add`, `backup`, `delete` |
-| `MANAGER_IP` | `deploy` (direct mode) |
-| `MANAGER_PORT` | `deploy` (PATty mode) |
-| `MANAGER_MASK` | `deploy` (direct mode) |
-| `MANAGER_GATEWAY` | `deploy` (direct mode) |
-| `MANAGER_USER` | `deploy`, `add`, `backup` |
-| `MANAGER_PASSWORD` | `deploy`, `add`, `backup` |
+| `LAB_NAME` | `deploy`, `add`, `backup`, `restore`, `delete` |
+| `MANAGER_IP` | `deploy`, `restore` (direct mode) |
+| `MANAGER_PORT` | `deploy`, `restore` (PATty mode) |
+| `MANAGER_MASK` | `deploy`, `restore` (direct mode) |
+| `MANAGER_GATEWAY` | `deploy`, `restore` (direct mode) |
+| `MANAGER_USER` | `deploy`, `add`, `backup`, `restore` |
+| `MANAGER_PASSWORD` | `deploy`, `add`, `backup`, `restore` |
 
 ---
 
@@ -190,6 +190,43 @@ csdwan deploy 20.15.1 --manager-port 2000 --lab my-lab
 
 ---
 
+### `add`
+
+Adds and automatically onboards SD-WAN devices to an existing lab. The command detects the lab's IP type (v4/v6/dual) and uses it automatically.
+
+```
+csdwan add [OPTIONS] <count> <device-type> <version>
+```
+
+**Positional arguments:**
+
+| Argument | Description |
+|---|---|
+| `count` | Number of devices to add |
+| `device-type` | `controller(s)`, `validator(s)`, `edge(s)`, `sdrouting` |
+| `version` | SD-WAN software version |
+
+**Options:**
+
+| Option | Env var | Description |
+|---|---|---|
+| `--lab` | `LAB_NAME` | CML lab name |
+| `--manager-user` | `MANAGER_USER` | Manager username (default: `admin`) |
+| `--manager-pass` | `MANAGER_PASSWORD` | Manager password |
+| `--cpus` | | Override CPU count for each added node |
+| `--ram` | | Override RAM in MB for each added node |
+
+**Examples:**
+
+```sh
+csdwan add 1 validator 20.15.1
+csdwan add 2 controllers 20.15.1
+csdwan add 3 edges 20.15.1
+csdwan add 2 sdrouting 17.15.1
+```
+
+---
+
 ### `backup`
 
 Backs up a running SD-WAN lab to a zip archive (or directory). Captures:
@@ -224,39 +261,43 @@ csdwan backup --lab my-lab --manager-pass secret --directory -o /backups/my-lab
 
 ---
 
-### `add`
+### `restore`
 
-Adds and automatically onboards SD-WAN devices to an existing lab. The command detects the lab's IP type (v4/v6/dual) and uses it automatically.
+Restores a Catalyst SD-WAN lab from a backup archive. Recreates the CML lab, boots the control plane, restores Manager configuration via Sastre, then onboards edges using fresh bootstrap configs from Manager.
 
 ```
-csdwan add [OPTIONS] <count> <device-type> <version>
+csdwan restore [OPTIONS] <backup>
 ```
 
 **Positional arguments:**
 
 | Argument | Description |
 |---|---|
-| `count` | Number of devices to add |
-| `device-type` | `controller(s)`, `validator(s)`, `edge(s)`, `sdrouting` |
-| `version` | SD-WAN software version |
+| `backup` | Path to backup zip file or directory |
 
 **Options:**
 
 | Option | Env var | Description |
 |---|---|---|
 | `--lab` | `LAB_NAME` | CML lab name |
+| `--manager-ip` | `MANAGER_IP` | Manager IP address (direct mode) |
+| `--manager-port` | `MANAGER_PORT` | PATty external port; enables PATty mode |
+| `--manager-mask` | `MANAGER_MASK` | Manager subnet mask (direct mode) |
+| `--manager-gateway` | `MANAGER_GATEWAY` | Manager default gateway (direct mode) |
 | `--manager-user` | `MANAGER_USER` | Manager username (default: `admin`) |
 | `--manager-pass` | `MANAGER_PASSWORD` | Manager password |
-| `--cpus` | | Override CPU count for each added node |
-| `--ram` | | Override RAM in MB for each added node |
+| `--serial-file` | | Custom `.viptela` serial file (required if backup used one) |
+| `--contr-version` | | Override control plane image version |
+| `--edge-version` | | Override edge image version |
+| `--delete-existing` | | Delete existing lab with the same name before restoring |
+| `--retry` | | Resume from Manager boot, skipping lab import |
 
 **Examples:**
 
 ```sh
-csdwan add 1 validator 20.15.1
-csdwan add 2 controllers 20.15.1
-csdwan add 3 edges 20.15.1
-csdwan add 2 sdrouting 17.15.1
+csdwan restore my-lab-20240601.zip --manager-port 2000
+csdwan restore my-lab-20240601.zip --delete-existing --manager-port 2000
+csdwan restore /backups/my-lab --manager-ip 10.0.0.10 --manager-mask /24 --manager-gateway 10.0.0.254
 ```
 
 ---
