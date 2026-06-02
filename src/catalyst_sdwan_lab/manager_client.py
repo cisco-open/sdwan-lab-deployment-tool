@@ -197,6 +197,15 @@ class ManagerClient:
     def get_network_hierarchy(self) -> list[dict[str, Any]]:
         return self._get("/dataservice/v1/network-hierarchy")
 
+    def enable_mrf(self, global_id: str) -> None:
+        self._post(
+            f"/dataservice/v1/network-hierarchy/{global_id}/network-settings/mrf",
+            {"data": {"enableMrfInterRegionRouting": {"optionType": "global", "value": True}}},
+        )
+
+    def create_network_hierarchy_entry(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._post("/dataservice/v1/network-hierarchy", payload) or {}
+
     def get_sync_status(self) -> list[dict[str, Any]]:
         return self._get("/dataservice/device/sync_status?groupId=all").get("data", [])
 

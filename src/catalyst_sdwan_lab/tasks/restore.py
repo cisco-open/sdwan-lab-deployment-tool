@@ -390,10 +390,7 @@ def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
     # Enable MRF if no regions exist yet
     if not any(e.get("data", {}).get("label") == "REGION" for e in hierarchy):
         try:
-            client._post(
-                f"/dataservice/v1/network-hierarchy/{global_id}/network-settings/mrf",
-                {"data": {"enableMrfInterRegionRouting": {"optionType": "global", "value": True}}},
-            )
+            client.enable_mrf(global_id)
             hierarchy = client.get_network_hierarchy()
             global_id = next(e["id"] for e in hierarchy if e.get("data", {}).get("label") == "GLOBAL")
         except ManagerAPIError:
@@ -406,8 +403,8 @@ def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
             continue
         payload = {k: v for k, v in entry.items() if k not in _MRF_SERVER_FIELDS}
         payload["data"]["parentUuid"] = global_id
-        result = client._post("/dataservice/v1/network-hierarchy", payload)
-        new_uuid = (result or {}).get("Network Hierarchy UUID") or (result or {}).get("id", "")
+        result = client.create_network_hierarchy_entry(payload)
+        new_uuid = result.get("Network Hierarchy UUID") or result.get("id", "")
         old_to_new[entry["uuid"]] = new_uuid
 
     for entry in subregions:
@@ -416,8 +413,8 @@ def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
         payload = {k: v for k, v in entry.items() if k not in _MRF_SERVER_FIELDS}
         old_parent = entry["data"].get("parentUuid", "")
         payload["data"]["parentUuid"] = old_to_new.get(old_parent, old_parent)
-        result = client._post("/dataservice/v1/network-hierarchy", payload)
-        new_uuid = (result or {}).get("Network Hierarchy UUID") or (result or {}).get("id", "")
+        result = client.create_network_hierarchy_entry(payload)
+        new_uuid = result.get("Network Hierarchy UUID") or result.get("id", "")
         old_to_new[entry["uuid"]] = new_uuid
 
     log.info("MRF regions restored: %d regions, %d subregions", len(regions), len(subregions))
