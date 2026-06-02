@@ -182,7 +182,9 @@ def _load_backup(backup: Path) -> tuple[dict[str, Any], Path, Any]:
         tmpdir = tempfile.TemporaryDirectory()
         out = Path(tmpdir.name)
         with zipfile.ZipFile(backup) as zf:
-            zf.extractall(out)
+            for member in zf.infolist():
+                if ".." not in member.filename and not member.filename.startswith("/"):
+                    zf.extract(member, out)
         return yaml.safe_load((out / "topology.yaml").read_text()), out / "manager_configs", tmpdir
     return yaml.safe_load((backup / "topology.yaml").read_text()), backup / "manager_configs", None
 
