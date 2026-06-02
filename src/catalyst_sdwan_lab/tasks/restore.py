@@ -77,7 +77,7 @@ def run(
         cml = connect_cml(cml_host, cml_user, cml_password)
 
         progress.update(task, description="Loading backup...")
-        topology, manager_configs_dir, _tmpdir = _load_backup(backup)
+        topology, manager_configs_dir, backup_tmpdir = _load_backup(backup)
         check_serial_file_match(topology, serial_file)
 
         nodes = topology_nodes(topology)
