@@ -23,6 +23,7 @@ from .utils import (
     console,
     find_lab,
     load_certs,
+    topology_nodes,
 )
 
 log = logging.getLogger(__name__)
@@ -217,7 +218,7 @@ def _render_edge_cloud_init(
 
 
 def _update_node_configuration(topology: Any, node_label: str, cloud_init: str) -> None:
-    nodes = topology["nodes"] if "nodes" in topology else topology.get("lab", {}).get("nodes", [])
+    nodes = topology_nodes(topology)
     for node in nodes:
         if node.get("label") == node_label:
             node["configuration"] = cloud_init

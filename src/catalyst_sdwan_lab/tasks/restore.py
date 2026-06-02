@@ -27,6 +27,7 @@ from .utils import (
     onboard_control_components,
     resolve_image,
     sha512_crypt,
+    topology_nodes,
     trigger_rediscovery,
     wait_for_edges_onboarded,
     wait_for_manager,
@@ -78,7 +79,7 @@ def run(
         topology, manager_configs_dir, _tmpdir = _load_backup(backup)
         check_serial_file_match(topology, serial_file)
 
-        nodes = topology.get("nodes", topology.get("lab", {}).get("nodes", []))
+        nodes = topology_nodes(topology)
         mgr = next((n for n in nodes if n.get("node_definition") == "cat-sdwan-manager"), None)
         raw_version = mgr["image_definition"].split("-")[-1] if mgr and mgr.get("image_definition") else ""
         backup_version = raw_version if raw_version and raw_version[0].isdigit() else "20.15"
@@ -196,7 +197,7 @@ def _check_images(
     edge_version: str | None,
 ) -> None:
     _CTRL_DEFS = ("cat-sdwan-manager", "cat-sdwan-controller", "cat-sdwan-validator")
-    nodes = topology.get("nodes", topology.get("lab", {}).get("nodes", []))
+    nodes = topology_nodes(topology)
     checked: set[str] = set()
     for node in nodes:
         node_def = node.get("node_definition", "")
@@ -250,7 +251,7 @@ def _patch_topology(
         f"-- Do not delete this text --"
     )
 
-    nodes = topology.get("nodes", lab_section.get("nodes", []))
+    nodes = topology_nodes(topology)
     for node in nodes:
         node_def = node.get("node_definition", "")
         if node_def == "cat-sdwan-manager":

@@ -255,8 +255,12 @@ def find_lab(cml: ClientLibrary, lab_name: str) -> tuple[Lab, str, int]:
     return lab, m.group(1), int(m.group(2))
 
 
+def topology_nodes(topology: dict[str, Any]) -> list[Any]:
+    return topology.get("nodes", topology.get("lab", {}).get("nodes", []))
+
+
 def check_serial_file_match(topology: dict[str, Any], serial_file: Path) -> None:
-    nodes = topology.get("nodes", topology.get("lab", {}).get("nodes", []))
+    nodes = topology_nodes(topology)
     backup_uuids = {
         m.group(1)
         for node in nodes
