@@ -1,9 +1,7 @@
 import datetime
 import gzip
-import hashlib
 import json
 import logging
-import os
 import re
 import tarfile
 import time
@@ -83,56 +81,10 @@ def basic_configuration_path(ip_type: str) -> Path:
 
 _MANAGER_NOTE_RE = re.compile(r"manager_external_ip\s*=\s*(.+):(\d+)")
 
-_CRYPT64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-_SHA512_TRANSPOSE = (
-    42, 21,  0,  1, 43, 22, 23,  2, 44, 45, 24,  3,  4, 46, 25, 26,
-     5, 47, 48, 27,  6,  7, 49, 28, 29,  8, 50, 51, 30,  9, 10, 52,
-    31, 32, 11, 53, 54, 33, 12, 13, 55, 34, 35, 14, 56, 57, 36, 15,
-    16, 58, 37, 38, 17, 59, 60, 39, 18, 19, 61, 40, 41, 20, 62, 63,
-)
 
-
-def sha512_crypt(password: str, rounds: int = 5000) -> str:
-    """Hash a password in Linux shadow $6$ (sha512crypt) format."""
-    pw = password.encode("utf-8")
-    salt = "".join(_CRYPT64[b % 64] for b in os.urandom(16)).encode("ascii")
-    pw_len, salt_len = len(pw), len(salt)
-
-    def _rep(b: bytes, n: int) -> bytes:
-        return (b * (n // len(b) + 1))[:n] if b else b""
-
-    db = hashlib.sha512(pw + salt + pw).digest()
-
-    a = hashlib.sha512(pw + salt)
-    a.update(_rep(db, pw_len))
-    i = pw_len
-    while i:
-        a.update(db if i & 1 else pw)
-        i >>= 1
-    da = a.digest()
-
-    dp = _rep(hashlib.sha512(pw * pw_len).digest(), pw_len)
-    ds = hashlib.sha512(salt * (16 + da[0])).digest()[:salt_len]
-
-    dc = da
-    for i in range(rounds):
-        c = hashlib.sha512(dp if i & 1 else dc)
-        if i % 3:
-            c.update(ds)
-        if i % 7:
-            c.update(dp)
-        c.update(dc if i & 1 else dp)
-        dc = c.digest()
-
-    t = bytes(dc[i] for i in _SHA512_TRANSPOSE)
-    out = []
-    for k in range(0, 63, 3):
-        v = t[k] | (t[k + 1] << 8) | (t[k + 2] << 16)
-        out += [_CRYPT64[(v >> s) & 0x3f] for s in (0, 6, 12, 18)]
-    out += [_CRYPT64[(t[63] >> s) & 0x3f] for s in (0, 6)]
-
-    prefix = f"$6$rounds={rounds}$" if rounds != 5000 else "$6$"
-    return f"{prefix}{salt.decode('ascii')}${''.join(out)}"
+def sha512_crypt(password: str) -> str:
+    from passlib.hash import sha512_crypt as _sha512_crypt  # type: ignore[import-untyped]
+    return _sha512_crypt.hash(password)
 
 @dataclass
 class Certs:
