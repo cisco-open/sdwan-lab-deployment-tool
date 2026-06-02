@@ -44,7 +44,7 @@ addopts = "--ignore=tests/integration"
 markers = ["integration: live-system workflow test (requires env vars; run with: pytest tests/integration/)"]
 
 [tool.uv.sources]
-cisco-sdwan = { git = "https://github.com/tzarski0/sastre", branch = "sdrouting-basic" }
+cisco-sdwan = { git = "https://github.com/CiscoDevNet/sastre", branch = "dev-1.28" }
 
 [dependency-groups]
 dev = [

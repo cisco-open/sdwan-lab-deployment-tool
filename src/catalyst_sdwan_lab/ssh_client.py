@@ -140,6 +140,9 @@ def extract_edge_config(
             ch.send(b"show run\r\n")
             out = ssh_recv(ch, "#", timeout=CONFIG_TIMEOUT)
             config = _strip_sdrouting_config(out)
+            # Flush any stale prompt before sending the next command
+            ch.send(b"\r\n")
+            ssh_recv(ch, "#", timeout=10.0)
             ch.send(b"show sd-routing certificate serial\r\n")
 
         serial_out = ssh_recv(ch, "#", timeout=30.0)

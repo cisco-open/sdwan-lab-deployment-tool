@@ -424,6 +424,7 @@ def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
 
 
 def _inject_otps_and_start_edges(lab: Any, client: ManagerClient) -> list[str]:
+    otps = client.get_vedge_otps()
     uuids: list[str] = []
     for node in lab.nodes():
         if node.node_definition != "cat-sdwan-edge":
@@ -435,19 +436,12 @@ def _inject_otps_and_start_edges(lab: Any, client: ManagerClient) -> list[str]:
             node.start()
             continue
         uuid = m.group(1)
-        sd_routing = bool(re.search(r"SD-Routing\s*:\s*true", cfg))
-        try:
-            bootstrap = client.get_bootstrap_config(uuid, wanif="GigabitEthernet1" if sd_routing else None)
-            otp_m = re.search(r"otp\s*:\s*(\w+)", bootstrap)
-            if otp_m:
-                node.configuration = re.sub(
-                    r"(otp\s*:)\s*\w+", rf"\g<1> {otp_m.group(1)}", cfg
-                )
-                log.debug("OTP injected for %s", node.label)
-            else:
-                log.warning("Could not extract OTP from bootstrap config for %s", node.label)
-        except ManagerAPIError as e:
-            log.warning("Could not get bootstrap config for %s: %s", node.label, e)
+        otp = otps.get(uuid)
+        if otp:
+            node.configuration = re.sub(r"(otp\s*:)\s*\w+", rf"\g<1> {otp}", cfg)
+            log.debug("OTP injected for %s", node.label)
+        else:
+            log.warning("No OTP found for %s (uuid=%s)", node.label, uuid)
         node.start()
         uuids.append(uuid)
     return uuids

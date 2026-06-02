@@ -380,7 +380,7 @@ def restore(
     ] = None,
     manager_port: Annotated[
         Optional[int],
-        typer.Option("--manager-port", envvar="MANAGER_PORT", help="PATty port; enables PATty mode"),
+        typer.Option("--manager-port", envvar="MANAGER_PORT", help="PATty port; enables PATty"),
     ] = None,
     manager_user: Annotated[
         str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
@@ -397,7 +397,9 @@ def restore(
     ] = None,
     manager_gateway: Annotated[
         Optional[str],
-        typer.Option("--manager-gateway", envvar="MANAGER_GATEWAY", help="Manager gateway (direct mode)"),
+        typer.Option(
+            "--manager-gateway", envvar="MANAGER_GATEWAY", help="Manager gateway (direct mode)"
+        ),
     ] = None,
     serial_file: Annotated[
         Optional[Path],
@@ -405,14 +407,16 @@ def restore(
     ] = None,
     control_version: Annotated[
         Optional[str],
-        typer.Option("--contr-version", help="Override control plane version (must not be older than backup)"),
+        typer.Option(
+            "--contr-version", help="Override control plane version (not older than backup)"
+        ),
     ] = None,
     edge_version: Annotated[
         Optional[str],
-        typer.Option("--edge-version", help="Override edge version (must not be older than backup)"),
+        typer.Option("--edge-version", help="Override edge version (not older than backup)"),
     ] = None,
     delete_existing: Annotated[
-        bool, typer.Option("--delete-existing", help="Delete existing lab with same name before restoring")
+        bool, typer.Option("--delete-existing", help="Delete existing lab before restoring")
     ] = False,
     retry: Annotated[
         bool, typer.Option("--retry", help="Resume from Manager boot, skipping lab import")

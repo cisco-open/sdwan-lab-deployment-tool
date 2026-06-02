@@ -127,7 +127,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cisco-sdwan", git = "https://github.com/tzarski0/sastre?branch=sdrouting-basic" },
+    { name = "cisco-sdwan", git = "https://github.com/CiscoDevNet/sastre?branch=dev-1.28" },
     { name = "cryptography", specifier = ">=42.0" },
     { name = "jinja2", specifier = ">=3.1" },
     { name = "paramiko", specifier = ">=5.0.0" },
@@ -314,8 +314,8 @@ wheels = [
 
 [[package]]
 name = "cisco-sdwan"
-version = "1.27"
-source = { git = "https://github.com/tzarski0/sastre?branch=sdrouting-basic#2ad047e9220c56ea4a83ecfc694c51eaa579e4fb" }
+version = "1.28.dev8"
+source = { git = "https://github.com/CiscoDevNet/sastre?branch=dev-1.28#4297341ec7b482acd5f5d31825043a0e38ff6edb" }
 dependencies = [
     { name = "pydantic" },
     { name = "pyyaml" },
