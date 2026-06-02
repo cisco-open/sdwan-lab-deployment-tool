@@ -218,13 +218,7 @@ def run_edge(
                 raise typer.Exit(1)
 
             progress.update(task, description="Looking up edge config group...")
-            cg = next(
-                (g for g in client.get_config_groups() if g.get("name") == "edge_basic"), None
-            )
-            if cg is None:
-                log.error("Config group 'edge_basic' not found in Manager.")
-                raise typer.Exit(1)
-            config_group_id: str = cg["id"]
+            config_group_id = _get_config_group_id(client, "edge_basic")
 
             start = _next_system_ip_num(lab, vedges)
             nums = [f"{start + i:02d}" for i in range(count)]
@@ -356,14 +350,7 @@ def run_sdrouting(
             uuids = free_uuids[:count]
 
             progress.update(task, description="Looking up SD-Routing config group...")
-            cg = next(
-                (g for g in client.get_config_groups() if g.get("name") == "sdrouting_basic"),
-                None,
-            )
-            if cg is None:
-                log.error("Config group 'sdrouting_basic' not found in Manager.")
-                raise typer.Exit(1)
-            config_group_id: str = cg["id"]
+            config_group_id = _get_config_group_id(client, "sdrouting_basic")
 
             devices_vars: list[dict[str, Any]] = []
             for num, uuid in zip(nums, uuids):
@@ -685,4 +672,12 @@ def _update_gateway_dns(
         ch.send(b"write memory\r\n")
         ssh_recv(ch, "#", timeout=15)
         log.info("Gateway DNS updated for validators: %s", ", ".join(new_ips))
+
+
+def _get_config_group_id(client: ManagerClient, name: str) -> str:
+    cg = next((g for g in client.get_config_groups() if g.get("name") == name), None)
+    if cg is None:
+        log.error("Config group '%s' not found in Manager.", name)
+        raise typer.Exit(1)
+    return cg["id"]
 
