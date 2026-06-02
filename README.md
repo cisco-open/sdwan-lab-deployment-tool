@@ -247,7 +247,7 @@ csdwan backup [OPTIONS]
 | `--manager-user` | `MANAGER_USER` | Manager username (default: `admin`) |
 | `--manager-pass` | `MANAGER_PASSWORD` | Manager password |
 | `--output, -o` | | Output path (default: `<lab>-<YYYYMMDD>.zip`) |
-| `--directory, -d` | | Save as a directory instead of a zip |
+| `--directory, -d` | | Save as unpacked directory instead of zip |
 
 **Examples:**
 

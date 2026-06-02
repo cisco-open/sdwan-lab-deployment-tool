@@ -375,7 +375,7 @@ def backup(
         typer.Option("--output", "-o", help="Output path (default: <lab>-<date>.zip)"),
     ] = None,
     directory: Annotated[
-        bool, typer.Option("--directory", "-d", help="Save as directory instead of zip")
+        bool, typer.Option("--directory", "-d", help="Save as unpacked directory instead of zip")
     ] = False,
 ) -> None:
     """Back up a running SD-WAN lab (topology + Manager config)."""

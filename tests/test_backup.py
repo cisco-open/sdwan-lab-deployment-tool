@@ -7,12 +7,12 @@ import pytest
 import yaml
 
 from catalyst_sdwan_lab.tasks.backup import (
-    _dump_topology,
     _inject_xml_personality,
     _save_directory,
     _save_zip,
     _update_node_configuration,
 )
+from catalyst_sdwan_lab.tasks.utils import dump_topology
 
 _SYSTEM_TAG = '<system xmlns="http://viptela.com/system">'
 
@@ -85,39 +85,39 @@ class TestInjectXmlPersonality:
 
 class TestDumpTopology:
     def test_multiline_string_uses_literal_block(self) -> None:
-        result = _dump_topology({"cfg": "line1\nline2\nline3"})
+        result = dump_topology({"cfg": "line1\nline2\nline3"})
         assert "cfg: |" in result
 
     def test_single_line_string_uses_plain_style(self) -> None:
-        result = _dump_topology({"key": "single line"})
+        result = dump_topology({"key": "single line"})
         assert "key: single line" in result
         assert "key: |" not in result
 
     def test_trailing_spaces_stripped_per_line(self) -> None:
-        result = _dump_topology({"cfg": "line1   \nline2\nline3"})
+        result = dump_topology({"cfg": "line1   \nline2\nline3"})
         assert "cfg: |" in result
         loaded = yaml.safe_load(result)
         assert loaded["cfg"] == "line1\nline2\nline3"
 
     def test_mime_multipart_uses_literal_block(self) -> None:
         mime = 'Content-Type: multipart/mixed; boundary="==BOUNDARY=="\nMIME-Version: 1.0\n'
-        result = _dump_topology({"configuration": mime})
+        result = dump_topology({"configuration": mime})
         assert "configuration: |" in result or "configuration: |-" in result
 
     def test_mime_with_trailing_space_uses_literal_block(self) -> None:
         mime = 'Content-Disposition: attachment; \n filename="cloud-config"\n'
-        result = _dump_topology({"configuration": mime})
+        result = dump_topology({"configuration": mime})
         assert "configuration: |" in result or "configuration: |-" in result
 
     def test_roundtrip_preserves_multiline_content(self) -> None:
         config = "line1\nline2\nline3"
         topology = {"nodes": [{"label": "M", "configuration": config}]}
-        loaded = yaml.safe_load(_dump_topology(topology))
+        loaded = yaml.safe_load(dump_topology(topology))
         assert loaded["nodes"][0]["configuration"] == config
 
     def test_non_string_values_unaffected(self) -> None:
         topology = {"count": 3, "flag": True, "items": [1, 2, 3]}
-        loaded = yaml.safe_load(_dump_topology(topology))
+        loaded = yaml.safe_load(dump_topology(topology))
         assert loaded == topology
 
 
