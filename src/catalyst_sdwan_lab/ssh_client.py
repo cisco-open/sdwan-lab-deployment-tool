@@ -1,12 +1,29 @@
 import logging
 import re
 import time
+from collections.abc import Generator
+from contextlib import contextmanager
 
 import paramiko
 
 log = logging.getLogger(__name__)
 SSH_TIMEOUT = 30.0
 CONFIG_TIMEOUT = 60.0
+
+
+@contextmanager
+def cml_shell(cml_host: str, cml_user: str, cml_password: str) -> Generator[paramiko.Channel, None, None]:
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
+    try:
+        ch = ssh.invoke_shell()
+        try:
+            yield ch
+        finally:
+            ch.close()
+    finally:
+        ssh.close()
 
 
 def ssh_recv(ch: paramiko.Channel, *prompts: str, timeout: float = SSH_TIMEOUT) -> str:
@@ -44,11 +61,7 @@ def extract_control_config(
     node_user: str,
     node_password: str,
 ) -> str:
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
-    ch = ssh.invoke_shell()
-    try:
+    with cml_shell(cml_host, cml_user, cml_password) as ch:
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/{node_label}/0\n".encode())
         ssh_drain(ch, duration=3)
@@ -81,9 +94,6 @@ def extract_control_config(
         if start == -1 or end == -1:
             raise RuntimeError(f"Could not find XML in output from {node_label}")
         return out[start:end + len("</config>")]
-    finally:
-        ch.close()
-        ssh.close()
 
 
 def extract_edge_config(
@@ -95,11 +105,7 @@ def extract_edge_config(
     manager_password: str = "",
 ) -> tuple[str, str, str]:
     """Returns (edge_type, config, uuid) where edge_type is 'sdwan' or 'sdrouting'."""
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
-    ch = ssh.invoke_shell()
-    try:
+    with cml_shell(cml_host, cml_user, cml_password) as ch:
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/{node_label}/0\n".encode())
         ssh_drain(ch, duration=3)
@@ -150,9 +156,6 @@ def extract_edge_config(
         if not m:
             raise RuntimeError(f"Could not find UUID in output from {node_label}")
         return edge_type, config, m.group(1)
-    finally:
-        ch.close()
-        ssh.close()
 
 
 def _strip_sdrouting_config(raw: str) -> str:

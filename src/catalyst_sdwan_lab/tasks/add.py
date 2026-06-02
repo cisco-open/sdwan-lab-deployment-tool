@@ -4,7 +4,6 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Literal
 
-import paramiko
 import typer
 from jinja2 import Environment, FileSystemLoader
 from rich.markup import escape
@@ -15,7 +14,7 @@ from virl2_client.models.lab import Lab
 from virl2_client.models.node import Node
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
-from catalyst_sdwan_lab.ssh_client import ssh_drain, ssh_recv
+from catalyst_sdwan_lab.ssh_client import cml_shell, ssh_drain, ssh_recv
 
 from .deploy import (
     _attach_controller_template,
@@ -658,11 +657,7 @@ def _update_gateway_dns(
         log.warning("Gateway node not found in lab; skipping DNS update.")
         return
 
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
-    ch = ssh.invoke_shell()
-    try:
+    with cml_shell(cml_host, cml_user, cml_password) as ch:
         time.sleep(1)
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/Gateway/0\n".encode())
@@ -704,7 +699,4 @@ def _update_gateway_dns(
         ch.send(b"write memory\r\n")
         ssh_recv(ch, "#", timeout=15)
         log.info("Gateway DNS updated for validators: %s", ", ".join(new_ips))
-    finally:
-        ch.close()
-        ssh.close()
 
