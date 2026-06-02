@@ -49,5 +49,6 @@ cisco-sdwan = { git = "https://github.com/CiscoDevNet/sastre", branch = "dev-1.2
 [dependency-groups]
 dev = [
     "pytest>=8.0",
+    "ruff>=0.9",
     "websocket-client>=1.9.0",
 ]

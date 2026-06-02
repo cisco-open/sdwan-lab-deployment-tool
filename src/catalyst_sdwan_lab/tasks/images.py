@@ -144,7 +144,9 @@ def list_versions(cml_host: str, cml_user: str, cml_password: str) -> None:
     console.print(table)
 
 
-def delete(cml_host: str, cml_user: str, cml_password: str, versions: list[str], dry_run: bool = False) -> None:
+def delete(
+    cml_host: str, cml_user: str, cml_password: str, versions: list[str], dry_run: bool = False
+) -> None:
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),

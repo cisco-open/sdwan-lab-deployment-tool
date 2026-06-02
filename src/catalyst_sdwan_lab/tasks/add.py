@@ -2,7 +2,7 @@ import logging
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 import typer
 from jinja2 import Environment, FileSystemLoader
@@ -129,9 +129,12 @@ def run_control_component(
                 )
 
             for i, (node, ip) in enumerate(zip(nodes, device_ips), 1):
-                progress.update(task, description=f"Waiting for {device_type}{'s' if count > 1 else ''} to boot...")
+                progress.update(task, description=f"Waiting for {device_type}s to boot...")
                 node.wait_until_converged()
-                progress.update(task, description=f"Waiting for {device_type} to be reachable ({i}/{count})...")
+                progress.update(
+                    task,
+                    description=f"Waiting for {device_type} to be reachable ({i}/{count})...",
+                )
                 _add_to_manager_retrying(client, ip, personality, timeout=_BOOT_TIMEOUT)
 
             progress.update(task, description=f"Waiting for {device_type} CSRs...")
@@ -407,9 +410,7 @@ def run_sdrouting(
                 nodes.append(node)
 
             for node in nodes:
-                progress.update(
-                    task, description=f"Waiting for {'SD-Routing edges' if count > 1 else 'SD-Routing edge'} to boot..."
-                )
+                progress.update(task, description="Waiting for SD-Routing edges to boot...")
                 node.wait_until_converged()
 
             progress.update(

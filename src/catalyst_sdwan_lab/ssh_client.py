@@ -12,7 +12,9 @@ CONFIG_TIMEOUT = 60.0
 
 
 @contextmanager
-def cml_shell(cml_host: str, cml_user: str, cml_password: str) -> Generator[paramiko.Channel, None, None]:
+def cml_shell(
+    cml_host: str, cml_user: str, cml_password: str
+) -> Generator[paramiko.Channel, None, None]:
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)

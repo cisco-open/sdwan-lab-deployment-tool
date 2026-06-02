@@ -32,9 +32,15 @@ from .utils import (
 log = logging.getLogger(__name__)
 
 _CTRL_XML_PERSONALITIES = {
-    "cat-sdwan-manager": "    <personality>vmanage</personality>\n    <device-model>vmanage</device-model>",
-    "cat-sdwan-controller": "    <personality>vsmart</personality>\n    <device-model>vsmart</device-model>",
-    "cat-sdwan-validator": "    <personality>vedge</personality>\n    <device-model>vedge-cloud</device-model>",
+    "cat-sdwan-manager": (
+        "    <personality>vmanage</personality>\n    <device-model>vmanage</device-model>"
+    ),
+    "cat-sdwan-controller": (
+        "    <personality>vsmart</personality>\n    <device-model>vsmart</device-model>"
+    ),
+    "cat-sdwan-validator": (
+        "    <personality>vedge</personality>\n    <device-model>vedge-cloud</device-model>"
+    ),
 }
 
 _TEMPLATE_NAMES = {
@@ -91,12 +97,18 @@ def run(
                     and n.node_definition != "cat-sdwan-edge"
                 ]
                 for i, node in enumerate(cml_extract_nodes, 1):
-                    progress.update(task, description=f"Extracting CML node configurations ({i}/{len(cml_extract_nodes)})...")
+                    n_total = len(cml_extract_nodes)
+                    progress.update(
+                        task,
+                        description=f"Extracting CML node configurations ({i}/{n_total})...",
+                    )
                     try:
                         node.extract_configuration()
                         log.info("Extracted config from %s via CML.", node.label)
                     except Exception:
-                        log.debug("Node '%s' does not support config extract — skipping.", node.label)
+                        log.debug(
+                            "Node '%s' does not support config extract — skipping.", node.label
+                        )
 
                 progress.update(task, description="Downloading CML topology...")
                 topology_str = lab.download()
@@ -113,7 +125,10 @@ def run(
                 for i, node in enumerate(extract_nodes, 1):
                     node_def = node.node_definition
                     if node_def in SDWAN_CTRL_NODE_DEFS:
-                        progress.update(task, description=f"Extracting config from {node.label} ({i}/{total})...")
+                        progress.update(
+                            task,
+                            description=f"Extracting config from {node.label} ({i}/{total})...",
+                        )
                         if node_def == "cat-sdwan-manager":
                             node_user, node_pass = manager_user, manager_password
                         else:
@@ -127,10 +142,15 @@ def run(
                         except Exception as e:
                             log.error("Failed to extract config from %s: %s", node.label, e)
                             raise typer.Exit(1)
-                        cloud_init = _render_cloud_init(node_def, root_ca=certs.chain, config=config_xml)
+                        cloud_init = _render_cloud_init(
+                            node_def, root_ca=certs.chain, config=config_xml
+                        )
                         _update_node_configuration(topology, node.label, cloud_init)
                     elif node_def == "cat-sdwan-edge":
-                        progress.update(task, description=f"Extracting config from {node.label} ({i}/{total})...")
+                        progress.update(
+                            task,
+                            description=f"Extracting config from {node.label} ({i}/{total})...",
+                        )
                         try:
                             edge_type, config_text, uuid = extract_edge_config(
                                 cml_host, cml_user, cml_password, lab_name, node.label,
@@ -139,7 +159,9 @@ def run(
                         except Exception as e:
                             log.error("Failed to extract config from %s: %s", node.label, e)
                             raise typer.Exit(1)
-                        template_key = "cat-sdwan-edge" if edge_type == "sdwan" else "cat-sdwan-edge-sdrouting"
+                        template_key = (
+                            "cat-sdwan-edge" if edge_type == "sdwan" else "cat-sdwan-edge-sdrouting"
+                        )
                         cloud_init = _render_cloud_init(
                             template_key, root_ca=certs.chain, org_name=org_name,
                             validator_fqdn=validator_fqdn, config=config_text, uuid=uuid,
@@ -202,7 +224,10 @@ def _update_node_configuration(topology: Any, node_label: str, cloud_init: str) 
 def _run_sastre_backup(
     manager_ip: str, manager_port: int, manager_user: str, manager_password: str, workdir: Path
 ) -> None:
-    from cisco_sdwan.tasks.implementation import BackupArgs, TaskBackup  # type: ignore[import-untyped]
+    from cisco_sdwan.tasks.implementation import (  # type: ignore[import-untyped]
+        BackupArgs,
+        TaskBackup,
+    )
 
     run_sastre_task(
         manager_ip, manager_port, manager_user, manager_password,

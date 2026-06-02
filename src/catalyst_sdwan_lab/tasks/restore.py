@@ -2,7 +2,6 @@ import json
 import logging
 import re
 import tempfile
-import time
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -16,6 +15,7 @@ from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
 
 from .delete import run as _delete_lab
 from .utils import (
+    SDWAN_CTRL_NODE_DEFS,
     check_serial_file_match,
     collect_control_components,
     configure_manager,
@@ -28,7 +28,6 @@ from .utils import (
     resolve_image,
     run_sastre_task,
     sha512_crypt,
-    SDWAN_CTRL_NODE_DEFS,
     topology_nodes,
     trigger_rediscovery,
     wait_for_edges_onboarded,
@@ -83,7 +82,9 @@ def run(
 
         nodes = topology_nodes(topology)
         mgr = next((n for n in nodes if n.get("node_definition") == "cat-sdwan-manager"), None)
-        raw_version = mgr["image_definition"].split("-")[-1] if mgr and mgr.get("image_definition") else ""
+        raw_version = (
+            mgr["image_definition"].split("-")[-1] if mgr and mgr.get("image_definition") else ""
+        )
         backup_version = raw_version if raw_version and raw_version[0].isdigit() else "20.15"
         version = control_version or backup_version
 
@@ -124,7 +125,10 @@ def run(
                 progress.update(task, description="Onboarding control components...")
                 components = collect_control_components(lab)
                 if not components:
-                    log.error("No controller or validator nodes found in topology — cannot onboard control plane.")
+                    log.error(
+                        "No controller or validator nodes found in topology"
+                        " — cannot onboard control plane."
+                    )
                     raise typer.Exit(1)
                 onboard_control_components(
                     client, certs, components,
@@ -141,7 +145,9 @@ def run(
                 _patch_config_group_passwords(manager_configs_dir)
 
                 progress.update(task, description="Restoring Manager configuration...")
-                _run_sastre_restore(manager_ip, manager_port, manager_user, manager_password, manager_configs_dir)
+                _run_sastre_restore(
+                    manager_ip, manager_port, manager_user, manager_password, manager_configs_dir
+                )
 
                 mrf_path = manager_configs_dir / "mrf.json"
                 if mrf_path.exists():
@@ -153,7 +159,9 @@ def run(
 
                 if edge_uuids:
                     total_edges = len(edge_uuids)
-                    progress.update(task, description=f"Waiting for edges to onboard... (0/{total_edges})")
+                    progress.update(
+                        task, description=f"Waiting for edges to onboard... (0/{total_edges})"
+                    )
                     wait_for_edges_onboarded(
                         client,
                         edge_uuids,
@@ -223,7 +231,9 @@ def _check_images(
 
 def _find_lab_by_manager(cml: Any, manager_ip: str, manager_port: int, patty: bool) -> Any:
     marker = f"{manager_ip}:{manager_port}" if patty else manager_ip
-    lab = next((l for l in cml.all_labs(show_all=True) if l.notes and marker in l.notes), None)
+    lab = next(
+        (lab for lab in cml.all_labs(show_all=True) if lab.notes and marker in lab.notes), None
+    )
     if not lab:
         log.error("Cannot find lab with Manager IP %s:%s in notes.", manager_ip, manager_port)
         raise typer.Exit(1)
@@ -278,7 +288,9 @@ def _patch_topology(
                 cfg = cfg.replace(m.group(0), f"{m.group(1)}{manager_gateway}{m.group(3)}")
             node_defs = cml.definitions.node_definitions()
             mgr_def = next((nd for nd in node_defs if nd["id"] == node_def), None)
-            if mgr_def and mgr_def.get("sim", {}).get("linux_native", {}).get("disk_driver") == "virtio":
+            sim = mgr_def.get("sim", {}) if mgr_def else {}
+            disk_driver = sim.get("linux_native", {}).get("disk_driver")
+            if disk_driver == "virtio":
                 cfg = cfg.replace('"/dev/sdb"', '"/dev/vdb"').replace("[ sdb,", "[ vdb,")
             node["configuration"] = cfg
             if patty:
@@ -359,7 +371,10 @@ def _patch_sastre_controller_uuids(manager_configs_dir: Path, client: ManagerCli
 def _run_sastre_restore(
     manager_ip: str, manager_port: int, manager_user: str, manager_password: str, workdir: Path
 ) -> None:
-    from cisco_sdwan.tasks.implementation import RestoreArgs, TaskRestore  # type: ignore[import-untyped]
+    from cisco_sdwan.tasks.implementation import (  # type: ignore[import-untyped]
+        RestoreArgs,
+        TaskRestore,
+    )
 
     run_sastre_task(
         manager_ip, manager_port, manager_user, manager_password,
@@ -380,7 +395,9 @@ def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
 
     hierarchy = client.get_network_hierarchy()
     existing_names = {e["name"] for e in hierarchy}
-    global_id = next((e["id"] for e in hierarchy if e.get("data", {}).get("label") == "GLOBAL"), None)
+    global_id = next(
+        (e["id"] for e in hierarchy if e.get("data", {}).get("label") == "GLOBAL"), None
+    )
     if not global_id:
         log.warning("Cannot find GLOBAL node in network hierarchy — skipping MRF restore")
         return
@@ -390,7 +407,9 @@ def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
         try:
             client.enable_mrf(global_id)
             hierarchy = client.get_network_hierarchy()
-            global_id = next(e["id"] for e in hierarchy if e.get("data", {}).get("label") == "GLOBAL")
+            global_id = next(
+                e["id"] for e in hierarchy if e.get("data", {}).get("label") == "GLOBAL"
+            )
         except ManagerAPIError:
             log.warning("Could not enable MRF inter-region routing — continuing")
 

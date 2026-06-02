@@ -36,7 +36,9 @@ from .utils import (
 
 log = logging.getLogger(__name__)
 
-_TOPOLOGY_ENV = Environment(loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True)
+_TOPOLOGY_ENV = Environment(
+    loader=FileSystemLoader(str(CML_DEPLOY_TEMPLATES_DIR)), trim_blocks=True
+)
 
 
 @dataclass

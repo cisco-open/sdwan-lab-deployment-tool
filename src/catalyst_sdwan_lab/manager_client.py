@@ -210,7 +210,10 @@ class ManagerClient:
         return self._get("/dataservice/device/sync_status?groupId=all").get("data", [])
 
     def rediscover_devices(self, devices: list[dict[str, Any]]) -> None:
-        self._post("/dataservice/device/action/rediscover", {"action": "rediscover", "devices": devices})
+        self._post(
+            "/dataservice/device/action/rediscover",
+            {"action": "rediscover", "devices": devices},
+        )
 
     def add_controller(self, ip: str, personality: str, username: str, password: str) -> None:
         self._post(

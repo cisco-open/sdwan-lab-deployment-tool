@@ -13,11 +13,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 import httpx
 import requests
 import typer
+import yaml
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric.types import CertificateIssuerPrivateKeyTypes
@@ -210,7 +209,9 @@ def sign_device_cert(client: ManagerClient, certs: Certs, device_ip: str) -> Non
 
 def sign_csr(ca_cert_pem: str, ca_key_pem: str, csr_pem: str) -> str:
     ca_cert = x509.load_pem_x509_certificate(ca_cert_pem.encode())
-    ca_key: CertificateIssuerPrivateKeyTypes = serialization.load_pem_private_key(ca_key_pem.encode(), password=None)  # type: ignore[assignment]
+    ca_key: CertificateIssuerPrivateKeyTypes = serialization.load_pem_private_key(  # type: ignore[assignment]
+        ca_key_pem.encode(), password=None
+    )
     csr = x509.load_pem_x509_csr(csr_pem.encode())
     now = datetime.datetime.now(datetime.timezone.utc)
     cert = (
