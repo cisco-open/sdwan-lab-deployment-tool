@@ -13,7 +13,6 @@ from rich.markup import escape
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
-from catalyst_sdwan_lab.tasks.backup import _TopologyDumper
 
 from .delete import run as _delete_lab
 from .utils import (
@@ -22,6 +21,7 @@ from .utils import (
     configure_manager,
     connect_cml,
     console,
+    dump_topology,
     extract_org_name,
     load_certs,
     onboard_control_components,
@@ -104,7 +104,7 @@ def run(
                     manager_port, manager_user, manager_password, patty,
                     control_version, edge_version, cml,
                 )
-                topology_yaml = yaml.dump(topology, Dumper=_TopologyDumper, allow_unicode=True, default_flow_style=False)
+                topology_yaml = dump_topology(topology)
                 progress.update(task, description="Importing lab into CML...")
                 lab = cml.import_lab(topology_yaml)
 

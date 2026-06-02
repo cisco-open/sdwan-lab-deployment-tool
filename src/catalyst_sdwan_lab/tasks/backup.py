@@ -22,6 +22,7 @@ from .utils import (
     connect_cml,
     connect_manager,
     console,
+    dump_topology,
     find_lab,
     load_certs,
     topology_nodes,
@@ -157,7 +158,7 @@ def run(
                         output = Path(f"{lab_name}-{ts}{suffix}")
 
                     progress.update(task, description="Saving backup...")
-                    updated_topology = _dump_topology(topology)
+                    updated_topology = dump_topology(topology)
                     if directory:
                         _save_directory(output, updated_topology, Path(tmpdir), mrf_data)
                     else:
@@ -172,24 +173,6 @@ def run(
     finally:
         cml.logout()
     console.print(f"[green]Backup complete.[/green] Saved to: {escape(str(output))}")
-
-
-class _TopologyDumper(yaml.SafeDumper):
-    pass
-
-
-def _literal_str(dumper: yaml.SafeDumper, data: str) -> yaml.ScalarNode:
-    if "\n" in data:
-        data = "\n".join(line.rstrip() for line in data.splitlines())
-        return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
-    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=None)
-
-
-_TopologyDumper.add_representer(str, _literal_str)
-
-
-def _dump_topology(topology: Any) -> str:
-    return yaml.dump(topology, Dumper=_TopologyDumper, allow_unicode=True, default_flow_style=False)
 
 
 def _inject_xml_personality(config_xml: str, node_def: str) -> str:

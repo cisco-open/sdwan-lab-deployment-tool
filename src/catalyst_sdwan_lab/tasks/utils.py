@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 import httpx
 import requests
 import typer
@@ -499,3 +501,21 @@ def trigger_rediscovery(client: ManagerClient) -> None:
     if reachable:
         client.rediscover_devices(reachable)
         log.info("Network rediscovery triggered for %d devices", len(reachable))
+
+
+class _TopologyDumper(yaml.SafeDumper):
+    pass
+
+
+def _literal_str(dumper: yaml.SafeDumper, data: str) -> yaml.ScalarNode:
+    if "\n" in data:
+        data = "\n".join(line.rstrip() for line in data.splitlines())
+        return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=None)
+
+
+_TopologyDumper.add_representer(str, _literal_str)
+
+
+def dump_topology(topology: Any) -> str:
+    return yaml.dump(topology, Dumper=_TopologyDumper, allow_unicode=True, default_flow_style=False)
