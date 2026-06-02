@@ -258,7 +258,7 @@ def _patch_topology(
             if manager_user != "admin" and f"<name>{manager_user}</name>" not in cfg:
                 cfg = re.sub(
                     r"(<user>[\s\S]+?<name>)admin(</name>)",
-                    rf"\g<1>{manager_user}\2",
+                    lambda m: f"{m.group(1)}{manager_user}{m.group(2)}",
                     cfg,
                     count=1,
                 )
