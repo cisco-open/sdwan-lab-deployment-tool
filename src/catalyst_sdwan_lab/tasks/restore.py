@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import re
@@ -269,6 +270,11 @@ def _patch_topology(
             cfg: str = node.get("configuration", "")
             encrypted = sha512_crypt(manager_password)
             cfg = re.sub(r"<password>(\S+)</password>", f"<password>{encrypted}</password>", cfg)
+            now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+00:00"
+            if "<last-password-change-time>" in cfg:
+                cfg = re.sub(r"<last-password-change-time>[^<]+</last-password-change-time>", f"<last-password-change-time>{now}</last-password-change-time>", cfg)
+            else:
+                cfg = cfg.replace("</password>", f"</password>\n            <last-password-change-time>{now}</last-password-change-time>", 1)
             if manager_user != "admin" and f"<name>{manager_user}</name>" not in cfg:
                 cfg = re.sub(
                     r"(<user>[\s\S]+?<name>)admin(</name>)",

@@ -37,11 +37,13 @@ write_files:
           <user>
             <name>admin</name>
             <password>{{ manager_pass }}</password>
+            <last-password-change-time>{{ password_change_time }}</last-password-change-time>
             <group>netadmin</group>
           </user>
           <user>
             <name>{{ manager_user }}</name>
             <password>{{ manager_pass }}</password>
+            <last-password-change-time>{{ password_change_time }}</last-password-change-time>
             <group>netadmin</group>
           </user>
         </aaa>
