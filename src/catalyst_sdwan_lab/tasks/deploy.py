@@ -310,7 +310,10 @@ def _create_lab(
         _check_ip_free(manager_ip)
 
     encrypted_password = sha512_crypt(manager_password)
-    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+00:00"
+    now = (
+        datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+        + "+00:00"
+    )
     topology = _TOPOLOGY_ENV.get_template("cml-base-topology.j2").render(
         title=lab_name,
         manager_image=images.manager,
