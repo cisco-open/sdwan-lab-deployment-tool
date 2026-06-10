@@ -132,7 +132,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cisco-sdwan", git = "https://github.com/CiscoDevNet/sastre?branch=dev-1.28" },
+    { name = "cisco-sdwan", specifier = ">=1.28" },
     { name = "cryptography", specifier = ">=42.0" },
     { name = "jinja2", specifier = ">=3.1" },
     { name = "paramiko", specifier = ">=5.0.0" },
@@ -320,12 +320,16 @@ wheels = [
 
 [[package]]
 name = "cisco-sdwan"
-version = "1.28.dev8"
-source = { git = "https://github.com/CiscoDevNet/sastre?branch=dev-1.28#4297341ec7b482acd5f5d31825043a0e38ff6edb" }
+version = "1.28"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "pyyaml" },
     { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/25/a9/583fde8b837307392cf6091e2c35936fe21351bd912b5624d9070dbddad5/cisco_sdwan-1.28.tar.gz", hash = "sha256:eec8eda197616b1f913d69cb19de09ca759c476a95d32a68b63e469fa2e42f69", size = 140938, upload-time = "2026-06-05T19:50:46.264Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/a7/08e4eb285da69a885e5fa15aaa95de25906c25212d42a16efb030a16431f/cisco_sdwan-1.28-py3-none-any.whl", hash = "sha256:7c52066962c1ca54b22f0d591ee4e1d68ef70271e986fc12c0ada7ff13570f3b", size = 145384, upload-time = "2026-06-05T19:50:45.013Z" },
 ]
 
 [[package]]
