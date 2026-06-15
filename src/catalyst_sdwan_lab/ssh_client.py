@@ -78,6 +78,73 @@ def ssh_drain(ch: paramiko.Channel, duration: float = 1.0) -> None:
             time.sleep(0.05)
 
 
+def _edge_console_login(ch: paramiko.Channel, fallback_password: str = "") -> None:
+    """Bring an already-opened CML edge console channel to a privileged (#) prompt."""
+    ssh_drain(ch, duration=3)
+    ch.send(b"\r\n")
+    out = ssh_recv(ch, "login:", "Username:", "#", ">")
+    if "login:" in out or "Username:" in out:
+        ch.send(b"admin\r\n")
+        out = ssh_recv(ch, "Password:", "#", ">")
+    if "Password:" in out:
+        ch.send(b"admin\r\n")
+        out = ssh_recv(ch, "#", ">", "incorrect", "failed")
+    if ("incorrect" in out.lower() or "failed" in out.lower()) and fallback_password:
+        ch.send(b"admin\r\n")
+        out = ssh_recv(ch, "Password:", "#", ">")
+        if "Password:" in out:
+            ch.send(f"{fallback_password}\r\n".encode())
+            out = ssh_recv(ch, "#", ">")
+    if ">" in out and "#" not in out:
+        ch.send(b"enable\r\n")
+        out = ssh_recv(ch, "#", "Password:")
+        if "Password:" in out and "#" not in out:
+            ch.send(b"\r\n")
+            ssh_recv(ch, "#")
+
+
+
+def fix_sdrouting_default_route(
+    cml_host: str, cml_user: str, cml_password: str, lab_name: str, node_label: str,
+) -> bool:
+    """Wait for SD-Routing daemons, then reload if default route is missing.
+    Returns True if a reload was triggered."""
+    with cml_shell(cml_host, cml_user, cml_password) as ch:
+        ssh_drain(ch)
+        ch.send(f"open /{lab_name}/{node_label}/0\n".encode())
+        _edge_console_login(ch)
+        ch.send(b"terminal length 0\r\n")
+        ssh_recv(ch, "#", timeout=10.0)
+
+        deadline = time.time() + 300.0
+        while time.time() < deadline:
+            ssh_drain(ch)
+            ch.send(b"show sd-routing system status\r\n")
+            out = ssh_recv(ch, "#", timeout=30.0)
+            last_prompt = next((line for line in reversed(out.splitlines()) if "#" in line), "")
+            if "not responding" not in out and "Router" not in last_prompt:
+                break
+            time.sleep(15)
+        else:
+            log.warning("%s: SD-Routing daemons not ready after 5 min, skipping route check",
+                        node_label)
+            return False
+
+        ch.send(b"show ip route\r\n")
+        out = ssh_recv(ch, "#", timeout=30.0)
+        if "0.0.0.0/0" in out:
+            log.debug("%s: default route present", node_label)
+            return False
+        log.info("%s: default route missing, reloading", node_label)
+        ch.send(b"reload\r\n")
+        out = ssh_recv(ch, "confirm", "yes/no", timeout=30.0)
+        if "yes/no" in out:
+            ch.send(b"yes\r\n")
+            ssh_recv(ch, "confirm", timeout=60.0)
+        ch.send(b"\r\n")
+        return True
+
+
 def extract_control_config(
     cml_host: str,
     cml_user: str,
@@ -134,27 +201,7 @@ def extract_edge_config(
     with cml_shell(cml_host, cml_user, cml_password) as ch:
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/{node_label}/0\n".encode())
-        ssh_drain(ch, duration=3)
-        ch.send(b"\r\n")
-        out = ssh_recv(ch, "login:", "Username:", "#", ">")
-        if "login:" in out or "Username:" in out:
-            ch.send(b"admin\r\n")
-            out = ssh_recv(ch, "Password:", "#", ">")
-        if "Password:" in out:
-            ch.send(b"admin\r\n")
-            out = ssh_recv(ch, "#", ">", "incorrect", "failed")
-        if ("incorrect" in out.lower() or "failed" in out.lower()) and manager_password:
-            ch.send(b"admin\r\n")
-            out = ssh_recv(ch, "Password:", "#", ">")
-            if "Password:" in out:
-                ch.send(f"{manager_password}\r\n".encode())
-                out = ssh_recv(ch, "#", ">")
-        if ">" in out and "#" not in out:
-            ch.send(b"enable\r\n")
-            out = ssh_recv(ch, "#", "Password:")
-            if "Password:" in out and "#" not in out:
-                ch.send(b"\r\n")
-                ssh_recv(ch, "#")
+        _edge_console_login(ch, fallback_password=manager_password)
         ch.send(b"terminal length 0\r\n")
         ssh_recv(ch, "#", timeout=10.0)
 

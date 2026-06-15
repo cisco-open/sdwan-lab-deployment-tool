@@ -17,7 +17,7 @@ from catalyst_sdwan_lab.tasks.add import (
     _wait_for_controllers_ready,
     _wait_for_csrs,
 )
-from catalyst_sdwan_lab.tasks.utils import detect_ip_type, find_lab as _find_lab, wait_for_edges_onboarded
+from catalyst_sdwan_lab.tasks.utils import detect_ip_type, find_lab, wait_for_edges_onboarded
 
 
 def _make_node(label: str, configuration: str = "", node_definition: str = "") -> MagicMock:
@@ -40,13 +40,13 @@ class TestFindLab:
         cml = MagicMock()
         cml.find_labs_by_title.return_value = []
         with pytest.raises(Exit):
-            _find_lab(cml, "mylab")
+            find_lab(cml, "mylab")
 
     def test_exits_if_multiple_labs(self) -> None:
         cml = MagicMock()
         cml.find_labs_by_title.return_value = [MagicMock(), MagicMock()]
         with pytest.raises(Exit):
-            _find_lab(cml, "mylab")
+            find_lab(cml, "mylab")
 
     def test_exits_if_no_notes(self) -> None:
         cml = MagicMock()
@@ -54,20 +54,20 @@ class TestFindLab:
         lab.notes = None
         cml.find_labs_by_title.return_value = [lab]
         with pytest.raises(Exit):
-            _find_lab(cml, "mylab")
+            find_lab(cml, "mylab")
 
     def test_exits_if_notes_missing_manager_ip(self) -> None:
         cml = MagicMock()
         lab = _make_lab([], notes="no manager info here")
         cml.find_labs_by_title.return_value = [lab]
         with pytest.raises(Exit):
-            _find_lab(cml, "mylab")
+            find_lab(cml, "mylab")
 
     def test_returns_lab_ip_port(self) -> None:
         cml = MagicMock()
         lab = _make_lab([], notes="manager_external_ip = 10.0.0.1:8443\n")
         cml.find_labs_by_title.return_value = [lab]
-        result_lab, ip, port = _find_lab(cml, "mylab")
+        result_lab, ip, port = find_lab(cml, "mylab")
         assert result_lab is lab
         assert ip == "10.0.0.1"
         assert port == 8443

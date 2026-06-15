@@ -142,11 +142,11 @@ class ManagerClient:
         return self._get("/dataservice/system/device/vedges").get("data", [])
 
     def get_vedge_otps(self) -> dict[str, str]:
-        data = self._get("/dataservice/certificate/data/vedge/list").get("data", [])
+        data = self._get("/dataservice/certificate/vedge/list").get("data", [])
         return {
             d["uuid"]: d["serialNumber"]
             for d in data
-            if d.get("vedgeCertificateState") == "tokengenerated"
+            if d.get("vedgeCertificateState") == "tokengenerated" and d.get("serialNumber")
         }
 
     def get_bootstrap_config(self, uuid: str, *, wanif: str | None = None) -> str:

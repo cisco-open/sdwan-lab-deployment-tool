@@ -14,7 +14,12 @@ from virl2_client.models.lab import Lab
 from virl2_client.models.node import Node
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
-from catalyst_sdwan_lab.ssh_client import cml_shell, ssh_drain, ssh_recv
+from catalyst_sdwan_lab.ssh_client import (
+    cml_shell,
+    fix_sdrouting_default_route,
+    ssh_drain,
+    ssh_recv,
+)
 
 from .deploy import (
     _attach_controller_template,
@@ -412,6 +417,12 @@ def run_sdrouting(
             for node in nodes:
                 progress.update(task, description="Waiting for SD-Routing edges to boot...")
                 node.wait_until_converged()
+                if int(version.split(".")[0]) < 26:
+                    progress.update(task, description=f"Checking default route on {node.label}...")
+                    if fix_sdrouting_default_route(
+                        cml_host, cml_user, cml_password, lab.title or lab_name, node.label
+                    ):
+                        node.wait_until_converged()
 
             progress.update(
                 task, description=f"Waiting for SD-Routing edges to onboard (0/{count})..."

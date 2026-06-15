@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 3.0.0b1 [2026-06-02]
+# Catalyst SD-WAN Lab 3.0.0 [unreleased]
 
 Complete rewrite. The tool is now dependency-minimal with no catalystwan SDK, no pyATS, and no pyOpenSSL.
 
@@ -22,6 +22,7 @@ Complete rewrite. The tool is now dependency-minimal with no catalystwan SDK, no
 - Accept un-padded software versions (`26.1.1` resolved to `26.01.01` automatically)
 - Move `setup --list` to `images list` and `setup --delete` to `images delete`
 - Rename `--manager` → `--manager-ip`, `--muser` → `--manager-user`, `--mpassword` → `--manager-pass`, `--mmask` → `--manager-mask`, `--mgateway` → `--manager-gateway`, `--ip_type` → `--ip-type`, `--deleteexisting` → `--delete-existing`, `--contr_version` → `--contr-version`, `--edge_version` → `--edge-version`
+- In add and restore tasks, fix issue where SD-Routing devices with version lower than 26.1.1 could fail to be onboarded
 
 # Catalyst SD-WAN Lab 2.1.8 [Mar 5, 2026]
 
