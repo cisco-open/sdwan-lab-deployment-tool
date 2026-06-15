@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from click.exceptions import Exit
+from typer import Exit
 
 from catalyst_sdwan_lab.tasks.delete import run
 

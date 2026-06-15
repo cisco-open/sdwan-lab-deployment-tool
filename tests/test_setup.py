@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from click.exceptions import Exit
+from typer import Exit
 
 from catalyst_sdwan_lab.tasks.setup import (
     _check_iol_definitions,

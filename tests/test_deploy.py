@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from click.exceptions import Exit
+from typer import Exit
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError
 from catalyst_sdwan_lab.tasks.deploy import (
