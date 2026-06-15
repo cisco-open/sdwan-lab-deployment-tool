@@ -41,6 +41,6 @@ markers = ["integration: live-system workflow test (requires env vars; run with:
 [dependency-groups]
 dev = [
     "pytest>=8.0",
-    "ruff>=0.9",
+    "ruff>=0.15.17",
     "websocket-client>=1.9.0",
 ]
