@@ -13,6 +13,7 @@ from rich.markup import escape
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
+from catalyst_sdwan_lab.ssh_client import fix_sdrouting_default_route
 
 from .delete import run as _delete_lab
 from .utils import (
@@ -157,6 +158,21 @@ def run(
 
                 progress.update(task, description="Starting edge nodes...")
                 edge_uuids = _inject_otps_and_start_edges(lab, client)
+
+                for node in lab.nodes():
+                    if node.node_definition != "cat-sdwan-edge":
+                        continue
+                    if "SD-Routing : true" not in (node.configuration or ""):
+                        continue
+                    img_version = (node.image_definition or "").removeprefix("cat-sdwan-edge-")
+                    if not img_version or int(img_version.split(".")[0]) >= 26:
+                        continue
+                    progress.update(task, description=f"Checking default route on {node.label}...")
+                    node.wait_until_converged()
+                    if fix_sdrouting_default_route(
+                        cml_host, cml_user, cml_password, lab.title or lab_name, node.label
+                    ):
+                        node.wait_until_converged()
 
                 if edge_uuids:
                     total_edges = len(edge_uuids)
