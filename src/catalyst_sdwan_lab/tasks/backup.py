@@ -136,7 +136,7 @@ def run(
                         try:
                             config_xml = extract_control_config(
                                 cml_host, cml_user, cml_password, lab_name,
-                                node.label, node_user, node_pass,
+                                node.label, node_user, node_pass, console=console,
                             )
                             config_xml = _inject_xml_personality(config_xml, node_def)
                         except Exception as e:
@@ -154,7 +154,7 @@ def run(
                         try:
                             edge_type, config_text, uuid = extract_edge_config(
                                 cml_host, cml_user, cml_password, lab_name, node.label,
-                                manager_password,
+                                manager_password, console=console,
                             )
                         except Exception as e:
                             log.error("Failed to extract config from %s: %s", node.label, e)

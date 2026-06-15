@@ -170,7 +170,8 @@ def run(
                     progress.update(task, description=f"Checking default route on {node.label}...")
                     node.wait_until_converged()
                     if fix_sdrouting_default_route(
-                        cml_host, cml_user, cml_password, lab.title or lab_name, node.label
+                        cml_host, cml_user, cml_password, lab.title or lab_name, node.label,
+                        console=console,
                     ):
                         node.wait_until_converged()
 

@@ -1,11 +1,15 @@
+import base64
 import logging
 import re
+import sys
 import time
 from collections.abc import Generator
 from contextlib import contextmanager
+from pathlib import Path
 
 import paramiko
 import typer
+from rich.console import Console
 
 log = logging.getLogger(__name__)
 SSH_TIMEOUT = 30.0
@@ -13,26 +17,49 @@ CONFIG_TIMEOUT = 60.0
 
 
 class _InteractiveHostKeyPolicy(paramiko.MissingHostKeyPolicy):
+    def __init__(self, console: Console) -> None:
+        self._console = console
+
     def missing_host_key(
         self, client: paramiko.SSHClient, hostname: str, key: paramiko.PKey
     ) -> None:
         fingerprint = ":".join(f"{b:02x}" for b in key.get_fingerprint())
-        answer = input(
-            f"The authenticity of host '{hostname}' cannot be established.\n"
-            f"{key.get_name()} key fingerprint is {fingerprint}.\n"
-            "Are you sure you want to continue connecting (yes/no)? "
-        )
-        if answer.strip().lower() != "yes":
+        live_stack = getattr(self._console, "_live_stack", [])
+        live = live_stack[-1] if live_stack else None
+        if live is not None:
+            old_transient = live.transient
+            live.transient = True
+            live.stop()
+            live.transient = old_transient
+            sys.stdout.flush()
+        try:
+            sys.stderr.write(
+                f"The authenticity of host '{hostname}' cannot be established.\n"
+                f"{key.get_name()} key fingerprint is {fingerprint}.\n"
+                "Are you sure you want to continue connecting (yes/no)? "
+            )
+            sys.stderr.flush()
+            answer = sys.stdin.readline().strip()
+        finally:
+            if live is not None:
+                print()
+                live.start()
+        if answer.lower() != "yes":
             raise paramiko.SSHException(f"Host key verification failed for {hostname}.")
+        known_hosts = Path.home() / ".ssh" / "known_hosts"
+        entry = f"{hostname} {key.get_name()} {base64.b64encode(key.asbytes()).decode()}\n"
+        with open(known_hosts, "a") as f:
+            f.write(entry)
+        client.get_host_keys().add(hostname, key.get_name(), key)
 
 
 @contextmanager
 def cml_shell(
-    cml_host: str, cml_user: str, cml_password: str
+    cml_host: str, cml_user: str, cml_password: str, console: Console | None = None
 ) -> Generator[paramiko.Channel, None, None]:
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
-    ssh.set_missing_host_key_policy(_InteractiveHostKeyPolicy())
+    ssh.set_missing_host_key_policy(_InteractiveHostKeyPolicy(console or Console()))
     try:
         ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
     except paramiko.BadHostKeyException:
@@ -106,10 +133,11 @@ def _edge_console_login(ch: paramiko.Channel, fallback_password: str = "") -> No
 
 def fix_sdrouting_default_route(
     cml_host: str, cml_user: str, cml_password: str, lab_name: str, node_label: str,
+    console: Console | None = None,
 ) -> bool:
     """Wait for SD-Routing daemons, then reload if default route is missing.
     Returns True if a reload was triggered."""
-    with cml_shell(cml_host, cml_user, cml_password) as ch:
+    with cml_shell(cml_host, cml_user, cml_password, console) as ch:
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/{node_label}/0\n".encode())
         _edge_console_login(ch)
@@ -153,8 +181,9 @@ def extract_control_config(
     node_label: str,
     node_user: str,
     node_password: str,
+    console: Console | None = None,
 ) -> str:
-    with cml_shell(cml_host, cml_user, cml_password) as ch:
+    with cml_shell(cml_host, cml_user, cml_password, console) as ch:
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/{node_label}/0\n".encode())
         ssh_drain(ch, duration=3)
@@ -196,9 +225,10 @@ def extract_edge_config(
     lab_name: str,
     node_label: str,
     manager_password: str = "",
+    console: Console | None = None,
 ) -> tuple[str, str, str]:
     """Returns (edge_type, config, uuid) where edge_type is 'sdwan' or 'sdrouting'."""
-    with cml_shell(cml_host, cml_user, cml_password) as ch:
+    with cml_shell(cml_host, cml_user, cml_password, console) as ch:
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/{node_label}/0\n".encode())
         _edge_console_login(ch, fallback_password=manager_password)

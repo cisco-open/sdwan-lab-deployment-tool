@@ -420,7 +420,8 @@ def run_sdrouting(
                 if int(version.split(".")[0]) < 26:
                     progress.update(task, description=f"Checking default route on {node.label}...")
                     if fix_sdrouting_default_route(
-                        cml_host, cml_user, cml_password, lab.title or lab_name, node.label
+                        cml_host, cml_user, cml_password, lab.title or lab_name, node.label,
+                        console=console,
                     ):
                         node.wait_until_converged()
 
@@ -642,7 +643,7 @@ def _update_gateway_dns(
         log.warning("Gateway node not found in lab; skipping DNS update.")
         return
 
-    with cml_shell(cml_host, cml_user, cml_password) as ch:
+    with cml_shell(cml_host, cml_user, cml_password, console) as ch:
         time.sleep(1)
         ssh_drain(ch)
         ch.send(f"open /{lab_name}/Gateway/0\n".encode())
