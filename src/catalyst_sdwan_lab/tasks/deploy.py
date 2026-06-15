@@ -71,6 +71,13 @@ def run(
     if manager_password == "admin":
         log.error("Cannot use default credentials. Update Manager password and try again.")
         raise typer.Exit(1)
+    try:
+        major, minor = (int(x) for x in version.split(".")[:2])
+    except ValueError:
+        major, minor = 0, 0
+    if (major, minor) < (20, 15):
+        log.error("Minimum supported Manager version is 20.15. Got: %s", version)
+        raise typer.Exit(1)
 
     try:
         org_name = extract_org_name(serial_file)
