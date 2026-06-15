@@ -102,13 +102,10 @@ def _configure_logging(verbose: bool, debug: bool) -> None:
 
 
 def _cml_credentials() -> tuple[str, str, str]:
-    if not _state.cml_host or not _state.cml_user or not _state.cml_password:
-        log.error(
-            "CML credentials required. Use --cml / --user / --password "
-            "or set CML_IP / CML_USER / CML_PASSWORD environment variables."
-        )
-        raise typer.Exit(1)
-    return _state.cml_host, _state.cml_user, _state.cml_password
+    host = _state.cml_host or typer.prompt("CML IP address")
+    user = _state.cml_user or typer.prompt("CML username")
+    password = _state.cml_password or typer.prompt("CML password", hide_input=True)
+    return host, user, password
 
 
 def _version_callback(value: bool) -> None:
@@ -171,12 +168,14 @@ def deploy(
         typer.Option("--manager-port", envvar="MANAGER_PORT", help="PATty port; enables PATty"),
     ] = None,
     manager_user: Annotated[
-        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
+        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username",
+                          prompt="Manager username")
     ] = "admin",
     manager_pass: Annotated[
         str,
         typer.Option(
-            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
+            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password",
+            hide_input=True, prompt="Manager password"
         ),
     ] = ...,  # type: ignore[assignment]
     manager_mask: Annotated[
@@ -191,7 +190,7 @@ def deploy(
     ] = None,
     lab_name: Annotated[
         str,
-        typer.Option("--lab", envvar="LAB_NAME", help="CML lab name"),
+        typer.Option("--lab", envvar="LAB_NAME", help="CML lab name", prompt="Lab name"),
     ] = ...,  # type: ignore[assignment]
     bridge: Annotated[
         Optional[str], typer.Option("--bridge", help="CML bridge name (direct mode)")
@@ -292,12 +291,14 @@ def add(
         str, typer.Option("--lab", envvar="LAB_NAME", help="CML lab name")
     ] = ...,  # type: ignore[assignment]
     manager_user: Annotated[
-        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
+        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username",
+                          prompt="Manager username")
     ] = "admin",
     manager_pass: Annotated[
         str,
         typer.Option(
-            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
+            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password",
+            hide_input=True, prompt="Manager password"
         ),
     ] = ...,  # type: ignore[assignment]
     cpus: Annotated[
@@ -359,12 +360,14 @@ def backup(
         str, typer.Option("--lab", envvar="LAB_NAME", help="CML lab name")
     ] = ...,  # type: ignore[assignment]
     manager_user: Annotated[
-        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
+        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username",
+                          prompt="Manager username")
     ] = "admin",
     manager_pass: Annotated[
         str,
         typer.Option(
-            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
+            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password",
+            hide_input=True, prompt="Manager password"
         ),
     ] = ...,  # type: ignore[assignment]
     output: Annotated[
@@ -401,12 +404,14 @@ def restore(
         typer.Option("--manager-port", envvar="MANAGER_PORT", help="PATty port; enables PATty"),
     ] = None,
     manager_user: Annotated[
-        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username")
+        str, typer.Option("--manager-user", envvar="MANAGER_USER", help="Manager username",
+                          prompt="Manager username")
     ] = "admin",
     manager_pass: Annotated[
         str,
         typer.Option(
-            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password", hide_input=True
+            "--manager-pass", envvar="MANAGER_PASSWORD", help="Manager password",
+            hide_input=True, prompt="Manager password"
         ),
     ] = ...,  # type: ignore[assignment]
     manager_mask: Annotated[
