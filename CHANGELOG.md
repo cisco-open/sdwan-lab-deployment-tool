@@ -22,7 +22,10 @@ Complete rewrite. The tool is now dependency-minimal with no catalystwan SDK, no
 - Accept un-padded software versions (`26.1.1` resolved to `26.01.01` automatically)
 - Move `setup --list` to `images list` and `setup --delete` to `images delete`
 - Rename `--manager` → `--manager-ip`, `--muser` → `--manager-user`, `--mpassword` → `--manager-pass`, `--mmask` → `--manager-mask`, `--mgateway` → `--manager-gateway`, `--ip_type` → `--ip-type`, `--deleteexisting` → `--delete-existing`, `--contr_version` → `--contr-version`, `--edge_version` → `--edge-version`
-- In add and restore tasks, fix issue where SD-Routing devices with version lower than 26.1.1 could fail to be onboarded
+- Fix issue where SD-Routing devices with version lower than 26.1.1 could fail to be onboarded in add and restore tasks
+- Add Cisco PKI support for `deploy` and `restore` (`--pki cisco`, requires Manager 20.18.2+) — device code authentication flow, CSR submission to Cisco cloud, automatic polling for certificate installation
+- Add HTTP proxy support for `deploy` and `restore` (`--proxy-ip`, `--proxy-port`, `--no-proxy`) — RFC1918 ranges always excluded from proxy automatically
+- Add PKI mode auto-detection to add task — reads current signing mode from Manager, no `--pki` flag needed
 
 # Catalyst SD-WAN Lab 2.1.8 [Mar 5, 2026]
 

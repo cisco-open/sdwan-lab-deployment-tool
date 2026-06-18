@@ -5,7 +5,7 @@ import re
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import typer
 import yaml
@@ -56,6 +56,10 @@ def run(
     delete_existing: bool,
     retry: bool,
     patty: bool,
+    pki: Literal["enterprise", "cisco"] = "enterprise",
+    proxy_ip: str = "",
+    proxy_port: str = "80",
+    no_proxy: str = "",
 ) -> None:
     if manager_password == "admin":
         log.error("Cannot use default credentials. Update Manager password and try again.")
@@ -90,12 +94,31 @@ def run(
         backup_version = raw_version if raw_version and raw_version[0].isdigit() else "20.15"
         version = control_version or backup_version
 
+        if pki == "cisco":
+            try:
+                parts = (version.split(".")[:3] + ["0", "0"])[:3]
+                major, minor, patch = (int(x) for x in parts)
+            except ValueError:
+                major, minor, patch = 0, 0, 0
+            if (major, minor, patch) < (20, 18, 2):
+                log.error("Cisco PKI requires Manager version 20.18.2 or later. Got: %s", version)
+                raise typer.Exit(1)
+
         progress.update(task, description="Checking images...")
         _check_images(cml, topology, control_version, edge_version)
 
         if delete_existing:
             progress.update(task, description="Removing existing lab...")
             _delete_lab(cml_host, cml_user, cml_password, lab_name, force=True)
+
+        if not retry and not delete_existing:
+            if any(lab.title == lab_name for lab in cml.all_labs(show_all=True)):
+                log.error(
+                    "Lab '%s' already exists. Use --retry to resume, "
+                    "--delete-existing to replace, or choose a different name.",
+                    lab_name,
+                )
+                raise typer.Exit(1)
 
         try:
             if retry:
@@ -122,7 +145,11 @@ def run(
             )
             try:
                 progress.update(task, description="Configuring SD-WAN Manager...")
-                configure_manager(client, version, org_name, certs.chain)
+                configure_manager(
+                    client, version, org_name, certs.chain, pki=pki,
+                    on_status=lambda s: progress.update(task, description=s),
+                    proxy_ip=proxy_ip, proxy_port=proxy_port, no_proxy=no_proxy,
+                )
 
                 progress.update(task, description="Onboarding control components...")
                 components = collect_control_components(lab)
@@ -135,6 +162,7 @@ def run(
                 onboard_control_components(
                     client, certs, components,
                     lambda s: progress.update(task, description=s),
+                    pki=pki,
                 )
 
                 progress.update(task, description="Uploading serial file...")
@@ -157,15 +185,14 @@ def run(
                     _restore_mrf(client, json.loads(mrf_path.read_text()))
 
                 progress.update(task, description="Starting edge nodes...")
-                edge_uuids = _inject_otps_and_start_edges(lab, client)
+                edge_uuids = _inject_otps_and_start_edges(
+                    lab, client, ca_chain=certs.chain if pki == "enterprise" else ""
+                )
 
                 for node in lab.nodes():
                     if node.node_definition != "cat-sdwan-edge":
                         continue
                     if "SD-Routing : true" not in (node.configuration or ""):
-                        continue
-                    img_version = (node.image_definition or "").removeprefix("cat-sdwan-edge-")
-                    if not img_version or int(img_version.split(".")[0]) >= 26:
                         continue
                     progress.update(task, description=f"Checking default route on {node.label}...")
                     node.wait_until_converged()
@@ -466,7 +493,24 @@ def _restore_mrf(client: ManagerClient, mrf_data: list[dict[str, Any]]) -> None:
     log.info("MRF regions restored: %d regions, %d subregions", len(regions), len(subregions))
 
 
-def _inject_otps_and_start_edges(lab: Any, client: ManagerClient) -> list[str]:
+def _add_ca_certs(cfg: str, ca_chain: str) -> str:
+    cloud_start = cfg.find("#cloud-config")
+    if cloud_start == -1:
+        return cfg
+    boundary = cfg.find("--==BOUNDARY==", cloud_start)
+    if boundary == -1:
+        return cfg
+    indented = "\n".join("   " + line for line in ca_chain.strip().splitlines())
+    ca_block = " - rcc : true\nca-certs:\n  remove-defaults: false\n  trusted:\n  - |\n"
+    ca_block += indented + "\n"
+    return cfg[:boundary] + ca_block + "\n" + cfg[boundary:]
+
+
+def _inject_otps_and_start_edges(
+    lab: Any,
+    client: ManagerClient,
+    ca_chain: str = "",
+) -> list[str]:
     otps = client.get_vedge_otps()
     uuids: list[str] = []
     for node in lab.nodes():
@@ -481,6 +525,8 @@ def _inject_otps_and_start_edges(lab: Any, client: ManagerClient) -> list[str]:
         uuid = m.group(1)
         otp = otps.get(uuid)
         if otp:
+            if ca_chain and "ca-certs:" not in cfg:
+                cfg = _add_ca_certs(cfg, ca_chain)
             node.configuration = re.sub(r"(otp\s*:)\s*\w+", rf"\g<1> {otp}", cfg)
             log.debug("OTP injected for %s", node.label)
         else:

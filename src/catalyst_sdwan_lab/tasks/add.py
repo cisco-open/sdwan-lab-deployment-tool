@@ -94,6 +94,7 @@ def run_control_component(
         progress.update(task, description="Connecting to SD-WAN Manager...")
         client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
+            pki = client.get_certificate_signing()
             org_name = client.get_organization() or ""
             template_id = _import_controller_templates(client, ip_type) if is_ctrl else None
 
@@ -148,7 +149,8 @@ def run_control_component(
             progress.update(task, description=f"Signing {device_type} certificates...")
             with ThreadPoolExecutor() as pool:
                 futures = [
-                    pool.submit(sign_device_cert, client, certs, ip) for ip in device_ips
+                    pool.submit(sign_device_cert, client, certs, ip, pki=pki)
+                    for ip in device_ips
                 ]
                 for f in futures:
                     f.result()
@@ -417,13 +419,12 @@ def run_sdrouting(
             for node in nodes:
                 progress.update(task, description="Waiting for SD-Routing edges to boot...")
                 node.wait_until_converged()
-                if int(version.split(".")[0]) < 26:
-                    progress.update(task, description=f"Checking default route on {node.label}...")
-                    if fix_sdrouting_default_route(
-                        cml_host, cml_user, cml_password, lab.title or lab_name, node.label,
-                        console=console,
-                    ):
-                        node.wait_until_converged()
+                progress.update(task, description=f"Checking default route on {node.label}...")
+                if fix_sdrouting_default_route(
+                    cml_host, cml_user, cml_password, lab.title or lab_name, node.label,
+                    console=console,
+                ):
+                    node.wait_until_converged()
 
             progress.update(
                 task, description=f"Waiting for SD-Routing edges to onboard (0/{count})..."

@@ -13,14 +13,6 @@ vinitparam:
  - vbond : {{ validator_fqdn }}
  - otp : 59aac1776710406abb086f8fd7311977
  - org : {{ org_name }}
- - rcc : true
-ca-certs:
-  remove-defaults: false
-  trusted:
-  - |
-{% filter indent(width=3, first=True) %}
-{{ root_ca }}
-{% endfilter %}
 
 --==BOUNDARY==
 Content-Type: text/cloud-boothook; charset="us-ascii"

@@ -90,6 +90,9 @@ Available environment variables:
 | `MANAGER_GATEWAY` | `deploy`, `restore` (direct mode) |
 | `MANAGER_USER` | `deploy`, `add`, `backup`, `restore` |
 | `MANAGER_PASSWORD` | `deploy`, `add`, `backup`, `restore` |
+| `PROXY_IP` | `deploy`, `restore` |
+| `PROXY_PORT` | `deploy`, `restore` |
+| `NO_PROXY` | `deploy`, `restore` |
 
 ---
 
@@ -171,6 +174,10 @@ csdwan deploy [OPTIONS] <version>
 | `--dns` | | DNS server for lab nodes |
 | `--retry` | | Resume Manager onboarding without recreating the lab |
 | `--serial-file` | | Custom `.viptela` serial file |
+| `--pki` | | Certificate signing mode: `enterprise` (default) or `cisco` (requires 20.18.2+) |
+| `--proxy-ip` | `PROXY_IP` | HTTP proxy hostname or IP for Manager's outbound connections |
+| `--proxy-port` | `PROXY_PORT` | HTTP proxy port (default: `80`) |
+| `--no-proxy` | `NO_PROXY` | Additional no-proxy entries; RFC1918 ranges are always excluded |
 
 **Manager connectivity modes:**
 
@@ -291,6 +298,10 @@ csdwan restore [OPTIONS] <backup>
 | `--edge-version` | | Override edge image version |
 | `--delete-existing` | | Delete existing lab with the same name before restoring |
 | `--retry` | | Resume from Manager boot, skipping lab import |
+| `--pki` | | Certificate signing mode: `enterprise` (default) or `cisco` (requires 20.18.2+) |
+| `--proxy-ip` | `PROXY_IP` | HTTP proxy hostname or IP for Manager's outbound connections |
+| `--proxy-port` | `PROXY_PORT` | HTTP proxy port (default: `80`) |
+| `--no-proxy` | `NO_PROXY` | Additional no-proxy entries; RFC1918 ranges are always excluded |
 
 **Examples:**
 
@@ -299,6 +310,42 @@ csdwan restore my-lab-20240601.zip --manager-port 2000
 csdwan restore my-lab-20240601.zip --delete-existing --manager-port 2000
 csdwan restore /backups/my-lab --manager-ip 10.0.0.10 --manager-mask /24 --manager-gateway 10.0.0.254
 ```
+
+---
+
+### Cisco PKI
+
+By default, control-plane certificates are signed by the included Enterprise CA. Cisco PKI uses Cisco's cloud signing infrastructure instead and requires Manager 20.18.2 or later.
+
+To use Cisco PKI, pass `--pki cisco` to `deploy` or `restore`. If Manager needs a proxy to reach Cisco's cloud, also pass `--proxy-ip`.
+
+**Authentication flow:**
+
+On first use, the tool initiates a device code flow and prints an activation URL:
+
+```
+Cisco account registration required. Open this URL in your browser:
+  https://id.cisco.com/activate?user_code=XXXXXXXX
+```
+
+Open the URL, log in with your Cisco.com account, and approve the request. The tool polls automatically and continues once confirmed.
+
+**Example:**
+
+```sh
+csdwan deploy 26.1.1 --manager-port 2000 --lab my-lab --pki cisco --proxy-ip proxy.example.com
+```
+
+```sh
+csdwan restore my-lab-20240601.zip --manager-port 2000 --pki cisco --proxy-ip proxy.example.com
+```
+
+**Notes:**
+- Cisco PKI requires **Virtual Account Administrator** access to the organization name you are deploying. Always use `--serial-file` to provide a serial file from the organization to which you have VA admin access — the org name is read from the serial file and must match your Cisco.com account's VA.
+- Cisco limits the number of certificates that can be issued per Smart Account. For lab use, **Enterprise PKI (the default) is recommended** — it has no such limit and does not require internet connectivity.
+- RFC1918 ranges (`10.*`, `172.*`, `192.168.*`) are always excluded from the proxy automatically.
+- Use `--no-proxy` to add extra no-proxy entries on top of the built-in exclusions.
+- The `add` command detects the PKI mode from Manager automatically — no flag needed.
 
 ---
 

@@ -1,7 +1,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import requests
 import urllib3
@@ -64,10 +64,65 @@ class ManagerClient:
             {"certificateauthority": certificate_authority},
         )
 
-    def settings_certificate(self, certificate_signing: str) -> None:
+    def get_certificate_signing(self) -> Literal["enterprise", "cisco"]:
+        data = self._get("/dataservice/settings/configuration/certificate").get("data", [])
+        value = data[0].get("certificateSigning", "enterprise") if data else "enterprise"
+        return "cisco" if value == "cisco" else "enterprise"
+
+    def settings_certificate(
+        self,
+        certificate_signing: str,
+        validity_period: str | None = None,
+        retrieve_interval: str | None = None,
+    ) -> None:
+        payload: dict[str, Any] = {"certificateSigning": certificate_signing}
+        if validity_period is not None:
+            payload["validityPeriod"] = validity_period
+        if retrieve_interval is not None:
+            payload["retrieveInterval"] = retrieve_interval
+        self._post("/dataservice/settings/configuration/certificate", payload)
+
+    def get_cisco_services(self) -> list[dict[str, Any]]:
+        return self._get("/dataservice/settings/configuration/ciscoservices").get("data", [])
+
+    _PROXY_NO_PROXY_LIST = (
+        "localhost|::1|127.0.0.1"
+        "|169.254.1.1|169.254.1.2|169.254.1.3|169.254.1.4|169.254.1.5"
+        "|169.254.1.6|169.254.1.7|169.254.1.8|169.254.1.9|169.254.1.10"
+        "|169.254.1.11|169.254.1.12|169.254.1.13|169.254.1.14|169.254.1.15"
+        "|169.254.1.16|169.254.1.17"
+    )
+    _PROXY_NO_PROXY_RFC1918 = "10.*, 172.*, 192.168.*"
+
+    def settings_proxy(self, proxy_ip: str, proxy_port: str, no_proxy_extra: str = "") -> None:
+        no_proxy_custom = (
+            f"{self._PROXY_NO_PROXY_RFC1918}, {no_proxy_extra}"
+            if no_proxy_extra
+            else self._PROXY_NO_PROXY_RFC1918
+        )
         self._post(
-            "/dataservice/settings/configuration/certificate",
-            {"certificateSigning": certificate_signing},
+            "/dataservice/settings/configuration/proxyHttpServer",
+            {"proxy": True, "proxyIp": proxy_ip, "proxyPort": proxy_port,
+             "NoProxyList": self._PROXY_NO_PROXY_LIST,
+             "NoProxyListCustom": no_proxy_custom},
+        )
+
+    def initiate_cisco_account_registration(self) -> dict[str, Any]:
+        return self._post("/dataservice/settings/services/account/register", {})
+
+    def poll_cisco_account_token(self, user_code: str) -> bool:
+        response = self._session.post(
+            f"{self._base}/dataservice/settings/services/account/register/token?userCode={user_code}",
+            json=["pnp"],
+            timeout=self._TIMEOUT,
+        )
+        return response.ok
+
+    def register_cisco_services(self, username: str) -> None:
+        self._post(
+            "/dataservice/settings/services/register",
+            [{"pnp": {"enabled": True, "username": username}}],
+            timeout=120,
         )
 
     def settings_enterprise_rootca(self, ca_chain: str) -> None:
@@ -222,9 +277,10 @@ class ManagerClient:
              "generateCSR": False, "personality": personality},
         )
 
-    def generate_csr(self, ip: str) -> str:
+    def generate_csr(self, ip: str) -> tuple[str, str]:
         data = self._post("/dataservice/certificate/generate/csr", {"deviceIP": ip}, timeout=120)
-        return data["data"][0]["deviceCSR"]
+        entry = data["data"][0]
+        return entry["deviceCSR"], entry["uuid"]
 
     def install_signed_cert(self, cert_pem: str) -> str:
         response = self._session.post(

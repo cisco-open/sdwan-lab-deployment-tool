@@ -74,7 +74,7 @@ def _sync_node_definitions(
             log.debug("%s: not found in CML, uploading", node_id)
             cml.definitions.upload_node_definition(definition)
             console.print(f"  [green]CREATED[/green] {node_id}")
-        elif definition != existing[node_id]:
+        elif definition != {k: v for k, v in existing[node_id].items() if k in definition}:
             log.debug("%s: definition differs, updating", node_id)
             if existing[node_id]["general"]["read_only"]:
                 cml.definitions.set_node_definition_read_only(node_id, False)
