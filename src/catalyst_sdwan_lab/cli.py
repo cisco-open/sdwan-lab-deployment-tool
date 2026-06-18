@@ -208,8 +208,28 @@ def deploy(
         Optional[Path],
         typer.Option("--serial-file", help="Custom .viptela file (org name extracted for file)"),
     ] = None,
+    pki: Annotated[
+        str, typer.Option("--pki", help="Certificate signing mode: enterprise or cisco")
+    ] = "enterprise",
+    proxy_ip: Annotated[
+        Optional[str],
+        typer.Option("--proxy-ip", envvar="PROXY_IP", help="HTTP proxy IP or hostname"),
+    ] = None,
+    proxy_port: Annotated[
+        str, typer.Option("--proxy-port", envvar="PROXY_PORT", help="HTTP proxy port")
+    ] = "80",
+    no_proxy: Annotated[
+        str,
+        typer.Option(
+            "--no-proxy", envvar="NO_PROXY",
+            help="Additional no-proxy entries (10.*, 172.*, 192.168.* are always excluded)",
+        ),
+    ] = "",
 ) -> None:
     """Deploy a Catalyst SD-WAN lab in CML."""
+    if pki not in ("enterprise", "cisco"):
+        log.error("--pki must be 'enterprise' or 'cisco', got: %s", pki)
+        raise typer.Exit(1)
     if manager_ip and manager_ip.lower().startswith("pat:"):
         log.error(
             "The 'pat:<port>' syntax is no longer supported. "
@@ -242,6 +262,10 @@ def deploy(
         retry=retry,
         patty=patty,
         serial_file=serial_file or DEFAULT_SERIAL_FILE,
+        pki=pki,  # type: ignore[arg-type]
+        proxy_ip=proxy_ip or "",
+        proxy_port=proxy_port,
+        no_proxy=no_proxy,
     )
 
 
@@ -444,8 +468,28 @@ def restore(
     retry: Annotated[
         bool, typer.Option("--retry", help="Resume from Manager boot, skipping lab import")
     ] = False,
+    pki: Annotated[
+        str, typer.Option("--pki", help="Certificate signing mode: enterprise or cisco")
+    ] = "enterprise",
+    proxy_ip: Annotated[
+        Optional[str],
+        typer.Option("--proxy-ip", envvar="PROXY_IP", help="HTTP proxy IP or hostname"),
+    ] = None,
+    proxy_port: Annotated[
+        str, typer.Option("--proxy-port", envvar="PROXY_PORT", help="HTTP proxy port")
+    ] = "80",
+    no_proxy: Annotated[
+        str,
+        typer.Option(
+            "--no-proxy", envvar="NO_PROXY",
+            help="Additional no-proxy entries (10.*, 172.*, 192.168.* are always excluded)",
+        ),
+    ] = "",
 ) -> None:
     """Restore a Catalyst SD-WAN lab from a backup archive."""
+    if pki not in ("enterprise", "cisco"):
+        log.error("--pki must be 'enterprise' or 'cisco', got: %s", pki)
+        raise typer.Exit(1)
     patty = _validate_manager_mode(manager_ip, manager_port, manager_mask, manager_gateway)
     cml_host, cml_user, cml_password = _cml_credentials()
     _restore.run(
@@ -466,6 +510,10 @@ def restore(
         delete_existing=delete_existing,
         retry=retry,
         patty=patty,
+        pki=pki,  # type: ignore[arg-type]
+        proxy_ip=proxy_ip or "",
+        proxy_port=proxy_port,
+        no_proxy=no_proxy,
     )
 
 

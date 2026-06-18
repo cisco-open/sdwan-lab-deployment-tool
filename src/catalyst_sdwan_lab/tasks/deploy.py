@@ -6,7 +6,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import typer
 from jinja2 import Environment, FileSystemLoader
@@ -67,16 +67,23 @@ def run(
     retry: bool,
     patty: bool,
     serial_file: Path,
+    pki: Literal["enterprise", "cisco"] = "enterprise",
+    proxy_ip: str = "",
+    proxy_port: str = "80",
+    no_proxy: str = "",
 ) -> None:
     if manager_password == "admin":
         log.error("Cannot use default credentials. Update Manager password and try again.")
         raise typer.Exit(1)
     try:
-        major, minor = (int(x) for x in version.split(".")[:2])
+        major, minor, patch = (int(x) for x in (version.split(".")[:3] + ["0", "0"])[:3])
     except ValueError:
-        major, minor = 0, 0
+        major, minor, patch = 0, 0, 0
     if (major, minor) < (20, 15):
         log.error("Minimum supported Manager version is 20.15. Got: %s", version)
+        raise typer.Exit(1)
+    if pki == "cisco" and (major, minor, patch) < (20, 18, 2):
+        log.error("Cisco PKI requires Manager version 20.18.2 or later. Got: %s", version)
         raise typer.Exit(1)
 
     try:
@@ -135,7 +142,11 @@ def run(
             )
             try:
                 progress.update(task, description="Configuring SD-WAN Manager...")
-                configure_manager(client, version, org_name, certs.chain)
+                configure_manager(
+                    client, version, org_name, certs.chain, pki=pki,
+                    on_status=lambda msg: progress.update(task, description=msg),
+                    proxy_ip=proxy_ip, proxy_port=proxy_port, no_proxy=no_proxy,
+                )
 
                 onboard_control_components(
                     client,
@@ -144,6 +155,7 @@ def run(
                     if ip_type == "v6"
                     else [("172.16.0.201", "vbond"), ("172.16.0.101", "vsmart")],
                     on_status=lambda msg: progress.update(task, description=msg),
+                    pki=pki,
                 )
 
                 progress.update(task, description="Uploading serial file...")

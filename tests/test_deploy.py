@@ -24,6 +24,7 @@ from catalyst_sdwan_lab.tasks.utils import (
     load_certs,
     onboard_control_components,
     resolve_image,
+    sign_device_cert,
 )
 
 
@@ -180,6 +181,44 @@ class TestConfigureManager:
         configure_manager(client, "20.15.1", "Org", "chain")
         client.get_workflows.assert_not_called()
 
+    def test_enterprise_pki_sets_cert_and_rootca(self) -> None:
+        client = MagicMock()
+        client.get_organization.return_value = "Org"
+        configure_manager(client, "20.15.1", "Org", "my-chain", pki="enterprise")
+        client.settings_certificate.assert_called_once_with("enterprise")
+        client.settings_enterprise_rootca.assert_called_once_with("my-chain")
+
+    def test_cisco_pki_calls_cisco_cert_settings(self) -> None:
+        client = MagicMock()
+        client.get_organization.return_value = "Org"
+        with patch("catalyst_sdwan_lab.tasks.utils._ensure_cisco_services"):
+            configure_manager(client, "20.15.1", "Org", "chain", pki="cisco")
+        client.settings_certificate.assert_called_once_with(
+            "cisco", validity_period="1Y", retrieve_interval="1"
+        )
+
+    def test_cisco_pki_skips_enterprise_rootca(self) -> None:
+        client = MagicMock()
+        client.get_organization.return_value = "Org"
+        with patch("catalyst_sdwan_lab.tasks.utils._ensure_cisco_services"):
+            configure_manager(client, "20.15.1", "Org", "chain", pki="cisco")
+        client.settings_enterprise_rootca.assert_not_called()
+
+    def test_proxy_ip_calls_settings_proxy(self) -> None:
+        client = MagicMock()
+        client.get_organization.return_value = "Org"
+        configure_manager(
+            client, "20.15.1", "Org", "chain",
+            proxy_ip="proxy.example.com", proxy_port="8080", no_proxy="*.internal",
+        )
+        client.settings_proxy.assert_called_once_with("proxy.example.com", "8080", "*.internal")
+
+    def test_no_proxy_when_proxy_ip_empty(self) -> None:
+        client = MagicMock()
+        client.get_organization.return_value = "Org"
+        configure_manager(client, "20.15.1", "Org", "chain")
+        client.settings_proxy.assert_not_called()
+
 
 class TestOnboardControlComponents:
     _V4_COMPONENTS = [("172.16.0.201", "vbond"), ("172.16.0.101", "vsmart")]
@@ -214,6 +253,15 @@ class TestOnboardControlComponents:
         client = self._make_client()
         onboard_control_components(client, MagicMock(), self._V4_COMPONENTS, on_status=MagicMock())
         client.get_controllers.assert_called_once()
+
+    def test_pki_passed_to_sign_device_cert(self) -> None:
+        client = self._make_client(pending_ips=["172.16.0.101"])
+        with patch("catalyst_sdwan_lab.tasks.utils.sign_device_cert") as mock_sign:
+            onboard_control_components(
+                client, MagicMock(), self._V4_COMPONENTS, on_status=MagicMock(), pki="cisco"
+            )
+        mock_sign.assert_called_once()
+        assert mock_sign.call_args.kwargs["pki"] == "cisco"
 
 
 class TestRestoreBasicConfiguration:
@@ -375,3 +423,43 @@ class TestFindLab:
         with pytest.raises(Exit):
             _find_lab(cml, "10.0.0.1", 8443)
 
+
+class TestSignDeviceCert:
+    def test_enterprise_generates_signs_and_installs(self) -> None:
+        client = MagicMock()
+        client.generate_csr.return_value = ("---CSR---", "uuid-1")
+        client.install_signed_cert.return_value = "task-1"
+        certs = MagicMock()
+        with patch("catalyst_sdwan_lab.tasks.utils.sign_csr", return_value="---CERT---"):
+            sign_device_cert(client, certs, "172.16.0.101")
+        client.generate_csr.assert_called_once_with("172.16.0.101")
+        client.install_signed_cert.assert_called_once_with("---CERT---")
+        client.wait_for_task.assert_called_once_with("task-1")
+
+    def test_cisco_returns_when_cert_installed(self) -> None:
+        client = MagicMock()
+        client.generate_csr.return_value = ("---CSR---", "uuid-101")
+        client.get_controllers.return_value = [
+            {"uuid": "uuid-101", "certInstallStatus": "Installed"}
+        ]
+        with patch("time.sleep"):
+            sign_device_cert(client, MagicMock(), "172.16.0.101", pki="cisco")
+        client.install_signed_cert.assert_not_called()
+        client.get_controllers.assert_called_once()
+
+    def test_cisco_raises_on_timeout(self) -> None:
+        client = MagicMock()
+        client.generate_csr.return_value = ("---CSR---", "uuid-101")
+        client.get_controllers.return_value = [
+            {"uuid": "uuid-101", "certInstallStatus": "Pending"}
+        ]
+        with patch("time.sleep"), patch("time.time", side_effect=[0, 0, 301]):
+            with pytest.raises(ManagerAPIError, match="Certificate not installed"):
+                sign_device_cert(client, MagicMock(), "172.16.0.101", pki="cisco")
+
+    def test_enterprise_wraps_connection_error(self) -> None:
+        import requests
+        client = MagicMock()
+        client.generate_csr.side_effect = requests.exceptions.ConnectionError("down")
+        with pytest.raises(ManagerAPIError, match="Certificate signing failed"):
+            sign_device_cert(client, MagicMock(), "172.16.0.101")

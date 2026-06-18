@@ -163,7 +163,7 @@ def run(
                             "cat-sdwan-edge" if edge_type == "sdwan" else "cat-sdwan-edge-sdrouting"
                         )
                         cloud_init = _render_cloud_init(
-                            template_key, root_ca=certs.chain, org_name=org_name,
+                            template_key, org_name=org_name,
                             validator_fqdn=validator_fqdn, config=config_text, uuid=uuid,
                         )
                         _update_node_configuration(topology, node.label, cloud_init)

@@ -11,7 +11,7 @@ from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import httpx
 import requests
@@ -195,9 +195,24 @@ def resolve_image(cml: ClientLibrary, node_type: str, version: str) -> str:
     raise typer.Exit(1)
 
 
-def sign_device_cert(client: ManagerClient, certs: Certs, device_ip: str) -> None:
+def sign_device_cert(
+    client: ManagerClient,
+    certs: Certs,
+    device_ip: str,
+    *,
+    pki: Literal["enterprise", "cisco"] = "enterprise",
+) -> None:
     try:
-        csr = client.generate_csr(device_ip)
+        csr, uuid = client.generate_csr(device_ip)
+        if pki == "cisco":
+            deadline = time.time() + 300
+            while time.time() < deadline:
+                for ctrl in client.get_controllers():
+                    if ctrl.get("uuid") == uuid and ctrl.get("certInstallStatus") == "Installed":
+                        log.info("Certificate installed for %s", device_ip)
+                        return
+                time.sleep(10)
+            raise ManagerAPIError(f"Certificate not installed for {device_ip} within 300s")
         cert = sign_csr(certs.cert, certs.key, csr)
         task_id = client.install_signed_cert(cert)
         client.wait_for_task(task_id)
@@ -398,15 +413,83 @@ def _query_boot_diagnostic(ip: str, port: int) -> tuple[int, int] | None:
     return None
 
 
+def _cisco_services_registered(services: list[dict[str, Any]]) -> bool:
+    return any(s.get("user_id", "—") not in ("—", "", None) for s in services)
+
+
+def _ensure_cisco_services(
+    client: ManagerClient, on_status: Callable[[str], None] | None = None
+) -> None:
+    if _cisco_services_registered(client.get_cisco_services()):
+        log.info("Cisco services already registered")
+        return
+
+    try:
+        reg = client.initiate_cisco_account_registration()
+    except requests.exceptions.RequestException as e:
+        raise ManagerAPIError(
+            "Cannot reach Cisco cloud services to initiate account registration. "
+            "Check that Manager has internet connectivity and try again."
+        ) from e
+    user_code = reg["user_code"]
+    url = reg["verification_uri_complete"]
+    expires_in = reg.get("expires_in", 600)
+
+    console.print(
+        f"\nCisco account registration required. Open this URL in your browser:\n"
+        f"  [bold cyan]{url}[/bold cyan]\n"
+    )
+    if on_status:
+        on_status("Waiting for Cisco account registration in browser...")
+
+    deadline = time.time() + expires_in
+    while time.time() < deadline:
+        if client.poll_cisco_account_token(user_code):
+            break
+        time.sleep(5)
+    else:
+        raise ManagerAPIError("Cisco account registration timed out")
+
+    if on_status:
+        on_status("Registering Cisco services...")
+    services = client.get_cisco_services()
+    if not _cisco_services_registered(services):
+        raise ManagerAPIError("Cisco services not available after registration")
+    username = services[0]["user_id"]
+    try:
+        client.register_cisco_services(username)
+    except requests.exceptions.RequestException as e:
+        raise ManagerAPIError(
+            "Cannot reach Cisco cloud services to register services. "
+            "Check that Manager has internet connectivity and try again."
+        ) from e
+    log.info("Cisco services registered for %s", username)
+
+
 def configure_manager(
-    client: ManagerClient, version: str, org_name: str, ca_chain: str
+    client: ManagerClient,
+    version: str,
+    org_name: str,
+    ca_chain: str,
+    *,
+    pki: Literal["enterprise", "cisco"] = "enterprise",
+    on_status: Callable[[str], None] | None = None,
+    proxy_ip: str = "",
+    proxy_port: str = "80",
+    no_proxy: str = "",
 ) -> None:
     if client.get_organization() is None:
         client.settings_organization(org_name)
     client.settings_device(VALIDATOR_FQDN)
     client.settings_vedge_cloud("vmanage")
-    client.settings_certificate("enterprise")
-    client.settings_enterprise_rootca(ca_chain)
+    if proxy_ip:
+        client.settings_proxy(proxy_ip, proxy_port, no_proxy)
+    if pki == "cisco":
+        _ensure_cisco_services(client, on_status)
+        client.settings_certificate("cisco", validity_period="1Y", retrieve_interval="1")
+    else:
+        client.settings_certificate("enterprise")
+        client.settings_enterprise_rootca(ca_chain)
     client.settings_data_stream(enable=True, ip_type="systemIp", server_hostname="systemIp", vpn=0)
     client.settings_cloudx("on")
     log.info("SD-WAN Manager settings configured")
@@ -468,6 +551,8 @@ def onboard_control_components(
     certs: Certs,
     components: list[tuple[str, str]],
     on_status: Callable[[str], None],
+    *,
+    pki: Literal["enterprise", "cisco"] = "enterprise",
 ) -> None:
     total = len(components)
     for i, (ip, personality) in enumerate(components, 1):
@@ -488,7 +573,7 @@ def onboard_control_components(
         if d.get("serialNumber") == "No certificate installed" and d.get("deviceIP")
     ]
     with ThreadPoolExecutor() as pool:
-        futures = [pool.submit(sign_device_cert, client, certs, ip) for ip in pending]
+        futures = [pool.submit(sign_device_cert, client, certs, ip, pki=pki) for ip in pending]
         for f in futures:
             f.result()
 

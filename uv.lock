@@ -951,14 +951,14 @@ wheels = [
 
 [[package]]
 name = "virl2-client"
-version = "2.9.1"
+version = "2.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/96/14/c0852bb495fb7adcd76f22e230ab1bd969a132f3acead9df4b1ec959f0a4/virl2_client-2.9.1.tar.gz", hash = "sha256:dfa470a5c2c7a07d3269d0d9de09e55dd474a7b170ea3e64994282de90d2c5d9", size = 78089, upload-time = "2025-11-20T19:13:46.728Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/46/aea415292ae5a4f09bd60b52f34d2b8c9364d7ecb11bb22c20e48c274d6e/virl2_client-2.10.0.tar.gz", hash = "sha256:c880ca055ba2b65ba03a388dc529bab60344332ca1220d08ad4bdb05753404ed", size = 80250, upload-time = "2026-05-15T16:29:02.958Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a1/17/781dbf08ac3fd0c611e58b6aa764d2e59c0734211aed863e196e84160c49/virl2_client-2.9.1-py3-none-any.whl", hash = "sha256:e28f41ac99c37177750de9b245f6dcccd3912f2be9c48a6b1f86ecb8a5339297", size = 98372, upload-time = "2025-11-20T19:13:45.176Z" },
+    { url = "https://files.pythonhosted.org/packages/ee/71/80c258110403fa4ae85914cc3da42ebea68b4388ccbd5e520ec756a2c776/virl2_client-2.10.0-py3-none-any.whl", hash = "sha256:3e0147dce5877b69790013685425d9cc25c3ca3b713010d8d209d9f3273c3d6a", size = 104645, upload-time = "2026-05-15T16:29:09.675Z" },
 ]
 
 [[package]]
