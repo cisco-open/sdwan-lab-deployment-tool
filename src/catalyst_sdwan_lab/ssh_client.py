@@ -252,6 +252,7 @@ def extract_edge_config(
             # Flush any stale prompt before sending the next command
             ch.send(b"\r\n")
             ssh_recv(ch, "#", timeout=10.0)
+            ssh_drain(ch)
             ch.send(b"show sd-routing certificate serial\r\n")
 
         serial_out = ssh_recv(ch, "#", timeout=30.0)
