@@ -419,13 +419,12 @@ def run_sdrouting(
             for node in nodes:
                 progress.update(task, description="Waiting for SD-Routing edges to boot...")
                 node.wait_until_converged()
-                if int(version.split(".")[0]) < 26:
-                    progress.update(task, description=f"Checking default route on {node.label}...")
-                    if fix_sdrouting_default_route(
-                        cml_host, cml_user, cml_password, lab.title or lab_name, node.label,
-                        console=console,
-                    ):
-                        node.wait_until_converged()
+                progress.update(task, description=f"Checking default route on {node.label}...")
+                if fix_sdrouting_default_route(
+                    cml_host, cml_user, cml_password, lab.title or lab_name, node.label,
+                    console=console,
+                ):
+                    node.wait_until_converged()
 
             progress.update(
                 task, description=f"Waiting for SD-Routing edges to onboard (0/{count})..."

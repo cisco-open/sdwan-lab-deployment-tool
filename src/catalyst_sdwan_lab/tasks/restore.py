@@ -185,9 +185,6 @@ def run(
                         continue
                     if "SD-Routing : true" not in (node.configuration or ""):
                         continue
-                    img_version = (node.image_definition or "").removeprefix("cat-sdwan-edge-")
-                    if not img_version or int(img_version.split(".")[0]) >= 26:
-                        continue
                     progress.update(task, description=f"Checking default route on {node.label}...")
                     node.wait_until_converged()
                     if fix_sdrouting_default_route(
