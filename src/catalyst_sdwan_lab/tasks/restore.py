@@ -111,6 +111,15 @@ def run(
             progress.update(task, description="Removing existing lab...")
             _delete_lab(cml_host, cml_user, cml_password, lab_name, force=True)
 
+        if not retry and not delete_existing:
+            if any(lab.title == lab_name for lab in cml.all_labs(show_all=True)):
+                log.error(
+                    "Lab '%s' already exists. Use --retry to resume, "
+                    "--delete-existing to replace, or choose a different name.",
+                    lab_name,
+                )
+                raise typer.Exit(1)
+
         try:
             if retry:
                 progress.update(task, description="Locating existing lab...")
