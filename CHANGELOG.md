@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 3.0.0 [unreleased]
+# Catalyst SD-WAN Lab 3.0.0 [Jun 22, 2026]
 
 Complete rewrite. The tool is now dependency-minimal with no catalystwan SDK, no pyATS, and no pyOpenSSL.
 
