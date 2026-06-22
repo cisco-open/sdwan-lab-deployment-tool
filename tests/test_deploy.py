@@ -102,6 +102,10 @@ class TestResolveImage:
         with pytest.raises(Exit):
             resolve_image(cml, "cat-sdwan-manager", "20.15.2")
 
+    def test_dash_separated_version(self) -> None:
+        cml = self._make_cml(["cat-sdwan-manager-20-18-2-1"])
+        assert resolve_image(cml, "cat-sdwan-manager", "20.18.2.1") == "cat-sdwan-manager-20-18-2-1"
+
     def test_no_available_images_exits(self) -> None:
         cml = self._make_cml([])
         with pytest.raises(Exit):
