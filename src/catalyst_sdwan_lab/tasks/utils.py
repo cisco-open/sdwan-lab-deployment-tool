@@ -175,6 +175,13 @@ def resolve_image(cml: ClientLibrary, node_type: str, version: str) -> str:
     # CML image IDs sometimes use zero-padded segments (26.01.01); accept un-padded input too
     if normalized != version and f"{node_type}-{normalized}" in available:
         return f"{node_type}-{normalized}"
+    # CML image IDs sometimes use dashes instead of dots (e.g. 20-18-2-1)
+    dash_version = version.replace(".", "-")
+    if f"{node_type}-{dash_version}" in available:
+        return f"{node_type}-{dash_version}"
+    normalized_dash = normalized.replace(".", "-")
+    if normalized_dash != dash_version and f"{node_type}-{normalized_dash}" in available:
+        return f"{node_type}-{normalized_dash}"
     if node_type in ("cat-sdwan-controller", "cat-sdwan-validator"):
         parts = version.split(".")
         if len(parts) == 4 and parts[-1] == "1":
@@ -182,10 +189,10 @@ def resolve_image(cml: ClientLibrary, node_type: str, version: str) -> str:
         else:
             parts[-1] = str(int(parts[-1]) - 1)
             fallback_version = ".".join(parts)
-        fallback = f"{node_type}-{fallback_version}"
-        if fallback in available:
-            log.debug("%s: exact version not found, using %s", node_type, fallback)
-            return fallback
+        for fv in (fallback_version, fallback_version.replace(".", "-")):
+            if f"{node_type}-{fv}" in available:
+                log.debug("%s: exact version not found, using %s", node_type, fv)
+                return f"{node_type}-{fv}"
     label = node_type.split("-")[2].title()
     versions = [img_id[len(node_type) + 1:] for img_id in available]
     log.error(

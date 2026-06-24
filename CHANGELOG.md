@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 3.0.1 [unreleased]
+
+- Fix issue where `deploy`, `add`, and `restore` tasks fail to find software images when CML image IDs use dashes instead of dots (e.g. `20-18-2-1` instead of `20.18.2.1`)
+
 # Catalyst SD-WAN Lab 3.0.0 [Jun 22, 2026]
 
 Complete rewrite. The tool is now dependency-minimal with no catalystwan SDK, no pyATS, and no pyOpenSSL.
