@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 3.0.2 [unreleased]
+
+- Fix backup task failing to extract config from SD-WAN and SD-Routing edges when `#` present in interface description
+
 # Catalyst SD-WAN Lab 3.0.1 [Jun 24, 2026]
 
 - Fix issue where `deploy`, `add`, and `restore` tasks fail to find software images when CML image IDs use dashes instead of dots (e.g. `20-18-2-1` instead of `20.18.2.1`)
