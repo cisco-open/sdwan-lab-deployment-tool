@@ -235,31 +235,37 @@ def extract_edge_config(
         ch.send(b"terminal length 0\r\n")
         ssh_recv(ch, "#", timeout=10.0)
 
-        ch.send(b"show sdwan run\r\n")
-        out = ssh_recv(ch, "#", timeout=CONFIG_TIMEOUT)
+        ch.send(b"show version | include mode\r\n")
+        mode_out = ssh_recv(ch, "#", timeout=30.0)
 
-        m = re.search(r"^system\b", out, re.MULTILINE)
-        if m:
-            edge_type = "sdwan"
-            end = out.rfind("\n#")
-            config = out[m.start():end if end != -1 else len(out)].strip()
-            ch.send(b"show sdwan certificate serial\r\n")
-        else:
+        if "Autonomous" in mode_out:
             edge_type = "sdrouting"
+            ch.send(b"show sd-routing certificate serial\r\n")
+            serial_out = ssh_recv(ch, "#", timeout=30.0)
+            m = re.search(r"Chassis\s+number:\s+([\w-]+)", serial_out, re.IGNORECASE)
+            if not m:
+                log.debug("%s: certificate serial output: %r", node_label, serial_out)
+                raise RuntimeError(f"Could not find UUID in output from {node_label}")
+            uuid = m.group(1)
             ch.send(b"show run\r\n")
             out = ssh_recv(ch, "#", timeout=CONFIG_TIMEOUT)
             config = _strip_sdrouting_config(out)
-            # Flush any stale prompt before sending the next command
-            ch.send(b"\r\n")
-            ssh_recv(ch, "#", timeout=10.0)
-            ssh_drain(ch)
-            ch.send(b"show sd-routing certificate serial\r\n")
+        else:
+            edge_type = "sdwan"
+            ch.send(b"show sdwan certificate serial\r\n")
+            serial_out = ssh_recv(ch, "#", timeout=30.0)
+            m = re.search(r"Chassis\s+number:\s+([\w-]+)", serial_out, re.IGNORECASE)
+            if not m:
+                log.debug("%s: certificate serial output: %r", node_label, serial_out)
+                raise RuntimeError(f"Could not find UUID in output from {node_label}")
+            uuid = m.group(1)
+            ch.send(b"show sdwan run\r\n")
+            out = ssh_recv(ch, "#", timeout=CONFIG_TIMEOUT)
+            sm = re.search(r"^system\b", out, re.MULTILINE)
+            end = out.rfind("\n#")
+            config = out[sm.start() if sm else 0 : end if end != -1 else None].strip()
 
-        serial_out = ssh_recv(ch, "#", timeout=30.0)
-        m = re.search(r"Chassis\s+number:\s+([\w-]+)", serial_out, re.IGNORECASE)
-        if not m:
-            raise RuntimeError(f"Could not find UUID in output from {node_label}")
-        return edge_type, config, m.group(1)
+        return edge_type, config, uuid
 
 
 def _strip_sdrouting_config(raw: str) -> str:
