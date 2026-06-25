@@ -18,9 +18,13 @@ dependencies = [
     "cisco-sdwan>=1.28",
 ]
 
+[project.optional-dependencies]
+mcp = ["mcp[cli]>=1.0.0"]
+
 [project.scripts]
 sdwan-lab = "catalyst_sdwan_lab.cli:app"
 csdwan = "catalyst_sdwan_lab.cli:app"
+csdwan-mcp = "catalyst_sdwan_lab.mcp_server:main"
 
 [build-system]
 requires = ["uv_build>=0.11.22,<0.12"]
@@ -43,4 +47,5 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.15.18",
     "websocket-client>=1.9.0",
+    "mcp[cli]>=1.0.0",
 ]
