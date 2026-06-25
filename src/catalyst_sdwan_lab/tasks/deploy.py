@@ -102,17 +102,21 @@ def run(
         transient=True,
     ) as progress:
         task = progress.add_task("Connecting to CML...")
+        log.info("[1/11] Connecting to CML at %s...", cml_host)
         cml = connect_cml(cml_host, cml_user, cml_password)
 
         progress.update(task, description="Checking SD-WAN images...")
+        log.info("[2/11] Checking SD-WAN images for version %s...", version)
         images = _check_images(cml, version)
 
         try:
             if retry:
                 progress.update(task, description="Locating existing lab...")
+                log.info("[3/11] Locating existing lab...")
                 _find_lab(cml, manager_ip, manager_port)
             else:
                 progress.update(task, description=f"Creating lab {lab_name}...")
+                log.info("[3/11] Creating lab '%s' and booting control plane...", lab_name)
                 _create_lab(
                     cml,
                     lab_name=lab_name,
@@ -132,6 +136,10 @@ def run(
                 )
 
             progress.update(task, description="Waiting for SD-WAN Manager...")
+            log.info(
+                "[4/11] Waiting for SD-WAN Manager to come online "
+                "(this can take several minutes)..."
+            )
             client = wait_for_manager(
                 manager_ip,
                 manager_port,
@@ -142,12 +150,14 @@ def run(
             )
             try:
                 progress.update(task, description="Configuring SD-WAN Manager...")
+                log.info("[5/11] Configuring SD-WAN Manager (org, certificates, PKI=%s)...", pki)
                 configure_manager(
                     client, version, org_name, certs.chain, pki=pki,
                     on_status=lambda msg: progress.update(task, description=msg),
                     proxy_ip=proxy_ip, proxy_port=proxy_port, no_proxy=no_proxy,
                 )
 
+                log.info("[6/11] Onboarding control components (validator, controller)...")
                 onboard_control_components(
                     client,
                     certs,
@@ -159,18 +169,23 @@ def run(
                 )
 
                 progress.update(task, description="Uploading serial file...")
+                log.info("[7/11] Uploading serial file...")
                 client.upload_serial_file(serial_file)
 
                 progress.update(task, description="Importing basic configuration...")
+                log.info("[8/11] Importing basic configuration...")
                 _restore_basic_configuration(client, ip_type)
 
                 progress.update(task, description="Importing controller templates...")
+                log.info("[9/11] Importing controller templates...")
                 template_id = _import_controller_templates(client, ip_type)
 
                 progress.update(task, description="Attaching controller template...")
+                log.info("[10/11] Attaching controller template...")
                 _attach_controller_template(client, ip_type, template_id)
 
                 progress.update(task, description="Triggering network rediscovery...")
+                log.info("[11/11] Triggering network rediscovery...")
                 trigger_rediscovery(client)
             except ManagerAPIError as e:
                 log.error("%s", e)
