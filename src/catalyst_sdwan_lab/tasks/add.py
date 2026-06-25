@@ -85,13 +85,16 @@ def run_control_component(
         transient=True,
     ) as progress:
         task = progress.add_task("Connecting to CML...")
+        log.info("Connecting to CML at %s...", cml_host)
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
+        log.info("Checking lab '%s' and %s image %s...", lab_name, device_type, version)
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, node_def, version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
+        log.info("Connecting to SD-WAN Manager...")
         client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
             pki = client.get_certificate_signing()
@@ -111,6 +114,7 @@ def run_control_component(
                     task,
                     description=f"Adding {label_prefix}{num} to CML ({i + 1}/{count})...",
                 )
+                log.info("Adding %s%s to CML (%d/%d)...", label_prefix, num, i + 1, count)
                 extra = (
                     {"controller_num": num, "validator_fqdn": VALIDATOR_FQDN}
                     if is_ctrl
@@ -144,6 +148,7 @@ def run_control_component(
                 _add_to_manager_retrying(client, ip, personality, timeout=_BOOT_TIMEOUT)
 
             progress.update(task, description=f"Waiting for {device_type} CSRs...")
+            log.info("Waiting for %s CSRs and signing certificates...", device_type)
             _wait_for_csrs(client, device_ips, timeout=_CSR_POLL_TIMEOUT)
 
             progress.update(task, description=f"Signing {device_type} certificates...")
@@ -171,6 +176,7 @@ def run_control_component(
                     cml_host, cml_user, cml_password, lab, lab_name, device_ips,
                 )
             progress.update(task, description="Triggering network rediscovery...")
+            log.info("Triggering network rediscovery...")
             trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
@@ -205,16 +211,20 @@ def run_edge(
         transient=True,
     ) as progress:
         task = progress.add_task("Connecting to CML...")
+        log.info("Connecting to CML at %s...", cml_host)
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
+        log.info("Checking lab '%s' and edge image %s...", lab_name, version)
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
+        log.info("Connecting to SD-WAN Manager...")
         client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
             progress.update(task, description="Checking available edge devices...")
+            log.info("Checking available edge devices...")
             vedges = client.get_vedges()
             free_uuids = [
                 v["uuid"]
@@ -266,6 +276,7 @@ def run_edge(
                 devices_vars.append({"device-id": uuid, "variables": variables})
 
             progress.update(task, description="Associating config group...")
+            log.info("Deploying edge_basic config group to %d device(s)...", count)
             client.associate_config_group(config_group_id, uuids)
             progress.update(task, description="Setting device variables...")
             client.set_config_group_variables(config_group_id, devices_vars)
@@ -274,6 +285,7 @@ def run_edge(
             client.wait_for_task(task_id)
 
             progress.update(task, description="Fetching bootstrap configs...")
+            log.info("Fetching bootstrap configs and adding edges to CML...")
             bootstrap_configs = {uuid: client.get_bootstrap_config(uuid) for uuid in uuids}
 
             nodes: list[Node] = []
@@ -281,6 +293,7 @@ def run_edge(
                 progress.update(
                     task, description=f"Adding Edge{num} to CML ({i}/{count})..."
                 )
+                log.info("Adding Edge%s to CML (%d/%d)...", num, i, count)
                 node = _add_wan_edge_node(
                     lab, f"Edge{num}", image_id, bootstrap_configs[uuid], True, cpus, ram,
                 )
@@ -292,17 +305,22 @@ def run_edge(
                     task, description=f"Waiting for {'edges' if count > 1 else 'edge'} to boot..."
                 )
                 node.wait_until_converged()
+            log.info("Edges booted; waiting for onboarding...")
 
             progress.update(task, description=f"Waiting for edges to onboard (0/{count})...")
             wait_for_edges_onboarded(
                 client,
                 uuids,
                 timeout=_BOOT_TIMEOUT,
-                on_progress=lambda done, total: progress.update(
-                    task, description=f"Waiting for edges to onboard ({done}/{total})..."
+                on_progress=lambda done, total: (
+                    progress.update(
+                        task, description=f"Waiting for edges to onboard ({done}/{total})..."
+                    ),
+                    log.info("Edges onboarded: %d/%d", done, total),
                 ),
             )
             progress.update(task, description="Triggering network rediscovery...")
+            log.info("Triggering network rediscovery...")
             trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
@@ -332,13 +350,16 @@ def run_sdrouting(
         transient=True,
     ) as progress:
         task = progress.add_task("Connecting to CML...")
+        log.info("Connecting to CML at %s...", cml_host)
         cml = connect_cml(cml_host, cml_user, cml_password)
         progress.update(task, description="Checking lab and images...")
+        log.info("Checking lab '%s' and SD-Routing image %s...", lab_name, version)
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
         progress.update(task, description="Connecting to SD-WAN Manager...")
+        log.info("Connecting to SD-WAN Manager...")
         client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
             progress.update(task, description="Checking available SD-Routing devices...")
@@ -390,6 +411,7 @@ def run_sdrouting(
                 devices_vars.append({"device-id": uuid, "variables": variables})
 
             progress.update(task, description="Associating config group...")
+            log.info("Deploying sdrouting_basic config group to %d device(s)...", count)
             client.associate_config_group(config_group_id, uuids)
             progress.update(task, description="Setting device variables...")
             client.set_config_group_variables(
@@ -400,6 +422,7 @@ def run_sdrouting(
             client.wait_for_task(task_id)
 
             progress.update(task, description="Fetching bootstrap configs...")
+            log.info("Fetching bootstrap configs and adding SD-Routing edges to CML...")
             bootstrap_configs = {
                 uuid: client.get_bootstrap_config(uuid, wanif="GigabitEthernet1")
                 for uuid in uuids
@@ -410,6 +433,7 @@ def run_sdrouting(
                 progress.update(
                     task, description=f"Adding SD-Edge{num} to CML ({i}/{count})..."
                 )
+                log.info("Adding SD-Edge%s to CML (%d/%d)...", num, i, count)
                 node = _add_wan_edge_node(
                     lab, f"SD-Edge{num}", image_id, bootstrap_configs[uuid], False, cpus, ram,
                 )
@@ -426,6 +450,7 @@ def run_sdrouting(
                 ):
                     node.wait_until_converged()
 
+            log.info("SD-Routing edges booted; waiting for onboarding...")
             progress.update(
                 task, description=f"Waiting for SD-Routing edges to onboard (0/{count})..."
             )
@@ -433,12 +458,16 @@ def run_sdrouting(
                 client,
                 uuids,
                 timeout=_BOOT_TIMEOUT,
-                on_progress=lambda done, total: progress.update(
-                    task,
-                    description=f"Waiting for SD-Routing edges to onboard ({done}/{total})...",
+                on_progress=lambda done, total: (
+                    progress.update(
+                        task,
+                        description=f"Waiting for SD-Routing edges to onboard ({done}/{total})...",
+                    ),
+                    log.info("SD-Routing edges onboarded: %d/%d", done, total),
                 ),
             )
             progress.update(task, description="Triggering network rediscovery...")
+            log.info("Triggering network rediscovery...")
             trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
