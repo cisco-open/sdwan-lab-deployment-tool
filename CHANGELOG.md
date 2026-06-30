@@ -8,7 +8,10 @@
   - Certificates signed automatically after each node reaches Ready state (enterprise and Cisco PKI)
 - Update `backup` to capture cluster node personas from the live cluster management API and embed them in each Manager's backed-up cloud-init
 - Update `restore` to re-enroll secondary Manager nodes into the cluster after Sastre restore
-- Refactor progress reporting across all tasks to use a shared `task_progress` context manager and `make_updater` helper; every spinner update now also emits a `log.info` event, making task progress visible to log consumers (e.g. MCP server)
+- Refactor progress reporting across all tasks to use a shared `task_progress` context manager and `make_updater` helper; every spinner update now also emits a `log.info` event, making task progress visible to log consumers
+- Add optional MCP server (`pip install catalyst-sdwan-lab[mcp]`, entry point `csdwan-mcp`)
+  - Exposes all tasks as MCP tools an LLM agent (VS Code Copilot, opencode, …) can drive conversationally
+  - Long-running tools (deploy, add_devices, restore, images_upload) run as background jobs and return a `job_id` immediately; agent polls progress via `job_status`
 
 # Catalyst SD-WAN Lab 3.0.1 [Jun 24, 2026]
 

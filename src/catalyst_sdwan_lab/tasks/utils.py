@@ -7,6 +7,7 @@ import os
 import re
 import tarfile
 import time
+import webbrowser
 from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
@@ -444,12 +445,22 @@ def _ensure_cisco_services(
     url = reg["verification_uri_complete"]
     expires_in = reg.get("expires_in", 600)
 
+    log.info(
+        "ACTION REQUIRED: Open this URL in your browser to register the Cisco account: %s "
+        "(expires in %ss)",
+        url, expires_in,
+    )
+    try:
+        if webbrowser.open(url):
+            log.info("Opened the registration URL in your default browser.")
+    except Exception as e:  # pragma: no cover - browser launch is best-effort
+        log.debug("Could not auto-open browser: %s", e)
     console.print(
         f"\nCisco account registration required. Open this URL in your browser:\n"
         f"  [bold cyan]{url}[/bold cyan]\n"
     )
     if on_status:
-        on_status("Waiting for Cisco account registration in browser...")
+        on_status(f"Waiting for Cisco account registration — open {url}")
 
     deadline = time.time() + expires_in
     while time.time() < deadline:

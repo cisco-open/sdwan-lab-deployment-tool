@@ -385,11 +385,89 @@ csdwan sign [OPTIONS] <csr-file>
 
 ---
 
+## MCP Server (optional)
+
+An optional [Model Context Protocol](https://modelcontextprotocol.io) server lets an LLM agent (VS Code Copilot, opencode, Claude Desktop, …) drive your SD-WAN lab conversationally — deploy a lab, add devices, run a backup, all through natural language.
+
+### Installing with MCP support
+
+```sh
+uv tool install "catalyst-sdwan-lab[mcp]"
+```
+
+Or with pip:
+
+```sh
+pip install "catalyst-sdwan-lab[mcp]"
+```
+
+### Starting the server
+
+```sh
+csdwan-mcp
+```
+
+The server reads credentials from the same environment variables as the CLI (`CML_IP`, `CML_USER`, `CML_PASSWORD`, `LAB_NAME`, `MANAGER_USER`, `MANAGER_PASSWORD`).
+
+### Configuring VS Code Copilot
+
+Add to your `.vscode/mcp.json` (or user settings):
+
+```json
+{
+  "servers": {
+    "sdwan-lab": {
+      "type": "stdio",
+      "command": "csdwan-mcp",
+      "env": {
+        "CML_IP": "your-cml-host",
+        "CML_USER": "admin",
+        "CML_PASSWORD": "...",
+        "LAB_NAME": "my-lab",
+        "MANAGER_USER": "sdwan",
+        "MANAGER_PASSWORD": "..."
+      }
+    }
+  }
+}
+```
+
+### Configuring OpenCode
+
+Add to your `opencode.json` (`~/.config/opencode/opencode.json` globally, or `<project>/.opencode/opencode.json` per-project):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "sdwan-lab": {
+      "type": "local",
+      "command": ["csdwan-mcp"],
+      "enabled": true,
+      "environment": {
+        "CML_IP": "your-cml-host",
+        "CML_USER": "admin",
+        "CML_PASSWORD": "...",
+        "LAB_NAME": "my-lab",
+        "MANAGER_USER": "sdwan",
+        "MANAGER_PASSWORD": "..."
+      }
+    }
+  }
+}
+```
+
+### Background jobs
+
+Long-running tools (`deploy`, `add_devices`, `restore_lab`, `images_upload`) return a `job_id` immediately. Use `job_status(job_id=...)` to poll for progress events and the final result. Short operations (`setup`, `delete_lab`, `backup_lab`, `sign_csr`) block until complete and stream progress inline.
+
+---
+
 ## Limitations and Scale
 
 Per CML lab:
 
-- 1 SD-WAN Manager (cluster not supported)
+- 6 SD-WAN Managers
 - 8 SD-WAN Validators
 - 12 SD-WAN Controllers
 - 20 SD-WAN Edges

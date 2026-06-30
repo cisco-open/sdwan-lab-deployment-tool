@@ -89,7 +89,7 @@ def upload(cml_host: str, cml_user: str, cml_password: str, images_dir: Path) ->
             for path, node_type, version in candidates:
                 norm_id = f"{node_type}-{version}"
                 if norm_id in existing:
-                    log.debug("%s: already exists, skipping", norm_id)
+                    log.info("Skipping %s (already exists)", norm_id)
                     console.print(f"  [dim]SKIPPED[/dim]  {norm_id} (already exists)")
                 else:
                     if node_defs is None:
@@ -97,7 +97,7 @@ def upload(cml_host: str, cml_user: str, cml_password: str, images_dir: Path) ->
                     if node_type not in node_defs:
                         log.error("Node definition '%s' not found. Run 'setup' first.", node_type)
                         raise typer.Exit(1)
-                    log.debug("Uploading %s as %s", path.name, norm_id)
+                    log.info("Starting upload of %s (%s)...", norm_id, path.name)
                     task = progress.add_task(f"Uploading {path.name}", total=path.stat().st_size)
                     upload_image_file(
                         cml._session,
@@ -112,6 +112,7 @@ def upload(cml_host: str, cml_user: str, cml_password: str, images_dir: Path) ->
                         "label": label,
                         "disk_image": path.name,
                     })
+                    log.info("Uploaded %s", norm_id)
                     console.print(f"  [green]UPLOADED[/green] {norm_id}")
         finally:
             cml.logout()
