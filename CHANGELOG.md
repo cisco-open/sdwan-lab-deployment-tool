@@ -1,6 +1,14 @@
-# Catalyst SD-WAN Lab 3.0.2 [unreleased]
+# Catalyst SD-WAN Lab 3.1.0 [unreleased]
 
 - Fix backup task failing to extract config from SD-WAN and SD-Routing edges when `#` present in interface description
+- Add Manager clustering support via `csdwan add managers <version>`
+  - Deploys additional Manager nodes into the CML topology with a dedicated Cluster switch
+  - Configures cluster IP on the primary Manager and enrolls new nodes one-by-one
+  - Supports `--persona` flag (`compute-and-data` default, `compute`, `data`)
+  - Certificates signed automatically after each node reaches Ready state (enterprise and Cisco PKI)
+- Update `backup` to capture cluster node personas from the live cluster management API and embed them in each Manager's backed-up cloud-init
+- Update `restore` to re-enroll secondary Manager nodes into the cluster after Sastre restore
+- Refactor progress reporting across all tasks to use a shared `task_progress` context manager and `make_updater` helper; every spinner update now also emits a `log.info` event, making task progress visible to log consumers (e.g. MCP server)
 
 # Catalyst SD-WAN Lab 3.0.1 [Jun 24, 2026]
 

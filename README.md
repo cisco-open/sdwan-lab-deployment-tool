@@ -210,7 +210,7 @@ csdwan add [OPTIONS] <count> <device-type> <version>
 | Argument | Description |
 |---|---|
 | `count` | Number of devices to add |
-| `device-type` | `controller(s)`, `validator(s)`, `edge(s)`, `sdrouting` |
+| `device-type` | `manager(s)`, `controller(s)`, `validator(s)`, `edge(s)`, `sdrouting` |
 | `version` | SD-WAN software version |
 
 **Options:**
@@ -220,17 +220,22 @@ csdwan add [OPTIONS] <count> <device-type> <version>
 | `--lab` | `LAB_NAME` | CML lab name |
 | `--manager-user` | `MANAGER_USER` | Manager username (default: `admin`) |
 | `--manager-pass` | `MANAGER_PASSWORD` | Manager password |
+| `--persona` | | Manager cluster persona: `compute-and-data` (default), `compute`, `data` — only for `manager(s)` |
 | `--cpus` | | Override CPU count for each added node |
 | `--ram` | | Override RAM in MB for each added node |
 
 **Examples:**
 
 ```sh
+csdwan add 2 managers 20.15.1
+csdwan add 2 managers 20.15.1 --persona data
 csdwan add 1 validator 20.15.1
 csdwan add 2 controllers 20.15.1
 csdwan add 3 edges 20.15.1
 csdwan add 2 sdrouting 17.15.1
 ```
+
+Adding managers deploys additional Manager nodes, sets up the cluster interface, enrolls them into the existing Manager cluster, and signs their certificates. The cluster switch is created automatically in the CML topology.
 
 ---
 
@@ -241,6 +246,7 @@ Backs up a running SD-WAN lab to a zip archive (or directory). Captures:
 - CML topology with running configs extracted via SSH from all nodes
 - SD-WAN Manager configuration (templates, config groups, policies, feature profiles) via Sastre
 - Network hierarchy (MRF regions)
+- Cluster configuration including node personas
 
 The lab must be running. Configs are extracted live over SSH — shut-down nodes are skipped with a warning.
 

@@ -8,8 +8,9 @@ import re
 import tarfile
 import time
 import webbrowser
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -22,6 +23,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric.types import CertificateIssuerPrivateKeyTypes
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TaskID, TextColumn
 from virl2_client import ClientLibrary
 from virl2_client.exceptions import APIError
 from virl2_client.models.lab import Lab
@@ -357,8 +359,8 @@ def wait_for_edges_onboarded(
 
 VALIDATOR_FQDN = "validator.sdwan.local"
 
-_MANAGER_BOOT_RETRIES = 120
-_MANAGER_BOOT_INTERVAL = 30
+MANAGER_BOOT_RETRIES = 120
+MANAGER_BOOT_INTERVAL = 30
 
 
 def extract_org_name(path: Path) -> str:
@@ -385,11 +387,11 @@ def wait_for_manager(
     manager_user: str,
     manager_password: str,
     version: str,
-    on_status: Callable[[str], None],
+    on_status: Callable[[str], None] = lambda _: None,
 ) -> ManagerClient:
     use_diagnostic = int(version.split(".")[0]) >= 26
     client = ManagerClient(manager_ip, manager_port, manager_user, manager_password)
-    for _ in range(_MANAGER_BOOT_RETRIES):
+    for _ in range(MANAGER_BOOT_RETRIES):
         if use_diagnostic:
             boot = _query_boot_diagnostic(manager_ip, manager_port)
             if boot:
@@ -401,7 +403,7 @@ def wait_for_manager(
             return client
         except (ManagerAPIError, requests.exceptions.RequestException):
             pass
-        time.sleep(_MANAGER_BOOT_INTERVAL)
+        time.sleep(MANAGER_BOOT_INTERVAL)
     log.error("SD-WAN Manager did not become available within 60 minutes.")
     raise typer.Exit(1)
 
@@ -607,6 +609,79 @@ def trigger_rediscovery(client: ManagerClient) -> None:
         log.info("Network rediscovery triggered for %d devices", len(reachable))
 
 
+def ensure_cluster_ip_configured(
+    client: ManagerClient,
+    manager_user: str,
+    manager_password: str,
+    on_status: Callable[[str], None] = lambda _: None,
+    persona: str = "COMPUTE_AND_DATA",
+) -> None:
+    cluster_list = client.get_cluster_management_list()
+    entry = cluster_list[0] if cluster_list else {}
+    if entry.get("isIPConfigured"):
+        log.info("Cluster IP already configured.")
+        return
+    if len(entry.get("data", [])) > 1:
+        log.info("Multiple vManage nodes present, cluster already set up.")
+        return
+    system_ip = client.get_local_system_ip()
+    cluster_ip = client.get_vpn0_interface_ip(system_ip, "eth2")
+    on_status("Configuring cluster IP on primary manager...")
+    client.setup_cluster_ip(cluster_ip, persona, manager_user, manager_password)
+    log.info("Cluster IP configured: %s — waiting for NMS restart.", cluster_ip)
+    on_status("Waiting for Manager to restart after cluster IP setup...")
+    time.sleep(120)
+
+
+def enroll_cluster_manager(
+    client: ManagerClient,
+    cluster_ip: str,
+    persona: str,
+    manager_host: str,
+    manager_port: int,
+    manager_user: str,
+    manager_password: str,
+    version: str,
+    certs: "Certs",
+    pki: Literal["enterprise", "cisco"],
+    label: str,
+    on_status: Callable[[str], None] = lambda _: None,
+) -> ManagerClient:
+    # cluster IPs are 172.16.254.N and VPN0 IPs are 172.16.0.N
+    # — same last octet by deploy convention
+    vpn0_ip = "172.16.0." + cluster_ip.split(".")[-1]
+
+    client.add_cluster_node(cluster_ip, persona, manager_user, manager_password)
+    client.logout()
+    on_status(f"Waiting for Manager to restart after adding {label}...")
+    time.sleep(120)
+    client = wait_for_manager(manager_host, manager_port, manager_user, manager_password, version)
+    on_status(f"Waiting for {label} to be ready in cluster...")
+
+    uuid: str | None = None
+    deadline = time.time() + 600
+    while time.time() < deadline:
+        try:
+            entries = client.get_cluster_management_list()
+            for n in (entries[0].get("data", []) if entries else []):
+                cfg = n.get("configJson", {})
+                if cfg.get("deviceIP") == cluster_ip and cfg.get("state", "").lower() == "ready":
+                    uuid = cfg.get("uuid")
+                    break
+            if uuid:
+                break
+        except ManagerAPIError:
+            pass
+        time.sleep(10)
+    if not uuid:
+        raise ManagerAPIError(f"Cluster node {cluster_ip} did not reach Ready state.")
+
+    client.update_device_connection(uuid, vpn0_ip, "admin", manager_password)
+    sign_device_cert(client, certs, vpn0_ip, pki=pki)
+    log.info("Cluster node %s enrolled and certificate signed.", cluster_ip)
+    return client
+
+
 class _TopologyDumper(yaml.SafeDumper):
     pass
 
@@ -644,3 +719,30 @@ def run_sastre_task(
         if output:
             for entry in output:
                 log.debug("Sastre: %s", entry)
+
+
+@contextmanager
+def task_progress(
+    console: Console,
+    initial: str = "Connecting to CML...",
+) -> Iterator[Callable[[str], None]]:
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        task = progress.add_task(initial)
+
+        def update(msg: str) -> None:
+            progress.update(task, description=msg)
+            log.info(msg)
+
+        yield update
+
+
+def make_updater(progress: Progress, task: TaskID) -> Callable[[str], None]:
+    def update(msg: str) -> None:
+        progress.update(task, description=msg)
+        log.info(msg)
+    return update

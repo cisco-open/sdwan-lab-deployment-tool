@@ -8,6 +8,13 @@ mounts:
 write_files:
 - path: /etc/default/personality
   content: "vmanage\n"
+{% if persona != 'COMPUTE_AND_DATA' %}
+- path: /opt/web-app/etc/persona
+  owner: vmanage:vmanage-admin
+  permissions: '0644'
+  content: |
+    {"persona":"{{ persona }}"}
+{% endif %}
 - path: /etc/default/inited
   content: "1\n"
 - path: /usr/share/viptela/symantec-root-ca.crt
@@ -106,6 +113,13 @@ write_files:
                 <netconf>true</netconf>
               </allow-service>
             </tunnel-interface>
+            <shutdown>false</shutdown>
+          </interface>
+          <interface>
+            <if-name>eth2</if-name>
+            <ip>
+              <address>172.16.254.{{ manager_num }}/24</address>
+            </ip>
             <shutdown>false</shutdown>
           </interface>
         </vpn-instance>

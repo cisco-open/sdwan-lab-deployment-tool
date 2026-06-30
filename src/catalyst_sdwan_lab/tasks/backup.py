@@ -11,7 +11,6 @@ import typer
 import yaml
 from jinja2 import Environment, FileSystemLoader
 from rich.markup import escape
-from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError
 from catalyst_sdwan_lab.ssh_client import extract_control_config, extract_edge_config
@@ -26,6 +25,7 @@ from .utils import (
     find_lab,
     load_certs,
     run_sastre_task,
+    task_progress,
     topology_nodes,
 )
 
@@ -67,19 +67,13 @@ def run(
     certs = load_certs()
     cml = connect_cml(cml_host, cml_user, cml_password)
     try:
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-            transient=True,
-        ) as progress:
-            task = progress.add_task("Locating lab...")
+        with task_progress(console, initial="Locating lab...") as update:
             lab, manager_ip, manager_port = find_lab(cml, lab_name)
             if not lab.is_active():
                 log.error("Lab '%s' is not active — start the lab before running backup.", lab_name)
                 raise typer.Exit(1)
 
-            progress.update(task, description="Connecting to SD-WAN Manager...")
+            update("Connecting to SD-WAN Manager...")
             client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
 
             try:
@@ -98,10 +92,7 @@ def run(
                 ]
                 for i, node in enumerate(cml_extract_nodes, 1):
                     n_total = len(cml_extract_nodes)
-                    progress.update(
-                        task,
-                        description=f"Extracting CML node configurations ({i}/{n_total})...",
-                    )
+                    update(f"Extracting CML node configurations ({i}/{n_total})...")
                     try:
                         node.extract_configuration()
                         log.info("Extracted config from %s via CML.", node.label)
@@ -110,9 +101,17 @@ def run(
                             "Node '%s' does not support config extract — skipping.", node.label
                         )
 
-                progress.update(task, description="Downloading CML topology...")
+                update("Downloading CML topology...")
                 topology_str = lab.download()
                 topology: Any = yaml.safe_load(topology_str)
+
+                cluster_list = client.get_cluster_management_list()
+                cluster_personas: dict[str, str] = {
+                    n["configJson"]["host-name"]: n["configJson"].get("persona", "COMPUTE_AND_DATA")
+                    for entry in cluster_list
+                    for n in entry.get("data", [])
+                    if "configJson" in n and "host-name" in n["configJson"]
+                }
 
                 extract_nodes = [
                     n for n in nodes
@@ -125,10 +124,7 @@ def run(
                 for i, node in enumerate(extract_nodes, 1):
                     node_def = node.node_definition
                     if node_def in SDWAN_CTRL_NODE_DEFS:
-                        progress.update(
-                            task,
-                            description=f"Extracting config from {node.label} ({i}/{total})...",
-                        )
+                        update(f"Extracting config from {node.label} ({i}/{total})...")
                         if node_def == "cat-sdwan-manager":
                             node_user, node_pass = manager_user, manager_password
                         else:
@@ -142,15 +138,16 @@ def run(
                         except Exception as e:
                             log.error("Failed to extract config from %s: %s", node.label, e)
                             raise typer.Exit(1)
+                        hostname_m = re.search(r"<host-name>([^<]+)</host-name>", config_xml)
+                        persona = cluster_personas.get(
+                            hostname_m.group(1) if hostname_m else "", "COMPUTE_AND_DATA"
+                        )
                         cloud_init = _render_cloud_init(
-                            node_def, root_ca=certs.chain, config=config_xml
+                            node_def, root_ca=certs.chain, config=config_xml, persona=persona,
                         )
                         _update_node_configuration(topology, node.label, cloud_init)
                     elif node_def == "cat-sdwan-edge":
-                        progress.update(
-                            task,
-                            description=f"Extracting config from {node.label} ({i}/{total})...",
-                        )
+                        update(f"Extracting config from {node.label} ({i}/{total})...")
                         try:
                             edge_type, config_text, uuid = extract_edge_config(
                                 cml_host, cml_user, cml_password, lab_name, node.label,
@@ -168,12 +165,12 @@ def run(
                         )
                         _update_node_configuration(topology, node.label, cloud_init)
 
-                progress.update(task, description="Backing up SD-WAN Manager configuration...")
+                update("Backing up SD-WAN Manager configuration...")
                 with tempfile.TemporaryDirectory() as tmpdir:
                     _run_sastre_backup(
                         manager_ip, manager_port, manager_user, manager_password, Path(tmpdir)
                     )
-                    progress.update(task, description="Backing up network hierarchy...")
+                    update("Backing up network hierarchy...")
                     mrf_data = client.get_network_hierarchy()
 
                     if output is None:
@@ -181,7 +178,7 @@ def run(
                         suffix = "" if directory else ".zip"
                         output = Path(f"{lab_name}-{ts}{suffix}")
 
-                    progress.update(task, description="Saving backup...")
+                    update("Saving backup...")
                     updated_topology = dump_topology(topology)
                     if directory:
                         _save_directory(output, updated_topology, Path(tmpdir), mrf_data)

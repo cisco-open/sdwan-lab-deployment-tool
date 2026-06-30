@@ -19,7 +19,7 @@ from virl2_client.exceptions import APIError
 
 from catalyst_sdwan_lab.cml_client import upload_image_file
 
-from .utils import SDWAN_ALL_NODE_DEFS, connect_cml, console
+from .utils import SDWAN_ALL_NODE_DEFS, connect_cml, console, make_updater, task_progress
 
 log = logging.getLogger(__name__)
 
@@ -78,9 +78,10 @@ def upload(cml_host: str, cml_user: str, cml_password: str, images_dir: Path) ->
         transient=True,
     ) as progress:
         status = progress.add_task("Connecting to CML...")
+        update = make_updater(progress, status)
         cml = connect_cml(cml_host, cml_user, cml_password)
         try:
-            progress.update(status, description="Checking existing images...")
+            update("Checking existing images...")
             existing = {_normalize_id(img["id"]) for img in cml.definitions.image_definitions()}
             progress.remove_task(status)
 
@@ -119,16 +120,10 @@ def upload(cml_host: str, cml_user: str, cml_password: str, images_dir: Path) ->
 
 
 def list_versions(cml_host: str, cml_user: str, cml_password: str) -> None:
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Connecting to CML...")
+    with task_progress(console) as update:
         cml = connect_cml(cml_host, cml_user, cml_password)
         try:
-            progress.update(task, description="Fetching image definitions...")
+            update("Fetching image definitions...")
             all_images = cml.definitions.image_definitions()
             table = Table(title="Catalyst SD-WAN Software Versions")
             table.add_column("Node Type", style="cyan")
@@ -157,9 +152,10 @@ def delete(
         transient=True,
     ) as progress:
         status = progress.add_task("Connecting to CML...")
+        update = make_updater(progress, status)
         cml = connect_cml(cml_host, cml_user, cml_password)
         try:
-            progress.update(status, description="Checking image definitions...")
+            update("Checking image definitions...")
             image_map = {
                 _normalize_id(img["id"]): img
                 for img in cml.definitions.image_definitions()
