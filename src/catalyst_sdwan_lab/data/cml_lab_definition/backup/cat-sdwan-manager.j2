@@ -16,7 +16,13 @@ write_files:
 {% filter indent(width=4, first=True) %}
 {{ root_ca }}
 {% endfilter %}
-
+{% if persona != 'COMPUTE_AND_DATA' %}
+- path: /opt/web-app/etc/persona
+  owner: vmanage:vmanage-admin
+  permissions: '0644'
+  content: |
+    {"persona":"{{ persona }}"}
+{% endif %}
 - path: /etc/confd/init/zcloud.xml
   content: |
 {% filter indent(width=4, first=True) %}

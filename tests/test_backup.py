@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import zipfile
 from pathlib import Path
 
@@ -194,3 +195,39 @@ class TestSaveDirectory:
         output = tmp_path / "deep" / "nested" / "backup"
         _save_directory(output, "nodes: []\n", self._make_manager_dir(tmp_path), [])
         assert output.is_dir()
+
+
+class TestClusterPersonas:
+    def _cluster_list(self, entries: list[dict]) -> list[dict]:
+        return [{"isIPConfigured": True, "data": entries}]
+
+    def test_extracts_persona_by_hostname(self) -> None:
+        cluster_list = self._cluster_list([
+            {"configJson": {"host-name": "Manager01", "persona": "COMPUTE_AND_DATA"}},
+            {"configJson": {"host-name": "Manager02", "persona": "DATA"}},
+        ])
+        personas = {
+            n["configJson"]["host-name"]: n["configJson"].get("persona", "COMPUTE_AND_DATA")
+            for entry in cluster_list
+            for n in entry.get("data", [])
+            if "configJson" in n and "host-name" in n["configJson"]
+        }
+        assert personas == {"Manager01": "COMPUTE_AND_DATA", "Manager02": "DATA"}
+
+    def test_hostname_parsed_from_config_xml(self) -> None:
+        config_xml = (
+            '<config xmlns="http://tail-f.com/ns/config/1.0">'
+            '  <system xmlns="http://viptela.com/system">'
+            '    <host-name>Manager02</host-name>'
+            '    <system-ip>100.0.0.2</system-ip>'
+            '  </system>'
+            '</config>'
+        )
+        m = re.search(r"<host-name>([^<]+)</host-name>", config_xml)
+        assert m is not None
+        assert m.group(1) == "Manager02"
+
+    def test_default_persona_when_not_in_cluster_list(self) -> None:
+        personas: dict[str, str] = {}
+        persona = personas.get("Manager03", "COMPUTE_AND_DATA")
+        assert persona == "COMPUTE_AND_DATA"

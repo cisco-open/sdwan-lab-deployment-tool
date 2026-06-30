@@ -114,6 +114,14 @@ def run(
                 topology_str = lab.download()
                 topology: Any = yaml.safe_load(topology_str)
 
+                cluster_list = client.get_cluster_management_list()
+                cluster_personas: dict[str, str] = {
+                    n["configJson"]["host-name"]: n["configJson"].get("persona", "COMPUTE_AND_DATA")
+                    for entry in cluster_list
+                    for n in entry.get("data", [])
+                    if "configJson" in n and "host-name" in n["configJson"]
+                }
+
                 extract_nodes = [
                     n for n in nodes
                     if n.is_active() and (
@@ -142,8 +150,12 @@ def run(
                         except Exception as e:
                             log.error("Failed to extract config from %s: %s", node.label, e)
                             raise typer.Exit(1)
+                        hostname_m = re.search(r"<host-name>([^<]+)</host-name>", config_xml)
+                        persona = cluster_personas.get(
+                            hostname_m.group(1) if hostname_m else "", "COMPUTE_AND_DATA"
+                        )
                         cloud_init = _render_cloud_init(
-                            node_def, root_ca=certs.chain, config=config_xml
+                            node_def, root_ca=certs.chain, config=config_xml, persona=persona,
                         )
                         _update_node_configuration(topology, node.label, cloud_init)
                     elif node_def == "cat-sdwan-edge":

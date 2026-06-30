@@ -355,6 +355,7 @@ def _create_lab(
         manager_port=manager_port,
         patty_used=patty,
         password_change_time=now,
+        persona="COMPUTE_AND_DATA",
     )
 
     log.info("Importing lab '%s' to CML...", lab_name)
