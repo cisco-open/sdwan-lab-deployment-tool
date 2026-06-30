@@ -5,7 +5,7 @@ import re
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 import typer
 import yaml
@@ -18,12 +18,15 @@ from catalyst_sdwan_lab.ssh_client import fix_sdrouting_default_route
 from .delete import run as _delete_lab
 from .utils import (
     SDWAN_CTRL_NODE_DEFS,
+    Certs,
     check_serial_file_match,
     collect_control_components,
     configure_manager,
     connect_cml,
     console,
     dump_topology,
+    enroll_cluster_manager,
+    ensure_cluster_ip_configured,
     extract_org_name,
     load_certs,
     onboard_control_components,
@@ -184,6 +187,12 @@ def run(
                     progress.update(task, description="Restoring network hierarchy...")
                     _restore_mrf(client, json.loads(mrf_path.read_text()))
 
+                client = _restore_cluster(
+                    client, lab, certs, pki,
+                    manager_ip, manager_port, manager_user, manager_password, version,
+                    on_status=lambda s: progress.update(task, description=s),
+                )
+
                 progress.update(task, description="Starting edge nodes...")
                 edge_uuids = _inject_otps_and_start_edges(
                     lab, client, ca_chain=certs.chain if pki == "enterprise" else ""
@@ -308,9 +317,11 @@ def _patch_topology(
     )
 
     nodes = topology_nodes(topology)
+    primary_manager_id = _find_primary_manager_id(topology)
     for node in nodes:
         node_def = node.get("node_definition", "")
         if node_def == "cat-sdwan-manager":
+            is_primary = node.get("id") == primary_manager_id
             cfg: str = node.get("configuration", "")
             encrypted = sha512_crypt(manager_password)
             cfg = re.sub(r"<password>(\S+)</password>", f"<password>{encrypted}</password>", cfg)
@@ -332,16 +343,20 @@ def _patch_topology(
                     cfg,
                     count=1,
                 )
-            if m := re.search(
-                r"(<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<address>)([\d./]+)(</address>)",
-                cfg,
-            ):
-                cfg = cfg.replace(m.group(0), f"{m.group(1)}{manager_ip}{manager_mask}{m.group(3)}")
-            if m := re.search(
-                r"(<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<next-hop>[\s\S]+?<address>)([\d.]+)(</address>)",
-                cfg,
-            ):
-                cfg = cfg.replace(m.group(0), f"{m.group(1)}{manager_gateway}{m.group(3)}")
+            if is_primary:
+                if m := re.search(
+                    r"(<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<address>)([\d./]+)(</address>)",
+                    cfg,
+                ):
+                    cfg = cfg.replace(
+                        m.group(0),
+                        f"{m.group(1)}{manager_ip}{manager_mask}{m.group(3)}",
+                    )
+                if m := re.search(
+                    r"(<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<next-hop>[\s\S]+?<address>)([\d.]+)(</address>)",
+                    cfg,
+                ):
+                    cfg = cfg.replace(m.group(0), f"{m.group(1)}{manager_gateway}{m.group(3)}")
             node_defs = cml.definitions.node_definitions()
             mgr_def = next((nd for nd in node_defs if nd["id"] == node_def), None)
             sim = mgr_def.get("sim", {}) if mgr_def else {}
@@ -349,7 +364,7 @@ def _patch_topology(
             if disk_driver == "virtio":
                 cfg = cfg.replace('"/dev/sdb"', '"/dev/vdb"').replace("[ sdb,", "[ vdb,")
             node["configuration"] = cfg
-            if patty:
+            if is_primary and patty:
                 node.setdefault("tags", [])
                 pat_tag = f"pat:{manager_port}:443"
                 if pat_tag not in node["tags"]:
@@ -358,6 +373,92 @@ def _patch_topology(
             node["image_definition"] = f"{node_def}-{control_version}"
         if edge_version and node_def == "cat-sdwan-edge":
             node["image_definition"] = f"{node_def}-{edge_version}"
+
+
+def _find_primary_manager_id(topology: Any) -> str | None:
+    nodes = topology_nodes(topology)
+    ext_ids = {n["id"] for n in nodes if n.get("node_definition") == "external_connector"}
+    manager_ids = {n["id"] for n in nodes if n.get("node_definition") == "cat-sdwan-manager"}
+    for link in topology.get("links", []):
+        n1, n2 = link.get("n1"), link.get("n2")
+        i1, i2 = link.get("i1"), link.get("i2")
+        if n1 in ext_ids and n2 in manager_ids and i2 == "i0":
+            return n2
+        if n2 in ext_ids and n1 in manager_ids and i1 == "i0":
+            return n1
+    return None
+
+
+def _restore_cluster(
+    client: ManagerClient,
+    lab: Any,
+    certs: Certs,
+    pki: Literal["enterprise", "cisco"],
+    manager_host: str,
+    manager_port: int,
+    manager_user: str,
+    manager_password: str,
+    version: str,
+    on_status: Callable[[str], None],
+) -> ManagerClient:
+    secondary_managers = [
+        n for n in lab.nodes()
+        if n.node_definition == "cat-sdwan-manager" and not _manager_connected_to_external(n)
+    ]
+    if not secondary_managers:
+        return client
+
+    on_status("Checking cluster IP configuration...")
+    ensure_cluster_ip_configured(
+        client, manager_user, manager_password, on_status=on_status,
+    )
+    client = wait_for_manager(manager_host, manager_port, manager_user, manager_password, version)
+
+    on_status("Waiting for secondary managers to boot...")
+    for node in secondary_managers:
+        node.wait_until_converged()
+
+    for node in secondary_managers:
+        m = re.search(r"<system-ip>100\.0\.0\.(\d+)</system-ip>", node.configuration or "")
+        if not m:
+            log.error("Cannot determine cluster IP for %s — skipping.", node.label)
+            continue
+        num = m.group(1)
+        cluster_ip = f"172.16.254.{num}"
+
+        entries = client.get_cluster_management_list()
+        enrolled = any(
+            n.get("configJson", {}).get("deviceIP") == cluster_ip
+            for entry in entries
+            for n in entry.get("data", [])
+        )
+        if enrolled:
+            log.info("%s already enrolled in cluster, skipping.", node.label)
+            continue
+
+        persona_m = re.search(r'"persona":"([^"]+)"', node.configuration or "")
+        persona = persona_m.group(1) if persona_m else "COMPUTE_AND_DATA"
+
+        on_status(f"Adding {node.label} to cluster...")
+        client = enroll_cluster_manager(
+            client, cluster_ip, persona,
+            manager_host, manager_port, manager_user, manager_password, version,
+            certs, pki, node.label, on_status=on_status,
+        )
+
+    return client
+
+
+def _manager_connected_to_external(node: Any) -> bool:
+    try:
+        eth0 = node.get_interface_by_label("eth0")
+    except Exception:
+        return False
+    if not eth0.connected or eth0.link is None:
+        return False
+    link = eth0.link
+    other = link.interface_b if link.interface_a.node == node else link.interface_a
+    return other.node.node_definition == "external_connector"
 
 
 def _start_control_plane(lab: Any) -> None:

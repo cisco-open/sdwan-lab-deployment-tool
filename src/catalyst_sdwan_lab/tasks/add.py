@@ -1,3 +1,4 @@
+import datetime
 import logging
 import re
 import time
@@ -8,6 +9,7 @@ import typer
 from jinja2 import Environment, FileSystemLoader
 from rich.markup import escape
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from virl2_client import ClientLibrary
 from virl2_client.exceptions import InterfaceNotFound
 from virl2_client.models.interface import Interface
 from virl2_client.models.lab import Lab
@@ -33,12 +35,16 @@ from .utils import (
     connect_manager,
     console,
     detect_ip_type,
+    enroll_cluster_manager,
+    ensure_cluster_ip_configured,
     find_lab,
     load_certs,
     resolve_image,
+    sha512_crypt,
     sign_device_cert,
     trigger_rediscovery,
     wait_for_edges_onboarded,
+    wait_for_manager,
 )
 
 log = logging.getLogger(__name__)
@@ -694,4 +700,208 @@ def _get_config_group_id(client: ManagerClient, name: str) -> str:
         log.error("Config group '%s' not found in Manager.", name)
         raise typer.Exit(1)
     return cg["id"]
+
+
+def run_managers(
+    cml_host: str,
+    cml_user: str,
+    cml_password: str,
+    lab_name: str,
+    version: str,
+    manager_user: str,
+    manager_password: str,
+    count: int,
+    persona: str,
+    cpus: int | None = None,
+    ram: int | None = None,
+) -> None:
+    cml = connect_cml(cml_host, cml_user, cml_password)
+    lab, manager_host, manager_port = find_lab(cml, lab_name)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"),
+                  transient=True, console=console) as progress:
+        task = progress.add_task("Setting up Cluster switch...")
+        cluster = _ensure_cluster_switch(lab)
+        progress.update(task, description="Connecting existing managers to Cluster switch...")
+        _connect_managers_to_cluster(lab, cluster)
+
+        progress.update(task, description="Checking cluster IP configuration...")
+        client = connect_manager(manager_host, manager_port, manager_user, manager_password)
+        try:
+            org_name = client.get_organization() or ""
+            ip_type = detect_ip_type(lab)
+            pki = client.get_certificate_signing()
+            ensure_cluster_ip_configured(
+                client, manager_user, manager_password, persona=persona,
+                on_status=lambda s: progress.update(task, description=s),
+            )
+        except ManagerAPIError as e:
+            log.error("%s", e)
+            raise typer.Exit(1)
+        finally:
+            client.logout()
+
+        progress.update(task, description=f"Adding {count} manager node(s) to CML...")
+        new_nodes = _create_manager_nodes(
+            lab, cluster, cml, count, version,
+            manager_user, manager_password, org_name, ip_type, persona, cpus, ram,
+        )
+
+        progress.update(task, description="Waiting for managers to boot...")
+        for node, _ in new_nodes:
+            node.wait_until_converged()
+
+        progress.update(task, description="Waiting for primary Manager...")
+        client = wait_for_manager(
+            manager_host, manager_port, manager_user, manager_password, version,
+        )
+        certs = load_certs()
+        try:
+            for node, cluster_ip in new_nodes:
+                progress.update(task, description=f"Adding {node.label} to cluster...")
+                client = enroll_cluster_manager(
+                    client, cluster_ip, persona,
+                    manager_host, manager_port, manager_user, manager_password, version,
+                    certs, pki, node.label,
+                    on_status=lambda s: progress.update(task, description=s),
+                )
+        except ManagerAPIError as e:
+            log.error("%s", e)
+            raise typer.Exit(1)
+        finally:
+            client.logout()
+
+    label = new_nodes[0][0].label if count == 1 else f"{count} managers"
+    console.print(f"[green]Added.[/green] {label} added to lab '{escape(lab_name)}'.")
+
+def _create_manager_nodes(
+    lab: Lab,
+    cluster: Node,
+    cml: ClientLibrary,
+    count: int,
+    version: str,
+    manager_user: str,
+    manager_password: str,
+    org_name: str,
+    ip_type: str,
+    persona: str,
+    cpus: int | None,
+    ram: int | None,
+) -> list[tuple[Node, str]]:
+    image_id = resolve_image(cml, "cat-sdwan-manager", version)
+    certs = load_certs()
+    encrypted_password = sha512_crypt(manager_password)
+    now = (
+        datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+        + "+00:00"
+    )
+    vpn0 = next(
+        (n for n in lab.nodes() if n.label == "VPN0" and n.node_definition == "unmanaged_switch"),
+        None,
+    )
+    if vpn0 is None:
+        log.error("VPN0 switch not found in lab.")
+        raise typer.Exit(1)
+
+    template = _CLOUD_INIT_ENV.get_template("manager-cloud-init.j2")
+    existing_managers = [n for n in lab.nodes() if n.node_definition == "cat-sdwan-manager"]
+    base_num = len(existing_managers)
+    ref = min(existing_managers, key=lambda n: n.y, default=None)
+    base_x = ref.x if ref else -280
+    base_y = (ref.y if ref else -80) - 80
+    nodes: list[tuple[Node, str]] = []
+
+    for i in range(count):
+        manager_num = str(base_num + i + 1)
+        config = template.render(
+            root_ca=certs.chain,
+            org_name=org_name,
+            validator_fqdn=VALIDATOR_FQDN,
+            manager_num=manager_num,
+            manager_user=manager_user,
+            manager_pass=encrypted_password,
+            manager_external_ip="",
+            external_subnet_mask="",
+            external_gateway="",
+            ip_type=ip_type,
+            patty_used=True,
+            persona=persona,
+            password_change_time=now,
+        )
+        node = lab.create_node(
+            label=f"Manager0{manager_num}",
+            node_definition="cat-sdwan-manager",
+            image_definition=image_id,
+            configuration=config,
+            x=base_x,
+            y=base_y - 80 * i,
+            populate_interfaces=True,
+            wait=False,
+            cpus=cpus,
+            ram=ram,
+        )
+        eth1 = _sync_until_interface(lab, node, "eth1")
+        free_vpn0 = vpn0.next_available_interface()
+        if free_vpn0 is None:
+            log.error("VPN0 switch has no free ports.")
+            raise typer.Exit(1)
+        lab.create_link(eth1, free_vpn0)
+
+        eth2 = node.get_interface_by_label("eth2")
+        free_cluster = cluster.next_available_interface()
+        if free_cluster is None:
+            log.error("Cluster switch has no free ports.")
+            raise typer.Exit(1)
+        lab.create_link(eth2, free_cluster)
+        nodes.append((node, f"172.16.254.{manager_num}"))
+
+    for node, _ in nodes:
+        node.start()
+        log.info("Started manager %s.", node.label)
+
+    return nodes
+
+
+def _ensure_cluster_switch(lab: Lab) -> Node:
+    existing = next(
+        (
+            n for n in lab.nodes()
+            if n.label == "Cluster" and n.node_definition == "unmanaged_switch"
+        ),
+        None,
+    )
+    if existing is not None:
+        if not existing.is_active():
+            existing.start()
+            existing.wait_until_converged()
+            log.info("Started stopped Cluster switch.")
+        return existing
+    node = lab.create_node(
+        label="Cluster",
+        node_definition="unmanaged_switch",
+        x=-400,
+        y=-160,
+        populate_interfaces=True,
+        wait=True,
+    )
+    node.start()
+    node.wait_until_converged()
+    log.info("Created Cluster switch.")
+    return node
+
+
+def _connect_managers_to_cluster(lab: Lab, cluster: Node) -> None:
+    managers = [n for n in lab.nodes() if n.node_definition == "cat-sdwan-manager"]
+    for manager in managers:
+        eth2 = manager.get_interface_by_label("eth2")
+        if eth2.connected:
+            log.info("%s eth2 already connected, skipping.", manager.label)
+            continue
+        free = cluster.next_available_interface()
+        if free is None:
+            log.error("Cluster switch has no free ports.")
+            raise typer.Exit(1)
+        lab.create_link(eth2, free)
+        eth2.bring_up()
+        log.info("Linked %s eth2 to Cluster switch.", manager.label)
 

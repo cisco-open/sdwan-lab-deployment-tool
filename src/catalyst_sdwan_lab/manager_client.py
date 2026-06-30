@@ -264,6 +264,76 @@ class ManagerClient:
     def get_sync_status(self) -> list[dict[str, Any]]:
         return self._get("/dataservice/device/sync_status?groupId=all").get("data", [])
 
+    def get_cluster_management_list(self) -> list[dict[str, Any]]:
+        return self._get("/dataservice/clusterManagement/list").get("data", [])
+
+    def get_local_system_ip(self) -> str:
+        return self._get("/dataservice/device/vmanage")["data"]["ipAddress"]
+
+    def get_vpn0_interface_ip(self, system_ip: str, ifname: str) -> str:
+        interfaces = self._get(
+            f"/dataservice/device/interface?vpn-id=0&deviceId={system_ip}"
+        ).get("data", [])
+        iface = next(
+            (i for i in interfaces if i.get("ifname") == ifname and i.get("af-type") == "ipv4"),
+            None,
+        )
+        if iface is None:
+            raise ManagerAPIError(f"Interface {ifname} not found in VPN 0 on {system_ip}")
+        return iface["ip-address"].split("/")[0]
+
+    def setup_cluster_ip(
+        self, cluster_ip: str, persona: str, username: str, password: str
+    ) -> None:
+        try:
+            self._put(
+                "/dataservice/clusterManagement/setup/",
+                {
+                    "persona": persona,
+                    "deviceIP": cluster_ip,
+                    "username": username,
+                    "password": password,
+                    "genCSR": False,
+                    "services": {"sd-avc": {"server": True}},
+                    "vmanageID": "0",
+                },
+            )
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            # NMS API restarts after cluster IP setup — connection drop/timeout is expected
+            pass
+
+    def add_cluster_node(
+        self, cluster_ip: str, persona: str, username: str, password: str,
+        retries: int = 120, interval: int = 30,
+    ) -> None:
+        """Blocks until the POST succeeds (200 OK), retrying on VCC0001 (node API not yet ready)."""
+        for _ in range(retries):
+            response = self._session.post(
+                f"{self._base}/dataservice/clusterManagement/setup/",
+                json={
+                    "persona": persona,
+                    "deviceIP": cluster_ip,
+                    "username": username,
+                    "password": password,
+                    "genCSR": False,
+                    "services": {"sd-avc": {"server": False}},
+                },
+                timeout=self._TIMEOUT,
+            )
+            if response.ok:
+                return
+            try:
+                code = response.json().get("error", {}).get("code", "")
+            except Exception:
+                code = ""
+            if response.status_code == 400 and code == "VCC0001":
+                time.sleep(interval)
+                continue
+            raise ManagerAPIError(f"HTTP {response.status_code}: {response.text[:200]}")
+        raise ManagerAPIError(
+            f"Cluster node {cluster_ip} did not become reachable after {retries * interval}s."
+        )
+
     def rediscover_devices(self, devices: list[dict[str, Any]]) -> None:
         self._post(
             "/dataservice/device/action/rediscover",
@@ -275,6 +345,14 @@ class ManagerClient:
             "/dataservice/system/device",
             {"deviceIP": ip, "username": username, "password": password,
              "generateCSR": False, "personality": personality},
+        )
+
+    def update_device_connection(
+        self, uuid: str, device_ip: str, username: str, password: str
+    ) -> None:
+        self._put(
+            f"/dataservice/system/device/{uuid}",
+            {"deviceIP": device_ip, "username": username, "password": password},
         )
 
     def generate_csr(self, ip: str) -> tuple[str, str]:
@@ -318,6 +396,8 @@ class ManagerClient:
     def logout(self) -> None:
         try:
             self._session.get(f"{self._base}/logout", timeout=self._TIMEOUT)
+        except requests.exceptions.RequestException:
+            pass
         finally:
             self._session.close()
 

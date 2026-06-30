@@ -1,6 +1,7 @@
 import ipaddress
 import logging
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -294,6 +295,8 @@ def sign(
 
 
 _DEVICE_TYPES: dict[str, str] = {
+    "manager": "manager",
+    "managers": "manager",
     "controller": "controller",
     "controllers": "controller",
     "validator": "validator",
@@ -304,11 +307,23 @@ _DEVICE_TYPES: dict[str, str] = {
 }
 
 
+class ManagerPersona(str, Enum):
+    compute_and_data = "compute-and-data"
+    compute = "compute"
+    data = "data"
+
+    def to_api_value(self) -> str:
+        return self.value.upper().replace("-", "_")
+
+
 @app.command()
 def add(
     count: Annotated[int, typer.Argument(help="Number of devices to add")],
     device_type: Annotated[
-        str, typer.Argument(help="Device type: controller(s), validator(s), edge(s), sdrouting")
+        str,
+        typer.Argument(
+            help="Device type: manager(s), controller(s), validator(s), edge(s), sdrouting"
+        ),
     ],
     version: Annotated[str, typer.Argument(help="SD-WAN software version (e.g. 20.15.1)")],
     lab_name: Annotated[
@@ -325,6 +340,10 @@ def add(
             hide_input=True, prompt="Manager password"
         ),
     ] = ...,  # type: ignore[assignment]
+    persona: Annotated[
+        ManagerPersona,
+        typer.Option("--persona", help="Manager persona (only for manager(s) device type)"),
+    ] = ManagerPersona.compute_and_data,
     cpus: Annotated[
         Optional[int], typer.Option("--cpus", help="Override number of CPUs for each node")
     ] = None,
@@ -339,7 +358,8 @@ def add(
     device = _DEVICE_TYPES.get(device_type.lower())
     if device is None:
         log.error(
-            "Unknown device type '%s'. Valid: controller, validator, edge, sdrouting.", device_type
+            "Unknown device type '%s'. Valid: manager, controller, validator, edge, sdrouting.",
+                device_type,
         )
         raise typer.Exit(1)
     if device in ("controller", "validator"):
@@ -373,6 +393,18 @@ def add(
             manager_user=manager_user,
             manager_password=manager_pass,
             count=count,
+            cpus=cpus,
+            ram=ram,
+        )
+    elif device == "manager":
+        _add.run_managers(
+            *_cml_credentials(),
+            lab_name=lab_name,
+            version=version,
+            manager_user=manager_user,
+            manager_password=manager_pass,
+            count=count,
+            persona=persona.to_api_value(),
             cpus=cpus,
             ram=ram,
         )
