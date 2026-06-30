@@ -348,7 +348,10 @@ def _patch_topology(
                     r"(<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<address>)([\d./]+)(</address>)",
                     cfg,
                 ):
-                    cfg = cfg.replace(m.group(0), f"{m.group(1)}{manager_ip}{manager_mask}{m.group(3)}")
+                    cfg = cfg.replace(
+                        m.group(0),
+                        f"{m.group(1)}{manager_ip}{manager_mask}{m.group(3)}",
+                    )
                 if m := re.search(
                     r"(<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<next-hop>[\s\S]+?<address>)([\d.]+)(</address>)",
                     cfg,
