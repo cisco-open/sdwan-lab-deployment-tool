@@ -221,6 +221,7 @@ async def add_devices(
     lab_name: str,
     manager_password: str,
     manager_user: str = "admin",
+    persona: str = "compute-and-data",
     cpus: int | None = None,
     ram: int | None = None,
     cml_host: str | None = None,
@@ -231,16 +232,18 @@ async def add_devices(
     Add and onboard SD-WAN devices to an existing lab.
 
     Detects the lab's IP type (v4/v6/dual) automatically.
-    This is a long-running operation for edge devices (boots VMs, generates
-    certificates, waits for onboarding).
+    This is a long-running operation for edge devices and managers (boots VMs,
+    generates certificates, waits for onboarding).
 
     Args:
         count: Number of devices to add (minimum 1)
-        device_type: One of "controller", "validator", "edge", "sdrouting"
+        device_type: One of "manager", "controller", "validator", "edge", "sdrouting"
         version: SD-WAN software version (e.g. "20.15.1")
         lab_name: Name of the existing CML lab
         manager_password: SD-WAN Manager password
         manager_user: Manager username (default: "admin")
+        persona: Manager cluster persona — "compute-and-data" (default), "compute", or "data"
+                 Only applies when device_type is "manager"
         cpus: Override number of CPUs per node
         ram: Override RAM in MB per node
         cml_host: CML hostname or IP (or set CML_IP env var)
@@ -249,7 +252,7 @@ async def add_devices(
     """
     host, user, password = _cml_creds(cml_host, cml_user, cml_password)
 
-    valid_types = {"controller", "validator", "edge", "sdrouting"}
+    valid_types = {"manager", "controller", "validator", "edge", "sdrouting"}
     device = device_type.lower().rstrip("s")  # allow plurals
     if device not in valid_types:
         valid = ", ".join(sorted(valid_types))
@@ -257,7 +260,26 @@ async def add_devices(
     if count < 1:
         return "Error: count must be at least 1."
 
-    if device in ("controller", "validator"):
+    valid_personas = {"compute-and-data", "compute", "data"}
+    if persona not in valid_personas:
+        return f"Error: Unknown persona '{persona}'. Valid: {', '.join(sorted(valid_personas))}"
+
+    if device == "manager":
+        from .cli import ManagerPersona
+        job_id = start_job(
+            "add_devices",
+            _add.run_managers,
+            host, user, password,
+            lab_name=lab_name,
+            version=version,
+            manager_user=manager_user,
+            manager_password=manager_password,
+            count=count,
+            persona=ManagerPersona(persona).to_api_value(),
+            cpus=cpus,
+            ram=ram,
+        )
+    elif device in ("controller", "validator"):
         job_id = start_job(
             "add_devices",
             _add.run_control_component,

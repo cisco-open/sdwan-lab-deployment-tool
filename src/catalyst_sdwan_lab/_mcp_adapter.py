@@ -271,12 +271,14 @@ class _Job:
 class _JobLogHandler(logging.Handler):
     """Routes log records emitted during a job into that job's event buffer."""
 
-    def __init__(self, job: _Job) -> None:
+    def __init__(self, job: _Job, thread_id: int) -> None:
         super().__init__()
         self.job = job
+        self._thread_id = thread_id
 
     def emit(self, record: logging.LogRecord) -> None:
-        self.job.emit(self.format(record))
+        if record.thread == self._thread_id:
+            self.job.emit(self.format(record))
 
 
 _JOBS: dict[str, _Job] = {}
@@ -294,7 +296,7 @@ def _job_worker(
     utils.console = capture_console
     patched = _patch_task_consoles(capture_console)
 
-    handler = _JobLogHandler(job)
+    handler = _JobLogHandler(job, threading.current_thread().ident or 0)
     handler.setLevel(logging.INFO)
     handler.setFormatter(logging.Formatter("%(message)s"))
     root_logger = logging.getLogger("catalyst_sdwan_lab")
