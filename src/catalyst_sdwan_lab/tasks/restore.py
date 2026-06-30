@@ -10,7 +10,6 @@ from typing import Any, Callable, Literal
 import typer
 import yaml
 from rich.markup import escape
-from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
 from catalyst_sdwan_lab.ssh_client import fix_sdrouting_default_route
@@ -33,6 +32,7 @@ from .utils import (
     resolve_image,
     run_sastre_task,
     sha512_crypt,
+    task_progress,
     topology_nodes,
     trigger_rediscovery,
     wait_for_edges_onboarded,
@@ -76,16 +76,10 @@ def run(
 
     certs = load_certs()
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Connecting to CML...")
+    with task_progress(console) as update:
         cml = connect_cml(cml_host, cml_user, cml_password)
 
-        progress.update(task, description="Loading backup...")
+        update("Loading backup...")
         topology, manager_configs_dir, backup_tmpdir = _load_backup(backup)
         check_serial_file_match(topology, serial_file)
 
@@ -107,11 +101,11 @@ def run(
                 log.error("Cisco PKI requires Manager version 20.18.2 or later. Got: %s", version)
                 raise typer.Exit(1)
 
-        progress.update(task, description="Checking images...")
+        update("Checking images...")
         _check_images(cml, topology, control_version, edge_version)
 
         if delete_existing:
-            progress.update(task, description="Removing existing lab...")
+            update("Removing existing lab...")
             _delete_lab(cml_host, cml_user, cml_password, lab_name, force=True)
 
         if not retry and not delete_existing:
@@ -125,36 +119,36 @@ def run(
 
         try:
             if retry:
-                progress.update(task, description="Locating existing lab...")
+                update("Locating existing lab...")
                 lab = _find_lab_by_manager(cml, manager_ip, manager_port, patty)
             else:
-                progress.update(task, description="Patching topology...")
+                update("Patching topology...")
                 _patch_topology(
                     topology, lab_name, manager_ip, manager_mask, manager_gateway,
                     manager_port, manager_user, manager_password, patty,
                     control_version, edge_version, cml,
                 )
                 topology_yaml = dump_topology(topology)
-                progress.update(task, description="Importing lab into CML...")
+                update("Importing lab into CML...")
                 lab = cml.import_lab(topology_yaml)
 
-            progress.update(task, description="Starting control plane...")
+            update("Starting control plane...")
             _start_control_plane(lab)
 
-            progress.update(task, description="Waiting for SD-WAN Manager...")
+            update("Waiting for SD-WAN Manager...")
             client = wait_for_manager(
                 manager_ip, manager_port, manager_user, manager_password, version,
-                lambda s: progress.update(task, description=s),
+                on_status=update,
             )
             try:
-                progress.update(task, description="Configuring SD-WAN Manager...")
+                update("Configuring SD-WAN Manager...")
                 configure_manager(
                     client, version, org_name, certs.chain, pki=pki,
-                    on_status=lambda s: progress.update(task, description=s),
+                    on_status=update,
                     proxy_ip=proxy_ip, proxy_port=proxy_port, no_proxy=no_proxy,
                 )
 
-                progress.update(task, description="Onboarding control components...")
+                update("Onboarding control components...")
                 components = collect_control_components(lab)
                 if not components:
                     log.error(
@@ -164,36 +158,36 @@ def run(
                     raise typer.Exit(1)
                 onboard_control_components(
                     client, certs, components,
-                    lambda s: progress.update(task, description=s),
+                    on_status=update,
                     pki=pki,
                 )
 
-                progress.update(task, description="Uploading serial file...")
+                update("Uploading serial file...")
                 client.upload_serial_file(serial_file)
 
-                progress.update(task, description="Patching Sastre controller UUIDs...")
+                update("Patching Sastre controller UUIDs...")
                 _patch_sastre_controller_uuids(manager_configs_dir, client)
 
-                progress.update(task, description="Patching config group passwords...")
+                update("Patching config group passwords...")
                 _patch_config_group_passwords(manager_configs_dir)
 
-                progress.update(task, description="Restoring Manager configuration...")
+                update("Restoring Manager configuration...")
                 _run_sastre_restore(
                     manager_ip, manager_port, manager_user, manager_password, manager_configs_dir
                 )
 
                 mrf_path = manager_configs_dir / "mrf.json"
                 if mrf_path.exists():
-                    progress.update(task, description="Restoring network hierarchy...")
+                    update("Restoring network hierarchy...")
                     _restore_mrf(client, json.loads(mrf_path.read_text()))
 
                 client = _restore_cluster(
                     client, lab, certs, pki,
                     manager_ip, manager_port, manager_user, manager_password, version,
-                    on_status=lambda s: progress.update(task, description=s),
+                    on_status=update,
                 )
 
-                progress.update(task, description="Starting edge nodes...")
+                update("Starting edge nodes...")
                 edge_uuids = _inject_otps_and_start_edges(
                     lab, client, ca_chain=certs.chain if pki == "enterprise" else ""
                 )
@@ -203,7 +197,7 @@ def run(
                         continue
                     if "SD-Routing : true" not in (node.configuration or ""):
                         continue
-                    progress.update(task, description=f"Checking default route on {node.label}...")
+                    update(f"Checking default route on {node.label}...")
                     node.wait_until_converged()
                     if fix_sdrouting_default_route(
                         cml_host, cml_user, cml_password, lab.title or lab_name, node.label,
@@ -213,18 +207,16 @@ def run(
 
                 if edge_uuids:
                     total_edges = len(edge_uuids)
-                    progress.update(
-                        task, description=f"Waiting for edges to onboard... (0/{total_edges})"
-                    )
+                    update(f"Waiting for edges to onboard... (0/{total_edges})")
                     wait_for_edges_onboarded(
                         client,
                         edge_uuids,
-                        on_progress=lambda done, total: progress.update(
-                            task, description=f"Waiting for edges to onboard... ({done}/{total})"
+                        on_progress=lambda done, total: update(
+                            f"Waiting for edges to onboard... ({done}/{total})"
                         ),
                     )
 
-                progress.update(task, description="Triggering network rediscovery...")
+                update("Triggering network rediscovery...")
                 trigger_rediscovery(client)
 
             except ManagerAPIError as e:

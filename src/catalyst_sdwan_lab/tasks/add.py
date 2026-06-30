@@ -8,7 +8,6 @@ from typing import Any, Literal
 import typer
 from jinja2 import Environment, FileSystemLoader
 from rich.markup import escape
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from virl2_client import ClientLibrary
 from virl2_client.exceptions import InterfaceNotFound
 from virl2_client.models.interface import Interface
@@ -42,6 +41,7 @@ from .utils import (
     resolve_image,
     sha512_crypt,
     sign_device_cert,
+    task_progress,
     trigger_rediscovery,
     wait_for_edges_onboarded,
     wait_for_manager,
@@ -84,20 +84,14 @@ def run_control_component(
     node_def = "cat-sdwan-controller" if is_ctrl else "cat-sdwan-validator"
     certs = load_certs()
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Connecting to CML...")
+    with task_progress(console) as update:
         cml = connect_cml(cml_host, cml_user, cml_password)
-        progress.update(task, description="Checking lab and images...")
+        update("Checking lab and images...")
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, node_def, version)
 
-        progress.update(task, description="Connecting to SD-WAN Manager...")
+        update("Connecting to SD-WAN Manager...")
         client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
             pki = client.get_certificate_signing()
@@ -113,10 +107,7 @@ def run_control_component(
             device_ips: list[str] = []
             for i in range(count):
                 num = _next_device_num(lab, num_re)
-                progress.update(
-                    task,
-                    description=f"Adding {label_prefix}{num} to CML ({i + 1}/{count})...",
-                )
+                update(f"Adding {label_prefix}{num} to CML ({i + 1}/{count})...")
                 extra = (
                     {"controller_num": num, "validator_fqdn": VALIDATOR_FQDN}
                     if is_ctrl
@@ -141,18 +132,15 @@ def run_control_component(
                 )
 
             for i, (node, ip) in enumerate(zip(nodes, device_ips), 1):
-                progress.update(task, description=f"Waiting for {device_type}s to boot...")
+                update(f"Waiting for {device_type}s to boot...")
                 node.wait_until_converged()
-                progress.update(
-                    task,
-                    description=f"Waiting for {device_type} to be reachable ({i}/{count})...",
-                )
+                update(f"Waiting for {device_type} to be reachable ({i}/{count})...")
                 _add_to_manager_retrying(client, ip, personality, timeout=_BOOT_TIMEOUT)
 
-            progress.update(task, description=f"Waiting for {device_type} CSRs...")
+            update(f"Waiting for {device_type} CSRs...")
             _wait_for_csrs(client, device_ips, timeout=_CSR_POLL_TIMEOUT)
 
-            progress.update(task, description=f"Signing {device_type} certificates...")
+            update(f"Signing {device_type} certificates...")
             with ThreadPoolExecutor() as pool:
                 futures = [
                     pool.submit(sign_device_cert, client, certs, ip, pki=pki)
@@ -166,17 +154,17 @@ def run_control_component(
                     f"100.0.0.{ip.split('.')[-1] if '.' in ip else ip.split(':')[-1]}"
                     for ip in device_ips
                 }
-                progress.update(task, description="Waiting for controllers to reconnect...")
+                update("Waiting for controllers to reconnect...")
                 _wait_for_controllers_ready(client, system_ips, timeout=_CSR_POLL_TIMEOUT)
-                progress.update(task, description="Attaching controller template...")
+                update("Attaching controller template...")
                 assert template_id is not None
                 _attach_controller_template(client, ip_type, template_id, system_ips)
             else:
-                progress.update(task, description="Updating Gateway DNS entries...")
+                update("Updating Gateway DNS entries...")
                 _update_gateway_dns(
                     cml_host, cml_user, cml_password, lab, lab_name, device_ips,
                 )
-            progress.update(task, description="Triggering network rediscovery...")
+            update("Triggering network rediscovery...")
             trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
@@ -204,23 +192,17 @@ def run_edge(
     cpus: int | None = None,
     ram: int | None = None,
 ) -> None:
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Connecting to CML...")
+    with task_progress(console) as update:
         cml = connect_cml(cml_host, cml_user, cml_password)
-        progress.update(task, description="Checking lab and images...")
+        update("Checking lab and images...")
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
-        progress.update(task, description="Connecting to SD-WAN Manager...")
+        update("Connecting to SD-WAN Manager...")
         client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
-            progress.update(task, description="Checking available edge devices...")
+            update("Checking available edge devices...")
             vedges = client.get_vedges()
             free_uuids = [
                 v["uuid"]
@@ -233,7 +215,7 @@ def run_edge(
                 )
                 raise typer.Exit(1)
 
-            progress.update(task, description="Looking up edge config group...")
+            update("Looking up edge config group...")
             config_group_id = _get_config_group_id(client, "edge_basic")
 
             start = _next_system_ip_num(lab, vedges)
@@ -271,22 +253,20 @@ def run_edge(
                     ]
                 devices_vars.append({"device-id": uuid, "variables": variables})
 
-            progress.update(task, description="Associating config group...")
+            update("Associating config group...")
             client.associate_config_group(config_group_id, uuids)
-            progress.update(task, description="Setting device variables...")
+            update("Setting device variables...")
             client.set_config_group_variables(config_group_id, devices_vars)
-            progress.update(task, description="Deploying config group...")
+            update("Deploying config group...")
             task_id = client.deploy_config_group(config_group_id, uuids)
             client.wait_for_task(task_id)
 
-            progress.update(task, description="Fetching bootstrap configs...")
+            update("Fetching bootstrap configs...")
             bootstrap_configs = {uuid: client.get_bootstrap_config(uuid) for uuid in uuids}
 
             nodes: list[Node] = []
             for i, (num, uuid) in enumerate(zip(nums, uuids), 1):
-                progress.update(
-                    task, description=f"Adding Edge{num} to CML ({i}/{count})..."
-                )
+                update(f"Adding Edge{num} to CML ({i}/{count})...")
                 node = _add_wan_edge_node(
                     lab, f"Edge{num}", image_id, bootstrap_configs[uuid], True, cpus, ram,
                 )
@@ -294,21 +274,19 @@ def run_edge(
                 nodes.append(node)
 
             for node in nodes:
-                progress.update(
-                    task, description=f"Waiting for {'edges' if count > 1 else 'edge'} to boot..."
-                )
+                update(f"Waiting for {'edges' if count > 1 else 'edge'} to boot...")
                 node.wait_until_converged()
 
-            progress.update(task, description=f"Waiting for edges to onboard (0/{count})...")
+            update(f"Waiting for edges to onboard (0/{count})...")
             wait_for_edges_onboarded(
                 client,
                 uuids,
                 timeout=_BOOT_TIMEOUT,
-                on_progress=lambda done, total: progress.update(
-                    task, description=f"Waiting for edges to onboard ({done}/{total})..."
+                on_progress=lambda done, total: update(
+                    f"Waiting for edges to onboard ({done}/{total})..."
                 ),
             )
-            progress.update(task, description="Triggering network rediscovery...")
+            update("Triggering network rediscovery...")
             trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
@@ -331,23 +309,17 @@ def run_sdrouting(
     cpus: int | None = None,
     ram: int | None = None,
 ) -> None:
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Connecting to CML...")
+    with task_progress(console) as update:
         cml = connect_cml(cml_host, cml_user, cml_password)
-        progress.update(task, description="Checking lab and images...")
+        update("Checking lab and images...")
         lab, manager_ip, manager_port = find_lab(cml, lab_name)
         ip_type = detect_ip_type(lab)
         image_id = resolve_image(cml, "cat-sdwan-edge", version)
 
-        progress.update(task, description="Connecting to SD-WAN Manager...")
+        update("Connecting to SD-WAN Manager...")
         client = connect_manager(manager_ip, manager_port, manager_user, manager_password)
         try:
-            progress.update(task, description="Checking available SD-Routing devices...")
+            update("Checking available SD-Routing devices...")
             vedges = client.get_vedges()
             free_uuids = [
                 v["uuid"]
@@ -365,7 +337,7 @@ def run_sdrouting(
             nums = [str(start + i) for i in range(count)]
             uuids = free_uuids[:count]
 
-            progress.update(task, description="Looking up SD-Routing config group...")
+            update("Looking up SD-Routing config group...")
             config_group_id = _get_config_group_id(client, "sdrouting_basic")
 
             devices_vars: list[dict[str, Any]] = []
@@ -395,17 +367,17 @@ def run_sdrouting(
                     ]
                 devices_vars.append({"device-id": uuid, "variables": variables})
 
-            progress.update(task, description="Associating config group...")
+            update("Associating config group...")
             client.associate_config_group(config_group_id, uuids)
-            progress.update(task, description="Setting device variables...")
+            update("Setting device variables...")
             client.set_config_group_variables(
                 config_group_id, devices_vars, solution="sd-routing"
             )
-            progress.update(task, description="Deploying config group...")
+            update("Deploying config group...")
             task_id = client.deploy_config_group(config_group_id, uuids)
             client.wait_for_task(task_id)
 
-            progress.update(task, description="Fetching bootstrap configs...")
+            update("Fetching bootstrap configs...")
             bootstrap_configs = {
                 uuid: client.get_bootstrap_config(uuid, wanif="GigabitEthernet1")
                 for uuid in uuids
@@ -413,9 +385,7 @@ def run_sdrouting(
 
             nodes: list[Node] = []
             for i, (num, uuid) in enumerate(zip(nums, uuids), 1):
-                progress.update(
-                    task, description=f"Adding SD-Edge{num} to CML ({i}/{count})..."
-                )
+                update(f"Adding SD-Edge{num} to CML ({i}/{count})...")
                 node = _add_wan_edge_node(
                     lab, f"SD-Edge{num}", image_id, bootstrap_configs[uuid], False, cpus, ram,
                 )
@@ -423,28 +393,25 @@ def run_sdrouting(
                 nodes.append(node)
 
             for node in nodes:
-                progress.update(task, description="Waiting for SD-Routing edges to boot...")
+                update("Waiting for SD-Routing edges to boot...")
                 node.wait_until_converged()
-                progress.update(task, description=f"Checking default route on {node.label}...")
+                update(f"Checking default route on {node.label}...")
                 if fix_sdrouting_default_route(
                     cml_host, cml_user, cml_password, lab.title or lab_name, node.label,
                     console=console,
                 ):
                     node.wait_until_converged()
 
-            progress.update(
-                task, description=f"Waiting for SD-Routing edges to onboard (0/{count})..."
-            )
+            update(f"Waiting for SD-Routing edges to onboard (0/{count})...")
             wait_for_edges_onboarded(
                 client,
                 uuids,
                 timeout=_BOOT_TIMEOUT,
-                on_progress=lambda done, total: progress.update(
-                    task,
-                    description=f"Waiting for SD-Routing edges to onboard ({done}/{total})...",
+                on_progress=lambda done, total: update(
+                    f"Waiting for SD-Routing edges to onboard ({done}/{total})..."
                 ),
             )
-            progress.update(task, description="Triggering network rediscovery...")
+            update("Triggering network rediscovery...")
             trigger_rediscovery(client)
         except ManagerAPIError as e:
             log.error("%s", e)
@@ -718,14 +685,12 @@ def run_managers(
     cml = connect_cml(cml_host, cml_user, cml_password)
     lab, manager_host, manager_port = find_lab(cml, lab_name)
 
-    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"),
-                  transient=True, console=console) as progress:
-        task = progress.add_task("Setting up Cluster switch...")
+    with task_progress(console, initial="Setting up Cluster switch...") as update:
         cluster = _ensure_cluster_switch(lab)
-        progress.update(task, description="Connecting existing managers to Cluster switch...")
+        update("Connecting existing managers to Cluster switch...")
         _connect_managers_to_cluster(lab, cluster)
 
-        progress.update(task, description="Checking cluster IP configuration...")
+        update("Checking cluster IP configuration...")
         client = connect_manager(manager_host, manager_port, manager_user, manager_password)
         try:
             org_name = client.get_organization() or ""
@@ -733,7 +698,7 @@ def run_managers(
             pki = client.get_certificate_signing()
             ensure_cluster_ip_configured(
                 client, manager_user, manager_password, persona=persona,
-                on_status=lambda s: progress.update(task, description=s),
+                on_status=update,
             )
         except ManagerAPIError as e:
             log.error("%s", e)
@@ -741,29 +706,29 @@ def run_managers(
         finally:
             client.logout()
 
-        progress.update(task, description=f"Adding {count} manager node(s) to CML...")
+        update(f"Adding {count} manager node(s) to CML...")
         new_nodes = _create_manager_nodes(
             lab, cluster, cml, count, version,
             manager_user, manager_password, org_name, ip_type, persona, cpus, ram,
         )
 
-        progress.update(task, description="Waiting for managers to boot...")
+        update("Waiting for managers to boot...")
         for node, _ in new_nodes:
             node.wait_until_converged()
 
-        progress.update(task, description="Waiting for primary Manager...")
+        update("Waiting for primary Manager...")
         client = wait_for_manager(
             manager_host, manager_port, manager_user, manager_password, version,
         )
         certs = load_certs()
         try:
             for node, cluster_ip in new_nodes:
-                progress.update(task, description=f"Adding {node.label} to cluster...")
+                update(f"Adding {node.label} to cluster...")
                 client = enroll_cluster_manager(
                     client, cluster_ip, persona,
                     manager_host, manager_port, manager_user, manager_password, version,
                     certs, pki, node.label,
-                    on_status=lambda s: progress.update(task, description=s),
+                    on_status=update,
                 )
         except ManagerAPIError as e:
             log.error("%s", e)

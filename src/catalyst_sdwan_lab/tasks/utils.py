@@ -7,8 +7,9 @@ import os
 import re
 import tarfile
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -21,6 +22,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric.types import CertificateIssuerPrivateKeyTypes
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TaskID, TextColumn
 from virl2_client import ClientLibrary
 from virl2_client.exceptions import APIError
 from virl2_client.models.lab import Lab
@@ -706,3 +708,30 @@ def run_sastre_task(
         if output:
             for entry in output:
                 log.debug("Sastre: %s", entry)
+
+
+@contextmanager
+def task_progress(
+    console: Console,
+    initial: str = "Connecting to CML...",
+) -> Iterator[Callable[[str], None]]:
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        task = progress.add_task(initial)
+
+        def update(msg: str) -> None:
+            progress.update(task, description=msg)
+            log.info(msg)
+
+        yield update
+
+
+def make_updater(progress: Progress, task: TaskID) -> Callable[[str], None]:
+    def update(msg: str) -> None:
+        progress.update(task, description=msg)
+        log.info(msg)
+    return update
