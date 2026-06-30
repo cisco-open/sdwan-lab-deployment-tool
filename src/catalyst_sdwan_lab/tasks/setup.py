@@ -1,40 +1,34 @@
 import logging
+from collections.abc import Callable
 from typing import Any
 
 import typer
 import yaml
-from rich.progress import Progress, SpinnerColumn, TaskID, TextColumn
 from virl2_client import ClientLibrary
 
-from .utils import CML_NODES_DEFINITION_DIR, connect_cml, console
+from .utils import CML_NODES_DEFINITION_DIR, connect_cml, console, task_progress
 
 log = logging.getLogger(__name__)
 _IOL_NODE_IDS = ("iol-xe", "ioll2-xe")
 
 
 def run(cml_host: str, cml_user: str, cml_password: str) -> None:
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Connecting to CML...")
+    with task_progress(console) as update:
         cml = connect_cml(cml_host, cml_user, cml_password)
         try:
-            progress.update(task, description="Checking license...")
+            update("Checking license...")
             _check_license(cml)
             log.info("License OK")
 
-            progress.update(task, description="Loading node definitions...")
+            update("Loading node definitions...")
             existing = {nd["id"]: nd for nd in cml.definitions.node_definitions()}
             log.debug("Loaded %d node definitions from CML", len(existing))
 
-            progress.update(task, description="Checking IOL definitions...")
+            update("Checking IOL definitions...")
             _check_iol_definitions(existing)
             log.info("IOL definitions found")
 
-            _sync_node_definitions(cml, existing, progress, task)
+            _sync_node_definitions(cml, existing, update)
         finally:
             cml.logout()
 
@@ -63,13 +57,12 @@ def _check_iol_definitions(existing: dict[str, Any]) -> None:
 def _sync_node_definitions(
     cml: ClientLibrary,
     existing: dict[str, Any],
-    progress: Progress,
-    task: TaskID,
+    update: Callable[[str], None],
 ) -> None:
     for path in sorted(CML_NODES_DEFINITION_DIR.glob("*.yaml")):
         definition = yaml.safe_load(path.read_text())
         node_id = definition["id"]
-        progress.update(task, description=f"Checking {node_id}...")
+        update(f"Checking {node_id}...")
         if node_id not in existing:
             log.debug("%s: not found in CML, uploading", node_id)
             cml.definitions.upload_node_definition(definition)

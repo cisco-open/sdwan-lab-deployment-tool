@@ -11,7 +11,6 @@ from typing import Any, Literal
 import typer
 from jinja2 import Environment, FileSystemLoader
 from rich.markup import escape
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from virl2_client import ClientLibrary
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError, ManagerClient
@@ -31,6 +30,7 @@ from .utils import (
     onboard_control_components,
     resolve_image,
     sha512_crypt,
+    task_progress,
     trigger_rediscovery,
     wait_for_manager,
 )
@@ -95,24 +95,18 @@ def run(
 
     certs = load_certs()
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Connecting to CML...")
+    with task_progress(console) as update:
         cml = connect_cml(cml_host, cml_user, cml_password)
 
-        progress.update(task, description="Checking SD-WAN images...")
+        update("Checking SD-WAN images...")
         images = _check_images(cml, version)
 
         try:
             if retry:
-                progress.update(task, description="Locating existing lab...")
+                update("Locating existing lab...")
                 _find_lab(cml, manager_ip, manager_port)
             else:
-                progress.update(task, description=f"Creating lab {lab_name}...")
+                update(f"Creating lab {lab_name}...")
                 _create_lab(
                     cml,
                     lab_name=lab_name,
@@ -131,20 +125,20 @@ def run(
                     patty=patty,
                 )
 
-            progress.update(task, description="Waiting for SD-WAN Manager...")
+            update("Waiting for SD-WAN Manager...")
             client = wait_for_manager(
                 manager_ip,
                 manager_port,
                 manager_user,
                 manager_password,
                 version,
-                on_status=lambda msg: progress.update(task, description=msg),
+                on_status=update,
             )
             try:
-                progress.update(task, description="Configuring SD-WAN Manager...")
+                update("Configuring SD-WAN Manager...")
                 configure_manager(
                     client, version, org_name, certs.chain, pki=pki,
-                    on_status=lambda msg: progress.update(task, description=msg),
+                    on_status=update,
                     proxy_ip=proxy_ip, proxy_port=proxy_port, no_proxy=no_proxy,
                 )
 
@@ -154,23 +148,23 @@ def run(
                     [("fc00:172:16::201", "vbond"), ("fc00:172:16::101", "vsmart")]
                     if ip_type == "v6"
                     else [("172.16.0.201", "vbond"), ("172.16.0.101", "vsmart")],
-                    on_status=lambda msg: progress.update(task, description=msg),
+                    on_status=update,
                     pki=pki,
                 )
 
-                progress.update(task, description="Uploading serial file...")
+                update("Uploading serial file...")
                 client.upload_serial_file(serial_file)
 
-                progress.update(task, description="Importing basic configuration...")
+                update("Importing basic configuration...")
                 _restore_basic_configuration(client, ip_type)
 
-                progress.update(task, description="Importing controller templates...")
+                update("Importing controller templates...")
                 template_id = _import_controller_templates(client, ip_type)
 
-                progress.update(task, description="Attaching controller template...")
+                update("Attaching controller template...")
                 _attach_controller_template(client, ip_type, template_id)
 
-                progress.update(task, description="Triggering network rediscovery...")
+                update("Triggering network rediscovery...")
                 trigger_rediscovery(client)
             except ManagerAPIError as e:
                 log.error("%s", e)

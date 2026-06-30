@@ -56,10 +56,9 @@ class TestSyncNodeDefinitions:
             "id: cat-sdwan-manager\ngeneral:\n  read_only: false\ndata: value\n"
         )
         cml = MagicMock()
-        progress, task = MagicMock(), MagicMock()
 
         with patch("catalyst_sdwan_lab.tasks.setup.CML_NODES_DEFINITION_DIR", tmp_path):
-            _sync_node_definitions(cml, existing={}, progress=progress, task=task)
+            _sync_node_definitions(cml, existing={}, update=MagicMock())
 
         cml.definitions.upload_node_definition.assert_called_once_with(definition)
 
@@ -73,10 +72,9 @@ class TestSyncNodeDefinitions:
             }
         }
         cml = MagicMock()
-        progress, task = MagicMock(), MagicMock()
 
         with patch("catalyst_sdwan_lab.tasks.setup.CML_NODES_DEFINITION_DIR", tmp_path):
-            _sync_node_definitions(cml, existing=existing, progress=progress, task=task)
+            _sync_node_definitions(cml, existing=existing, update=MagicMock())
 
         cml.definitions.upload_node_definition.assert_called_once()
         _, kwargs = cml.definitions.upload_node_definition.call_args
@@ -92,10 +90,9 @@ class TestSyncNodeDefinitions:
             }
         }
         cml = MagicMock()
-        progress, task = MagicMock(), MagicMock()
 
         with patch("catalyst_sdwan_lab.tasks.setup.CML_NODES_DEFINITION_DIR", tmp_path):
-            _sync_node_definitions(cml, existing=existing, progress=progress, task=task)
+            _sync_node_definitions(cml, existing=existing, update=MagicMock())
 
         cml.definitions.upload_node_definition.assert_not_called()
 
@@ -109,10 +106,9 @@ class TestSyncNodeDefinitions:
             }
         }
         cml = MagicMock()
-        progress, task = MagicMock(), MagicMock()
 
         with patch("catalyst_sdwan_lab.tasks.setup.CML_NODES_DEFINITION_DIR", tmp_path):
-            _sync_node_definitions(cml, existing=existing, progress=progress, task=task)
+            _sync_node_definitions(cml, existing=existing, update=MagicMock())
 
         cml.definitions.set_node_definition_read_only.assert_called_once_with(
             "cat-sdwan-manager", False
