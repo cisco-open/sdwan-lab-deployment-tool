@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 3.1.0 [unreleased]
+# Catalyst SD-WAN Lab 3.1.0 [Jun 30, 2026]
 
 - Fix backup task failing to extract config from SD-WAN and SD-Routing edges when `#` present in interface description
 - Add Manager clustering support via `csdwan add managers <version>`
