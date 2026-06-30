@@ -320,7 +320,10 @@ class ManagerPersona(str, Enum):
 def add(
     count: Annotated[int, typer.Argument(help="Number of devices to add")],
     device_type: Annotated[
-        str, typer.Argument(help="Device type: controller(s), validator(s), edge(s), sdrouting, manager(s)")
+        str,
+        typer.Argument(
+            help="Device type: manager(s), controller(s), validator(s), edge(s), sdrouting"
+        ),
     ],
     version: Annotated[str, typer.Argument(help="SD-WAN software version (e.g. 20.15.1)")],
     lab_name: Annotated[
@@ -355,7 +358,8 @@ def add(
     device = _DEVICE_TYPES.get(device_type.lower())
     if device is None:
         log.error(
-            "Unknown device type '%s'. Valid: controller, validator, edge, sdrouting, manager.", device_type
+            "Unknown device type '%s'. Valid: manager, controller, validator, edge, sdrouting.",
+                device_type,
         )
         raise typer.Exit(1)
     if device in ("controller", "validator"):

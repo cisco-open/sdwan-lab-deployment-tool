@@ -2,7 +2,6 @@ import datetime
 import logging
 import re
 import time
-
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Literal
 
@@ -865,7 +864,10 @@ def _create_manager_nodes(
 
 def _ensure_cluster_switch(lab: Lab) -> Node:
     existing = next(
-        (n for n in lab.nodes() if n.label == "Cluster" and n.node_definition == "unmanaged_switch"),
+        (
+            n for n in lab.nodes()
+            if n.label == "Cluster" and n.node_definition == "unmanaged_switch"
+        ),
         None,
     )
     if existing is not None:

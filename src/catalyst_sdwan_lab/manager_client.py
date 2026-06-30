@@ -330,7 +330,9 @@ class ManagerClient:
                 time.sleep(interval)
                 continue
             raise ManagerAPIError(f"HTTP {response.status_code}: {response.text[:200]}")
-        raise ManagerAPIError(f"Cluster node {cluster_ip} did not become reachable after {retries * interval}s.")
+        raise ManagerAPIError(
+            f"Cluster node {cluster_ip} did not become reachable after {retries * interval}s."
+        )
 
     def rediscover_devices(self, devices: list[dict[str, Any]]) -> None:
         self._post(
@@ -345,7 +347,9 @@ class ManagerClient:
              "generateCSR": False, "personality": personality},
         )
 
-    def update_device_connection(self, uuid: str, device_ip: str, username: str, password: str) -> None:
+    def update_device_connection(
+        self, uuid: str, device_ip: str, username: str, password: str
+    ) -> None:
         self._put(
             f"/dataservice/system/device/{uuid}",
             {"deviceIP": device_ip, "username": username, "password": password},

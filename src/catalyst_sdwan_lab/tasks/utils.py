@@ -634,7 +634,8 @@ def enroll_cluster_manager(
     label: str,
     on_status: Callable[[str], None] = lambda _: None,
 ) -> ManagerClient:
-    # cluster IPs are 172.16.254.N and VPN0 IPs are 172.16.0.N — same last octet by deploy convention
+    # cluster IPs are 172.16.254.N and VPN0 IPs are 172.16.0.N
+    # — same last octet by deploy convention
     vpn0_ip = "172.16.0." + cluster_ip.split(".")[-1]
 
     client.add_cluster_node(cluster_ip, persona, manager_user, manager_password)
