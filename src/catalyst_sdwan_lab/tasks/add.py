@@ -276,7 +276,6 @@ def run_edge(
             for node in nodes:
                 update(f"Waiting for {'edges' if count > 1 else 'edge'} to boot...")
                 node.wait_until_converged()
-            log.info("Edges booted; waiting for onboarding...")
 
             update(f"Waiting for edges to onboard (0/{count})...")
             wait_for_edges_onboarded(

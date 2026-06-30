@@ -142,7 +142,7 @@ def run(
                     proxy_ip=proxy_ip, proxy_port=proxy_port, no_proxy=no_proxy,
                 )
 
-                log.info("[6/11] Onboarding control components (validator, controller)...")
+                update("Adding control components...")
                 onboard_control_components(
                     client,
                     certs,
