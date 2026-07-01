@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 3.1.1 [Jul 1, 2026]
+
+- Fix `backup` task failing to extract config from control-plane nodes (Manager, Controller, Validator) when CML's SSH server rejects public key auth — paramiko now connects with password-only auth (`allow_agent=False, look_for_keys=False`)
+
 # Catalyst SD-WAN Lab 3.1.0 [Jun 30, 2026]
 
 - Fix backup task failing to extract config from SD-WAN and SD-Routing edges when `#` present in interface description
