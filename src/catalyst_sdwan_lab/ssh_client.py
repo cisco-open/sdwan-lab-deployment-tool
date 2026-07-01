@@ -61,7 +61,10 @@ def cml_shell(
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(_InteractiveHostKeyPolicy(console or Console()))
     try:
-        ssh.connect(cml_host, username=cml_user, password=cml_password, timeout=15)
+        ssh.connect(
+            cml_host, username=cml_user, password=cml_password,
+            timeout=15, allow_agent=False, look_for_keys=False,
+        )
     except paramiko.BadHostKeyException:
         log.error(
             "SSH host key for %s has changed. If this is expected (CML reinstall/upgrade), "
