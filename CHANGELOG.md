@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 3.1.2 [unreleased]
+
+- Fix `restore` deleting the Manager node's `admin` account when the configured manager user differs from `admin` — the backed-up `admin` user was renamed instead of cloned, leaving the restored Manager without its required `admin` account
+
 # Catalyst SD-WAN Lab 3.1.1 [Jul 1, 2026]
 
 - Fix `backup` task failing to extract config from control-plane nodes (Manager, Controller, Validator) when CML's SSH server rejects public key auth — paramiko now connects with password-only auth (`allow_agent=False, look_for_keys=False`)

@@ -329,12 +329,19 @@ def _patch_topology(
             else:
                 cfg = cfg.replace("</password>", f"</password>\n            {ts_tag}", 1)
             if manager_user != "admin" and f"<name>{manager_user}</name>" not in cfg:
-                cfg = re.sub(
-                    r"(<user>[\s\S]+?<name>)admin(</name>)",
-                    lambda m: f"{m.group(1)}{manager_user}{m.group(2)}",
-                    cfg,
-                    count=1,
+                admin_block = next(
+                    (
+                        b.group(0)
+                        for b in re.finditer(r"[ \t]*<user>[\s\S]*?</user>\n", cfg)
+                        if "<name>admin</name>" in b.group(0)
+                    ),
+                    None,
                 )
+                if admin_block:
+                    new_user_block = admin_block.replace(
+                        "<name>admin</name>", f"<name>{manager_user}</name>", 1
+                    )
+                    cfg = cfg.replace(admin_block, admin_block + new_user_block, 1)
             if is_primary:
                 if m := re.search(
                     r"(<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<address>)([\d./]+)(</address>)",
