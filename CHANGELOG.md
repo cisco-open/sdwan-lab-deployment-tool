@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 3.1.2 [unreleased]
+# Catalyst SD-WAN Lab 3.1.2 [Jul 9, 2026]
 
 - Fix `add` failing with `HTTP 400 Not Defined In Schema Attributes` against config groups (e.g. from an older tool version) that don't define per-device `_mask` variables — device variables are now filtered against the config group's actual schema
 - Fix `restore` deleting the Manager node's `admin` account when the configured manager user differs from `admin`
