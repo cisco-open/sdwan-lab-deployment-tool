@@ -2,6 +2,7 @@
 
 - Fix `restore` deleting the Manager node's `admin` account when the configured manager user differs from `admin` — the backed-up `admin` user was renamed instead of cloned, leaving the restored Manager without its required `admin` account
 - Fix `restore` creating the cloned manager user without `<group>` membership, causing `403 Access forbidden: role not allowed` on Manager API calls after restore — the cloned user now gets explicit `all`, `global`, and `netadmin` groups (not required for `admin`, which has them implicitly)
+- Fix `add` failing with `HTTP 400 ... Not Defined In Schema Attributes` when the lab's `edge_basic`/`sdrouting_basic` config group (e.g. created by an older tool version) doesn't define per-device `_mask` variables — device variables are now filtered against the config group's actual variable schema (`GET .../device/variables/schema`) before being pushed, instead of assuming a fixed variable set
 
 # Catalyst SD-WAN Lab 3.1.1 [Jul 1, 2026]
 

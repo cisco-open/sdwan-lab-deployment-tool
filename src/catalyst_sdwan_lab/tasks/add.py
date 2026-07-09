@@ -217,6 +217,7 @@ def run_edge(
 
             update("Looking up edge config group...")
             config_group_id = _get_config_group_id(client, "edge_basic")
+            allowed_vars = client.get_config_group_variable_names(config_group_id)
 
             start = _next_system_ip_num(lab, vedges)
             nums = [f"{start + i:02d}" for i in range(count)]
@@ -251,6 +252,7 @@ def run_edge(
                         {"name": "vpn0_gi2_mpls_ipv6", "value": f"fc00:172:16:2::{n}/64"},
                         {"name": "vpn1_gi3_lan_ipv6", "value": f"fc00:192:168:{n}::1/64"},
                     ]
+                variables = _drop_unsupported_variables(variables, allowed_vars)
                 devices_vars.append({"device-id": uuid, "variables": variables})
 
             update("Associating config group...")
@@ -339,6 +341,7 @@ def run_sdrouting(
 
             update("Looking up SD-Routing config group...")
             config_group_id = _get_config_group_id(client, "sdrouting_basic")
+            allowed_vars = client.get_config_group_variable_names(config_group_id)
 
             devices_vars: list[dict[str, Any]] = []
             for num, uuid in zip(nums, uuids):
@@ -365,6 +368,7 @@ def run_sdrouting(
                         {"name": "global_vrf_gi1_inet_ipv6", "value": f"fc00:172:16:1::{n}/64"},
                         {"name": "vrf1_gi3_lan_ipv6", "value": f"fc00:192:168:{n}::1/64"},
                     ]
+                variables = _drop_unsupported_variables(variables, allowed_vars)
                 devices_vars.append({"device-id": uuid, "variables": variables})
 
             update("Associating config group...")
@@ -667,6 +671,15 @@ def _get_config_group_id(client: ManagerClient, name: str) -> str:
         log.error("Config group '%s' not found in Manager.", name)
         raise typer.Exit(1)
     return cg["id"]
+
+
+def _drop_unsupported_variables(
+    variables: list[dict[str, Any]], allowed: set[str]
+) -> list[dict[str, Any]]:
+    dropped = [v["name"] for v in variables if v["name"] not in allowed]
+    if dropped:
+        log.debug("Config group schema doesn't define %s — skipping", ", ".join(dropped))
+    return [v for v in variables if v["name"] in allowed]
 
 
 def run_managers(
