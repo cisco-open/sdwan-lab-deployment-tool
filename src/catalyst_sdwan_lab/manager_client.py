@@ -227,6 +227,15 @@ class ManagerClient:
             {"solution": solution, "devices": devices},
         )
 
+    def get_config_group_variable_names(self, config_group_id: str) -> set[str]:
+        data = self._get(f"/dataservice/v1/config-group/{config_group_id}/device/variables/schema")
+        return {
+            name
+            for entry in data
+            for var in entry.get("variables", [])
+            for name in var.get("schema", {}).get("properties", {})
+        }
+
     def deploy_config_group(self, config_group_id: str, uuids: list[str]) -> str:
         data = self._post(
             f"/dataservice/v1/config-group/{config_group_id}/device/deploy",

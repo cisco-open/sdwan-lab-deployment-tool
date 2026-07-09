@@ -12,6 +12,7 @@ from catalyst_sdwan_lab.tasks.add import (
     _add_sdwan_node,
     _add_to_manager_retrying,
     _add_wan_edge_node,
+    _drop_unsupported_variables,
     _next_device_num,
     _next_system_ip_num,
     _wait_for_controllers_ready,
@@ -479,3 +480,27 @@ class TestWaitForTask:
         with patch("catalyst_sdwan_lab.manager_client.time.sleep"):
             client.wait_for_task("task-1")
         assert mock_get.call_count == 2
+
+
+class TestDropUnsupportedVariables:
+    def test_keeps_all_when_allowed(self) -> None:
+        variables = [
+            {"name": "system_ip", "value": "10.0.0.1"},
+            {"name": "host_name", "value": "Edge01"},
+        ]
+        allowed = {"system_ip", "host_name"}
+        assert _drop_unsupported_variables(variables, allowed) == variables
+
+    def test_drops_names_not_in_schema(self) -> None:
+        variables = [
+            {"name": "vpn0_gi1_inet_ip", "value": "172.16.1.1"},
+            {"name": "vpn0_gi1_inet_mask", "value": "255.255.255.0"},
+        ]
+        allowed = {"vpn0_gi1_inet_ip"}
+        assert _drop_unsupported_variables(variables, allowed) == [
+            {"name": "vpn0_gi1_inet_ip", "value": "172.16.1.1"}
+        ]
+
+    def test_empty_allowed_drops_everything(self) -> None:
+        variables = [{"name": "system_ip", "value": "10.0.0.1"}]
+        assert _drop_unsupported_variables(variables, set()) == []

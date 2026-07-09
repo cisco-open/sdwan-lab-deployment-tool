@@ -234,6 +234,15 @@ def run(
     )
 
 
+def _find_backup_root(path: Path) -> Path:
+    if (path / "topology.yaml").exists():
+        return path
+    subdirs = [p for p in path.iterdir() if p.is_dir()]
+    if len(subdirs) == 1 and (subdirs[0] / "topology.yaml").exists():
+        return subdirs[0]
+    return path
+
+
 def _load_backup(backup: Path) -> tuple[dict[str, Any], Path, Any]:
     if backup.suffix == ".zip":
         tmpdir = tempfile.TemporaryDirectory()
@@ -242,8 +251,11 @@ def _load_backup(backup: Path) -> tuple[dict[str, Any], Path, Any]:
             for member in zf.infolist():
                 if ".." not in member.filename and not member.filename.startswith("/"):
                     zf.extract(member, out)
-        return yaml.safe_load((out / "topology.yaml").read_text()), out / "manager_configs", tmpdir
-    return yaml.safe_load((backup / "topology.yaml").read_text()), backup / "manager_configs", None
+        root = _find_backup_root(out)
+        topology = yaml.safe_load((root / "topology.yaml").read_text())
+        return topology, root / "manager_configs", tmpdir
+    root = _find_backup_root(backup.resolve())
+    return yaml.safe_load((root / "topology.yaml").read_text()), root / "manager_configs", None
 
 
 def _check_images(
@@ -329,12 +341,29 @@ def _patch_topology(
             else:
                 cfg = cfg.replace("</password>", f"</password>\n            {ts_tag}", 1)
             if manager_user != "admin" and f"<name>{manager_user}</name>" not in cfg:
-                cfg = re.sub(
-                    r"(<user>[\s\S]+?<name>)admin(</name>)",
-                    lambda m: f"{m.group(1)}{manager_user}{m.group(2)}",
-                    cfg,
-                    count=1,
+                admin_block = next(
+                    (
+                        b.group(0)
+                        for b in re.finditer(r"[ \t]*<user>[\s\S]*?</user>\n", cfg)
+                        if "<name>admin</name>" in b.group(0)
+                    ),
+                    None,
                 )
+                if admin_block:
+                    new_user_block = admin_block.replace(
+                        "<name>admin</name>", f"<name>{manager_user}</name>", 1
+                    )
+                    if "<group>" not in new_user_block:
+                        groups = "".join(
+                            f"            <group>{g}</group>\n"
+                            for g in ("all", "global", "netadmin")
+                        )
+                        new_user_block = re.sub(
+                            r"\n(\s*)</user>\n$",
+                            f"\n{groups}" r"\1</user>\n",
+                            new_user_block,
+                        )
+                    cfg = cfg.replace(admin_block, admin_block + new_user_block, 1)
             if is_primary:
                 if m := re.search(
                     r"(<vpn-instance>[\s\S]+?<vpn-id>512</vpn-id>[\s\S]+?<address>)([\d./]+)(</address>)",
