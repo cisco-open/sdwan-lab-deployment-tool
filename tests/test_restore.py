@@ -1,4 +1,12 @@
-from catalyst_sdwan_lab.tasks.restore import _find_primary_manager_id
+from pathlib import Path
+
+import pytest
+
+from catalyst_sdwan_lab.tasks.restore import (
+    _find_backup_root,
+    _find_primary_manager_id,
+    _load_backup,
+)
 
 
 class TestFindPrimaryManagerId:
@@ -65,3 +73,40 @@ class TestFindPrimaryManagerId:
             links=[{"n1": "n5", "n2": "n0", "i1": "i0", "i2": "i0"}],
         )
         assert _find_primary_manager_id(topology) is None
+
+
+class TestFindBackupRoot:
+    def test_topology_at_top_level(self, tmp_path: Path) -> None:
+        (tmp_path / "topology.yaml").write_text("lab: {}")
+        assert _find_backup_root(tmp_path) == tmp_path
+
+    def test_topology_nested_in_single_wrapping_folder(self, tmp_path: Path) -> None:
+        wrapped = tmp_path / "sdwan_lab_backup"
+        wrapped.mkdir()
+        (wrapped / "topology.yaml").write_text("lab: {}")
+        assert _find_backup_root(tmp_path) == wrapped
+
+    def test_falls_back_to_given_path_when_ambiguous(self, tmp_path: Path) -> None:
+        (tmp_path / "one").mkdir()
+        (tmp_path / "two").mkdir()
+        (tmp_path / "two" / "topology.yaml").write_text("lab: {}")
+        assert _find_backup_root(tmp_path) == tmp_path
+
+    def test_falls_back_to_given_path_when_nothing_found(self, tmp_path: Path) -> None:
+        assert _find_backup_root(tmp_path) == tmp_path
+
+
+class TestLoadBackup:
+    def test_directory_backup_resolves_to_absolute_path(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        backup_dir = tmp_path / "sdwan_lab_backup"
+        backup_dir.mkdir()
+        (backup_dir / "topology.yaml").write_text("lab: {}")
+        (backup_dir / "manager_configs").mkdir()
+
+        monkeypatch.chdir(tmp_path)
+        _, manager_configs_dir, tmpdir = _load_backup(Path("sdwan_lab_backup"))
+
+        assert manager_configs_dir.is_absolute()
+        assert tmpdir is None

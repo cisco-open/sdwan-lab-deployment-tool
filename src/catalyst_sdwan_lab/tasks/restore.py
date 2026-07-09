@@ -234,6 +234,15 @@ def run(
     )
 
 
+def _find_backup_root(path: Path) -> Path:
+    if (path / "topology.yaml").exists():
+        return path
+    subdirs = [p for p in path.iterdir() if p.is_dir()]
+    if len(subdirs) == 1 and (subdirs[0] / "topology.yaml").exists():
+        return subdirs[0]
+    return path
+
+
 def _load_backup(backup: Path) -> tuple[dict[str, Any], Path, Any]:
     if backup.suffix == ".zip":
         tmpdir = tempfile.TemporaryDirectory()
@@ -242,8 +251,11 @@ def _load_backup(backup: Path) -> tuple[dict[str, Any], Path, Any]:
             for member in zf.infolist():
                 if ".." not in member.filename and not member.filename.startswith("/"):
                     zf.extract(member, out)
-        return yaml.safe_load((out / "topology.yaml").read_text()), out / "manager_configs", tmpdir
-    return yaml.safe_load((backup / "topology.yaml").read_text()), backup / "manager_configs", None
+        root = _find_backup_root(out)
+        topology = yaml.safe_load((root / "topology.yaml").read_text())
+        return topology, root / "manager_configs", tmpdir
+    root = _find_backup_root(backup.resolve())
+    return yaml.safe_load((root / "topology.yaml").read_text()), root / "manager_configs", None
 
 
 def _check_images(
