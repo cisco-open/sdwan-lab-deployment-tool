@@ -1,6 +1,7 @@
 # Catalyst SD-WAN Lab 3.1.2 [unreleased]
 
 - Fix `restore` deleting the Manager node's `admin` account when the configured manager user differs from `admin` — the backed-up `admin` user was renamed instead of cloned, leaving the restored Manager without its required `admin` account
+- Fix `restore` creating the cloned manager user without `<group>` membership, causing `403 Access forbidden: role not allowed` on Manager API calls after restore — the cloned user now gets explicit `all`, `global`, and `netadmin` groups (not required for `admin`, which has them implicitly)
 
 # Catalyst SD-WAN Lab 3.1.1 [Jul 1, 2026]
 

@@ -341,6 +341,16 @@ def _patch_topology(
                     new_user_block = admin_block.replace(
                         "<name>admin</name>", f"<name>{manager_user}</name>", 1
                     )
+                    if "<group>" not in new_user_block:
+                        groups = "".join(
+                            f"            <group>{g}</group>\n"
+                            for g in ("all", "global", "netadmin")
+                        )
+                        new_user_block = re.sub(
+                            r"\n(\s*)</user>\n$",
+                            f"\n{groups}" r"\1</user>\n",
+                            new_user_block,
+                        )
                     cfg = cfg.replace(admin_block, admin_block + new_user_block, 1)
             if is_primary:
                 if m := re.search(
