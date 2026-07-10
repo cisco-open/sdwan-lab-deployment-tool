@@ -1,3 +1,7 @@
+# Catalyst SD-WAN Lab 3.1.3 [unreleased]
+
+- Fix `restore` failing with `Interface eth2 not found in VPN 0` if modified direct connectivity between SD-WAN Manager eth0 and external connector
+
 # Catalyst SD-WAN Lab 3.1.2 [Jul 9, 2026]
 
 - Fix `add` failing with `HTTP 400 Not Defined In Schema Attributes` against config groups (e.g. from an older tool version) that don't define per-device `_mask` variables — device variables are now filtered against the config group's actual schema

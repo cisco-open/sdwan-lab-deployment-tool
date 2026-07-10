@@ -422,10 +422,11 @@ def _restore_cluster(
     version: str,
     on_status: Callable[[str], None],
 ) -> ManagerClient:
-    secondary_managers = [
-        n for n in lab.nodes()
-        if n.node_definition == "cat-sdwan-manager" and not _manager_connected_to_external(n)
-    ]
+    manager_nodes = [n for n in lab.nodes() if n.node_definition == "cat-sdwan-manager"]
+    if len(manager_nodes) <= 1:
+        return client
+
+    secondary_managers = [n for n in manager_nodes if not _manager_connected_to_external(n)]
     if not secondary_managers:
         return client
 
