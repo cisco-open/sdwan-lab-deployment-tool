@@ -5,6 +5,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Literal
 
+import requests
 import typer
 from jinja2 import Environment, FileSystemLoader
 from rich.markup import escape
@@ -569,7 +570,7 @@ def _add_to_manager_retrying(
         try:
             client.add_controller(ip, personality, "admin", "admin")
             return
-        except ManagerAPIError:
+        except (ManagerAPIError, requests.exceptions.RequestException):
             remaining = deadline - time.time()
             if remaining <= 0:
                 log.error("Timed out waiting for %s %s to become reachable.", personality, ip)

@@ -1,6 +1,7 @@
 # Catalyst SD-WAN Lab 3.1.3 [unreleased]
 
 - Fix `restore` failing with `Interface eth2 not found in VPN 0` if modified direct connectivity between SD-WAN Manager eth0 and external connector
+- Fix `add` crashing with an unhandled `ReadTimeout` while polling for controller/validator reachability right after boot
 
 # Catalyst SD-WAN Lab 3.1.2 [Jul 9, 2026]
 
