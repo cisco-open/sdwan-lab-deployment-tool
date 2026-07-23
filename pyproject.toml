@@ -1,6 +1,6 @@
 [project]
 name = "catalyst-sdwan-lab"
-version = "3.1.2"
+version = "3.1.3"
 description = "Automation tool for Cisco Catalyst SD-WAN labs in CML"
 authors = [{ name = "Tomasz Zarski", email = "tzarski@cisco.com" }]
 license = { text = "BSD-3-Clause" }
