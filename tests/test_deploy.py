@@ -19,10 +19,13 @@ from catalyst_sdwan_lab.tasks.deploy import (
 )
 from catalyst_sdwan_lab.tasks.utils import (
     _complete_initial_setup_workflow,
+    configure_controller_network_settings,
     configure_manager,
     extract_org_name,
+    get_controller_uuids,
     load_certs,
     onboard_control_components,
+    parse_version,
     resolve_image,
     sign_device_cert,
 )
@@ -373,6 +376,60 @@ class TestAttachControllerTemplate:
         device = client.attach_device_template.call_args[0][1][0]
         assert "/0/eth1/interface/ip/address" in device
         assert "/0/eth1/interface/ipv6/address" in device
+
+
+class TestGetControllerUuids:
+    def _device(self, personality: str, ip: str, uuid: str) -> dict:
+        return {"personality": personality, "deviceIP": ip, "uuid": uuid}
+
+    def test_filters_to_vsmart_only(self) -> None:
+        client = MagicMock()
+        client.get_controllers.return_value = [
+            self._device("vsmart", "100.0.0.101", "uuid-1"),
+            self._device("vbond", "100.0.0.201", "uuid-2"),
+        ]
+        assert get_controller_uuids(client) == ["uuid-1"]
+
+    def test_filters_by_controller_ips_when_given(self) -> None:
+        client = MagicMock()
+        client.get_controllers.return_value = [
+            self._device("vsmart", "100.0.0.101", "uuid-1"),
+            self._device("vsmart", "100.0.0.102", "uuid-2"),
+        ]
+        assert get_controller_uuids(client, {"100.0.0.102"}) == ["uuid-2"]
+
+
+class TestConfigureControllerNetworkSettings:
+    def test_skips_if_no_controllers(self) -> None:
+        client = MagicMock()
+        client.get_controllers.return_value = []
+        configure_controller_network_settings(client)
+        client.convert_control_component_to_settings.assert_not_called()
+        client.configure_control_component_network_settings.assert_not_called()
+        client.deploy_control_component_settings.assert_not_called()
+
+    def test_configures_and_deploys_to_matching_controllers(self) -> None:
+        client = MagicMock()
+        client.get_controllers.return_value = [
+            {"personality": "vsmart", "deviceIP": "100.0.0.101", "uuid": "uuid-1"},
+        ]
+        client.deploy_control_component_settings.return_value = "task-1"
+        configure_controller_network_settings(client, {"100.0.0.101"})
+        client.convert_control_component_to_settings.assert_called_once_with("uuid-1")
+        client.configure_control_component_network_settings.assert_called_once()
+        client.deploy_control_component_settings.assert_called_once_with(["uuid-1"])
+        client.wait_for_task.assert_called_once_with("task-1")
+
+
+class TestParseVersion:
+    def test_full_version(self) -> None:
+        assert parse_version("20.18.2") == (20, 18, 2)
+
+    def test_short_version_defaults_patch(self) -> None:
+        assert parse_version("20.15") == (20, 15, 0)
+
+    def test_garbage_falls_back_to_zero(self) -> None:
+        assert parse_version("not-a-version") == (0, 0, 0)
 
 
 class TestCheckIpFree:

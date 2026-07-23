@@ -31,6 +31,7 @@ from .utils import (
     CML_DEPLOY_TEMPLATES_DIR,
     SDWAN_CTRL_NODE_DEFS,
     VALIDATOR_FQDN,
+    configure_controller_network_settings,
     connect_cml,
     connect_manager,
     console,
@@ -39,6 +40,7 @@ from .utils import (
     ensure_cluster_ip_configured,
     find_lab,
     load_certs,
+    parse_version,
     resolve_image,
     sha512_crypt,
     sign_device_cert,
@@ -83,6 +85,8 @@ def run_control_component(
     is_ctrl = device_type == "controller"
     label_prefix = "Controller" if is_ctrl else "Validator"
     node_def = "cat-sdwan-controller" if is_ctrl else "cat-sdwan-validator"
+    major, minor, _ = parse_version(version)
+    use_network_settings = is_ctrl and (major, minor) >= (20, 18)
     certs = load_certs()
 
     with task_progress(console) as update:
@@ -97,7 +101,11 @@ def run_control_component(
         try:
             pki = client.get_certificate_signing()
             org_name = client.get_organization() or ""
-            template_id = _import_controller_templates(client, ip_type) if is_ctrl else None
+            template_id = (
+                _import_controller_templates(client, ip_type)
+                if is_ctrl and not use_network_settings
+                else None
+            )
 
             ip_offset = "1" if is_ctrl else "2"
             num_re = _CTRL_NUM_RE if is_ctrl else _VLDTR_NUM_RE
@@ -157,9 +165,13 @@ def run_control_component(
                 }
                 update("Waiting for controllers to reconnect...")
                 _wait_for_controllers_ready(client, system_ips, timeout=_CSR_POLL_TIMEOUT)
-                update("Attaching controller template...")
-                assert template_id is not None
-                _attach_controller_template(client, ip_type, template_id, system_ips)
+                if use_network_settings:
+                    update("Configuring controller network settings...")
+                    configure_controller_network_settings(client, system_ips)
+                else:
+                    update("Attaching controller template...")
+                    assert template_id is not None
+                    _attach_controller_template(client, ip_type, template_id, system_ips)
             else:
                 update("Updating Gateway DNS entries...")
                 _update_gateway_dns(

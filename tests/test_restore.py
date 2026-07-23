@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 
 import pytest
 
 from catalyst_sdwan_lab.tasks.restore import (
+    _controllers_have_device_template,
     _find_backup_root,
     _find_primary_manager_id,
     _load_backup,
@@ -110,3 +112,22 @@ class TestLoadBackup:
 
         assert manager_configs_dir.is_absolute()
         assert tmpdir is None
+
+
+class TestControllersHaveDeviceTemplate:
+    def test_no_attached_dir_returns_false(self, tmp_path: Path) -> None:
+        assert _controllers_have_device_template(tmp_path) is False
+
+    def test_no_vsmart_entries_returns_false(self, tmp_path: Path) -> None:
+        attached = tmp_path / "device_templates" / "attached"
+        attached.mkdir(parents=True)
+        (attached / "edge_basic.json").write_text(json.dumps([{"personality": "vedge"}]))
+
+        assert _controllers_have_device_template(tmp_path) is False
+
+    def test_vsmart_entry_returns_true(self, tmp_path: Path) -> None:
+        attached = tmp_path / "device_templates" / "attached"
+        attached.mkdir(parents=True)
+        (attached / "controller_basic.json").write_text(json.dumps([{"personality": "vsmart"}]))
+
+        assert _controllers_have_device_template(tmp_path) is True

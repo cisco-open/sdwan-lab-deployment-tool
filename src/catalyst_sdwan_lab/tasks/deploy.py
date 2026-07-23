@@ -22,12 +22,14 @@ from .utils import (
     VALIDATOR_FQDN,
     Certs,
     basic_configuration_path,
+    configure_controller_network_settings,
     configure_manager,
     connect_cml,
     console,
     extract_org_name,
     load_certs,
     onboard_control_components,
+    parse_version,
     resolve_image,
     sha512_crypt,
     task_progress,
@@ -75,10 +77,7 @@ def run(
     if manager_password == "admin":
         log.error("Cannot use default credentials. Update Manager password and try again.")
         raise typer.Exit(1)
-    try:
-        major, minor, patch = (int(x) for x in (version.split(".")[:3] + ["0", "0"])[:3])
-    except ValueError:
-        major, minor, patch = 0, 0, 0
+    major, minor, patch = parse_version(version)
     if (major, minor) < (20, 15):
         log.error("Minimum supported Manager version is 20.15. Got: %s", version)
         raise typer.Exit(1)
@@ -159,11 +158,15 @@ def run(
                 update("Importing basic configuration...")
                 _restore_basic_configuration(client, ip_type)
 
-                update("Importing controller templates...")
-                template_id = _import_controller_templates(client, ip_type)
+                if (major, minor) >= (20, 18):
+                    update("Configuring controller network settings...")
+                    configure_controller_network_settings(client)
+                else:
+                    update("Importing controller templates...")
+                    template_id = _import_controller_templates(client, ip_type)
 
-                update("Attaching controller template...")
-                _attach_controller_template(client, ip_type, template_id)
+                    update("Attaching controller template...")
+                    _attach_controller_template(client, ip_type, template_id)
 
                 update("Triggering network rediscovery...")
                 trigger_rediscovery(client)

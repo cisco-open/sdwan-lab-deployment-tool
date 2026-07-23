@@ -155,6 +155,14 @@ def load_certs() -> Certs:
     return Certs(**loaded)
 
 
+def parse_version(version: str) -> tuple[int, int, int]:
+    try:
+        major, minor, patch = (int(x) for x in (version.split(".")[:3] + ["0", "0"])[:3])
+    except ValueError:
+        return 0, 0, 0
+    return major, minor, patch
+
+
 def _normalize_version(version: str) -> str:
     def _pad(seg: str) -> str:
         i = 0
@@ -607,6 +615,69 @@ def trigger_rediscovery(client: ManagerClient) -> None:
     if reachable:
         client.rediscover_devices(reachable)
         log.info("Network rediscovery triggered for %d devices", len(reachable))
+
+
+CONTROLLER_NETWORK_SETTINGS: dict[str, Any] = {
+    "dns": {},
+    "ntp": {"server": [{"name": "time.google.com", "vpnId": 0, "prefer": False}]},
+    "aaa": {
+        "authOrder": ["local", "radius", "tacacs"],
+        "ciscoTacRoUser": True,
+        "ciscoTacRwUser": True,
+        "user": [{"name": "admin", "password": "admin"}],
+        "accounting": False,
+        "adminAuthOrder": False,
+        "authFallback": False,
+        "logs": {"auditDisable": False, "netconfDisable": False},
+    },
+    "banner": {"enableFeature": False},
+    "logging": {"enableFeature": False},
+    "snmp": {"enableFeature": False},
+    "controller": {
+        "omp": {
+            "shutdown": False,
+            "filterRoute": {"outbound": {"affinityGroupPreference": False, "tlocColor": False}},
+            "outboundPolicyCaching": True,
+            "sendBackupPaths": False,
+            "discardRejected": False,
+            "gracefulRestart": True,
+            "timers": {
+                "holdTime": 300,
+                "advertisementInterval": 1,
+                "gracefulRestartTimer": 43200,
+                "eorTimer": 300,
+            },
+        },
+        "hubSpokeTopology": False,
+    },
+    "security": {"protocol": "dtls"},
+}
+
+
+def get_controller_uuids(
+    client: ManagerClient, controller_ips: set[str] | None = None
+) -> list[str]:
+    return [
+        d["uuid"]
+        for d in client.get_controllers()
+        if d.get("personality") == "vsmart"
+        and (controller_ips is None or d.get("deviceIP") in controller_ips)
+    ]
+
+
+def configure_controller_network_settings(
+    client: ManagerClient, controller_ips: set[str] | None = None
+) -> None:
+    uuids = get_controller_uuids(client, controller_ips)
+    if not uuids:
+        log.debug("No controllers to configure — skipping")
+        return
+    for uuid in uuids:
+        client.convert_control_component_to_settings(uuid)
+    client.configure_control_component_network_settings(CONTROLLER_NETWORK_SETTINGS)
+    task_id = client.deploy_control_component_settings(uuids)
+    client.wait_for_task(task_id)
+    log.info("Controller network settings deployed to %d controller(s)", len(uuids))
 
 
 def ensure_cluster_ip_configured(
