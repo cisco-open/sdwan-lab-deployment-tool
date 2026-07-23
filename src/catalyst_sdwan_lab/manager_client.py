@@ -258,6 +258,21 @@ class ManagerClient:
     def get_controllers(self) -> list[dict[str, Any]]:
         return self._get("/dataservice/system/device/controllers").get("data", [])
 
+    def configure_control_component_network_settings(self, payload: dict[str, Any]) -> None:
+        self._post("/dataservice/v1/control-component/network-settings", payload)
+
+    def convert_control_component_to_settings(self, uuid: str) -> None:
+        self._post(f"/dataservice/v1/control-component/devices/{uuid}/settings/config-to-settings")
+
+    def deploy_control_component_settings(self, uuids: list[str]) -> str:
+        data = self._post(
+            "/dataservice/v1/control-component/devices/settings/deploy",
+            {"devices": [{"id": u} for u in uuids]},
+        )
+        if not data or "id" not in data:
+            raise ManagerAPIError("deploy_control_component_settings: missing id in response")
+        return data["id"]
+
     def get_network_hierarchy(self) -> list[dict[str, Any]]:
         return self._get("/dataservice/v1/network-hierarchy")
 

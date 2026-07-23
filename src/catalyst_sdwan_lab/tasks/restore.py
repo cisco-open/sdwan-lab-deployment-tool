@@ -20,6 +20,7 @@ from .utils import (
     Certs,
     check_serial_file_match,
     collect_control_components,
+    configure_controller_network_settings,
     configure_manager,
     connect_cml,
     console,
@@ -29,6 +30,7 @@ from .utils import (
     extract_org_name,
     load_certs,
     onboard_control_components,
+    parse_version,
     resolve_image,
     run_sastre_task,
     sha512_crypt,
@@ -91,15 +93,10 @@ def run(
         backup_version = raw_version if raw_version and raw_version[0].isdigit() else "20.15"
         version = control_version or backup_version
 
-        if pki == "cisco":
-            try:
-                parts = (version.split(".")[:3] + ["0", "0"])[:3]
-                major, minor, patch = (int(x) for x in parts)
-            except ValueError:
-                major, minor, patch = 0, 0, 0
-            if (major, minor, patch) < (20, 18, 2):
-                log.error("Cisco PKI requires Manager version 20.18.2 or later. Got: %s", version)
-                raise typer.Exit(1)
+        major, minor, patch = parse_version(version)
+        if pki == "cisco" and (major, minor, patch) < (20, 18, 2):
+            log.error("Cisco PKI requires Manager version 20.18.2 or later. Got: %s", version)
+            raise typer.Exit(1)
 
         update("Checking images...")
         _check_images(cml, topology, control_version, edge_version)
@@ -167,6 +164,12 @@ def run(
 
                 update("Patching Sastre controller UUIDs...")
                 _patch_sastre_controller_uuids(manager_configs_dir, client)
+
+                if (major, minor) >= (20, 18) and not _controllers_have_device_template(
+                    manager_configs_dir
+                ):
+                    update("Configuring controller network settings...")
+                    configure_controller_network_settings(client)
 
                 update("Patching config group passwords...")
                 _patch_config_group_passwords(manager_configs_dir)
@@ -545,6 +548,17 @@ def _patch_sastre_controller_uuids(manager_configs_dir: Path, client: ManagerCli
                     if new_uuid:
                         device["csv-deviceId"] = new_uuid
                 values_path.write_text(json.dumps(vdata, indent=2))
+
+
+def _controllers_have_device_template(manager_configs_dir: Path) -> bool:
+    attached_dir = manager_configs_dir / "device_templates" / "attached"
+    if not attached_dir.exists():
+        return False
+    for path in attached_dir.glob("*.json"):
+        data = json.loads(path.read_text())
+        if data and data[0].get("personality") == "vsmart":
+            return True
+    return False
 
 
 def _run_sastre_restore(
