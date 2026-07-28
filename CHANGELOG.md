@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 3.1.4 [unreleased]
+# Catalyst SD-WAN Lab 3.1.4 [Jul 28, 2026]
 
 - Fix `restore` crashing with `TypeError: expected string or bytes-like object, got 'list'` when a backed-up edge node was inactive at backup time
 
