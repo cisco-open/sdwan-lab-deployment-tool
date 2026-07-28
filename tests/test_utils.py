@@ -1,6 +1,6 @@
 import pytest
 
-from catalyst_sdwan_lab.tasks.utils import _normalize_version
+from catalyst_sdwan_lab.tasks.utils import _normalize_version, node_config_text
 
 
 @pytest.mark.parametrize(
@@ -16,3 +16,20 @@ from catalyst_sdwan_lab.tasks.utils import _normalize_version
 )
 def test_normalize_version(version: str, expected: str) -> None:
     assert _normalize_version(version) == expected
+
+
+def test_node_config_text_string() -> None:
+    assert node_config_text({"configuration": "uuid : abc-123"}) == "uuid : abc-123"
+
+
+def test_node_config_text_list() -> None:
+    node = {"configuration": [{"name": "Main", "content": "uuid : abc-123"}]}
+    assert node_config_text(node) == "uuid : abc-123"
+
+
+def test_node_config_text_empty_list() -> None:
+    assert node_config_text({"configuration": []}) == ""
+
+
+def test_node_config_text_missing() -> None:
+    assert node_config_text({}) == ""
