@@ -306,13 +306,20 @@ def topology_nodes(topology: dict[str, Any]) -> list[Any]:
     return topology.get("nodes", topology.get("lab", {}).get("nodes", []))
 
 
+def node_config_text(node: dict[str, Any]) -> str:
+    cfg = node.get("configuration", "")
+    if isinstance(cfg, list):
+        return cfg[0].get("content", "") if cfg else ""
+    return cfg or ""
+
+
 def check_serial_file_match(topology: dict[str, Any], serial_file: Path) -> None:
     nodes = topology_nodes(topology)
     backup_uuids = {
         m.group(1)
         for node in nodes
         if node.get("node_definition") == "cat-sdwan-edge"
-        for cfg in [node.get("configuration", "")]
+        for cfg in [node_config_text(node)]
         if (m := re.search(r"uuid\s*:\s*([\w-]+)", cfg))
     }
     if not backup_uuids:
