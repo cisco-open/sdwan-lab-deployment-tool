@@ -201,3 +201,4 @@ old/
 .claude/
 CLAUDE.md
 *.qcow2
+backup.zip
