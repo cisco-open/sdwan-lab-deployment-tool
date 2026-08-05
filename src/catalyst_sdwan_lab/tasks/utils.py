@@ -529,7 +529,7 @@ def configure_manager(
     client.settings_cloudx("on")
     log.info("SD-WAN Manager settings configured")
 
-    if int(version.split(".")[0]) >= 26:
+    if parse_version(version) >= (20, 18, 1):
         _complete_initial_setup_workflow(client)
 
 

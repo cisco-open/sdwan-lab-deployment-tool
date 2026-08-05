@@ -47,12 +47,14 @@ write_files:
             <last-password-change-time>{{ password_change_time }}</last-password-change-time>
             <group>netadmin</group>
           </user>
+{% if manager_user != 'admin' %}
           <user>
             <name>{{ manager_user }}</name>
             <password>{{ manager_pass }}</password>
             <last-password-change-time>{{ password_change_time }}</last-password-change-time>
             <group>netadmin</group>
           </user>
+{% endif %}
         </aaa>
       </system>
       <vpn xmlns="http://viptela.com/vpn">
