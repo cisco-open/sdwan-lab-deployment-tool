@@ -1,3 +1,8 @@
+# Catalyst SD-WAN Lab 3.1.5 [unreleased]
+
+- Fix `deploy`/`restore` skipping the initial setup workflow completion on Manager 20.18 (was gated to `>= 26`, but the feature was introduced in 20.18.1)
+- Fix `deploy` creating two duplicate `admin` users in SD-WAN Manager's cloud-init config when `--manager-user admin` is used (same value as the default account)
+
 # Catalyst SD-WAN Lab 3.1.4 [Jul 28, 2026]
 
 - Fix `restore` crashing with `TypeError: expected string or bytes-like object, got 'list'` when a backed-up edge node was inactive at backup time
