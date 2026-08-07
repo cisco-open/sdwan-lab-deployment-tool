@@ -27,7 +27,7 @@ csdwan = "catalyst_sdwan_lab.cli:app"
 csdwan-mcp = "catalyst_sdwan_lab.mcp_server:main"
 
 [build-system]
-requires = ["uv_build>=0.11.22,<0.12"]
+requires = ["uv_build>=0.11.22,<0.13"]
 build-backend = "uv_build"
 
 [tool.ruff]
