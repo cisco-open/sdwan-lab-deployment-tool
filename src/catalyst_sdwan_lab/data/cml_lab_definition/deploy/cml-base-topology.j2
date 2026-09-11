@@ -36,14 +36,14 @@ nodes:
 {% endfilter %}
 
     cpu_limit: null
-    cpus: null
+    cpus: {{ manager_cpus or 'null' }}
     data_volume: null
     hide_links: false
     id: n0
     image_definition: {{ manager_image }}
     label: Manager0{{ manager_num }}
     node_definition: cat-sdwan-manager
-    ram: null
+    ram: {{ manager_ram or 'null' }}
 {% if patty_used %}
     tags:
       - pat:{{ manager_port }}:443
@@ -76,14 +76,14 @@ nodes:
 {% endfilter %}
 
     cpu_limit: null
-    cpus: null
+    cpus: {{ controller_cpus or 'null' }}
     data_volume: null
     hide_links: false
     id: n1
     image_definition: {{ controller_image }}
     label: Controller{{ controller_num }}
     node_definition: cat-sdwan-controller
-    ram: null
+    ram: {{ controller_ram or 'null' }}
     tags: []
     x: -40
     y: -80
@@ -111,14 +111,14 @@ nodes:
 {% endfilter %}
 
     cpu_limit: null
-    cpus: null
+    cpus: {{ validator_cpus or 'null' }}
     data_volume: null
     hide_links: false
     id: n2
     image_definition: {{ validator_image }}
     label: Validator{{ validator_num }}
     node_definition: cat-sdwan-validator
-    ram: null
+    ram: {{ validator_ram or 'null' }}
     tags: []
     x: -160
     y: -80
