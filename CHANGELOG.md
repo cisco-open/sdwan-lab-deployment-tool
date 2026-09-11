@@ -1,8 +1,8 @@
-# Catalyst SD-WAN Lab 3.1.5 [unreleased]
+# Catalyst SD-WAN Lab 3.2.0 [Sep 11, 2026]
 
+- Add per-node CPU/RAM overrides to `deploy` via `--manager-cpus`/`--manager-ram`, `--controller-cpus`/`--controller-ram` and `--validator-cpus`/`--validator-ram` (env vars `MANAGER_CPUS`, `MANAGER_RAM`, `CONTROLLER_CPUS`, `CONTROLLER_RAM`, `VALIDATOR_CPUS`, `VALIDATOR_RAM`); each node keeps its image default unless overridden, and overrides are ignored with `--retry`
 - Fix `deploy`/`restore` skipping the initial setup workflow completion on Manager 20.18 (was gated to `>= 26`, but the feature was introduced in 20.18.1)
 - Fix `deploy` creating two duplicate `admin` users in SD-WAN Manager's cloud-init config when `--manager-user admin` is used (same value as the default account)
-- Add per-node CPU/RAM overrides to `deploy` via `--manager-cpus`/`--manager-ram`, `--controller-cpus`/`--controller-ram` and `--validator-cpus`/`--validator-ram` (env vars `MANAGER_CPUS`, `MANAGER_RAM`, `CONTROLLER_CPUS`, `CONTROLLER_RAM`, `VALIDATOR_CPUS`, `VALIDATOR_RAM`); each node keeps its image default unless overridden, and overrides are ignored with `--retry`
 
 # Catalyst SD-WAN Lab 3.1.4 [Jul 28, 2026]
 
