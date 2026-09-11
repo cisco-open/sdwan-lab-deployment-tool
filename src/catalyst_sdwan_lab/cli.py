@@ -226,6 +226,36 @@ def deploy(
             help="Additional no-proxy entries (10.*, 172.*, 192.168.* are always excluded)",
         ),
     ] = "",
+    manager_cpus: Annotated[
+        Optional[int],
+        typer.Option("--manager-cpus", envvar="MANAGER_CPUS",
+                     help="Override number of CPUs for the Manager node"),
+    ] = None,
+    manager_ram: Annotated[
+        Optional[int],
+        typer.Option("--manager-ram", envvar="MANAGER_RAM",
+                     help="Override RAM in MB for the Manager node"),
+    ] = None,
+    controller_cpus: Annotated[
+        Optional[int],
+        typer.Option("--controller-cpus", envvar="CONTROLLER_CPUS",
+                     help="Override number of CPUs for the Controller node"),
+    ] = None,
+    controller_ram: Annotated[
+        Optional[int],
+        typer.Option("--controller-ram", envvar="CONTROLLER_RAM",
+                     help="Override RAM in MB for the Controller node"),
+    ] = None,
+    validator_cpus: Annotated[
+        Optional[int],
+        typer.Option("--validator-cpus", envvar="VALIDATOR_CPUS",
+                     help="Override number of CPUs for the Validator node"),
+    ] = None,
+    validator_ram: Annotated[
+        Optional[int],
+        typer.Option("--validator-ram", envvar="VALIDATOR_RAM",
+                     help="Override RAM in MB for the Validator node"),
+    ] = None,
 ) -> None:
     """Deploy a Catalyst SD-WAN lab in CML."""
     if pki not in ("enterprise", "cisco"):
@@ -267,6 +297,12 @@ def deploy(
         proxy_ip=proxy_ip or "",
         proxy_port=proxy_port,
         no_proxy=no_proxy,
+        manager_cpus=manager_cpus,
+        manager_ram=manager_ram,
+        controller_cpus=controller_cpus,
+        controller_ram=controller_ram,
+        validator_cpus=validator_cpus,
+        validator_ram=validator_ram,
     )
 
 

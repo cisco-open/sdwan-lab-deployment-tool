@@ -131,6 +131,12 @@ async def deploy(
     proxy_ip: str = "",
     proxy_port: str = "80",
     no_proxy: str = "",
+    manager_cpus: int | None = None,
+    manager_ram: int | None = None,
+    controller_cpus: int | None = None,
+    controller_ram: int | None = None,
+    validator_cpus: int | None = None,
+    validator_ram: int | None = None,
     cml_host: str | None = None,
     cml_user: str | None = None,
     cml_password: str | None = None,
@@ -166,6 +172,12 @@ async def deploy(
         proxy_ip: HTTP proxy hostname or IP
         proxy_port: HTTP proxy port (default: "80")
         no_proxy: Additional no-proxy entries
+        manager_cpus: Override number of CPUs for the Manager node
+        manager_ram: Override RAM in MB for the Manager node
+        controller_cpus: Override number of CPUs for the Controller node
+        controller_ram: Override RAM in MB for the Controller node
+        validator_cpus: Override number of CPUs for the Validator node
+        validator_ram: Override RAM in MB for the Validator node
         cml_host: CML hostname or IP (or set CML_IP env var)
         cml_user: CML username (or set CML_USER env var)
         cml_password: CML password (or set CML_PASSWORD env var)
@@ -208,6 +220,12 @@ async def deploy(
         proxy_ip=proxy_ip,
         proxy_port=proxy_port,
         no_proxy=no_proxy,
+        manager_cpus=manager_cpus,
+        manager_ram=manager_ram,
+        controller_cpus=controller_cpus,
+        controller_ram=controller_ram,
+        validator_cpus=validator_cpus,
+        validator_ram=validator_ram,
     )
     return _started("deploy", job_id)
 

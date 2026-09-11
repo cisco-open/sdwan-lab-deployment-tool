@@ -178,6 +178,12 @@ csdwan deploy [OPTIONS] <version>
 | `--proxy-ip` | `PROXY_IP` | HTTP proxy hostname or IP for Manager's outbound connections |
 | `--proxy-port` | `PROXY_PORT` | HTTP proxy port (default: `80`) |
 | `--no-proxy` | `NO_PROXY` | Additional no-proxy entries; RFC1918 ranges are always excluded |
+| `--manager-cpus` | `MANAGER_CPUS` | Override CPU count for the Manager node |
+| `--manager-ram` | `MANAGER_RAM` | Override RAM in MB for the Manager node |
+| `--controller-cpus` | `CONTROLLER_CPUS` | Override CPU count for the Controller node |
+| `--controller-ram` | `CONTROLLER_RAM` | Override RAM in MB for the Controller node |
+| `--validator-cpus` | `VALIDATOR_CPUS` | Override CPU count for the Validator node |
+| `--validator-ram` | `VALIDATOR_RAM` | Override RAM in MB for the Validator node |
 
 **Manager connectivity modes:**
 
@@ -194,6 +200,18 @@ csdwan deploy 20.15.1 \
 ```sh
 csdwan deploy 20.15.1 --manager-port 2000 --lab my-lab
 ```
+
+**Resource overrides:**
+
+Each control-plane node keeps its image default unless overridden. Any subset of the six options can be used:
+
+```sh
+csdwan deploy 20.15.1 --manager-port 2000 --lab my-lab \
+  --manager-cpus 8 --manager-ram 32768 \
+  --controller-ram 4096
+```
+
+The values can also be set once in `lab.env` via their env vars. Overrides only apply when the lab is created, so they are ignored with `--retry`.
 
 ---
 

@@ -6,10 +6,12 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+import yaml
 from typer import Exit
 
 from catalyst_sdwan_lab.manager_client import ManagerAPIError
 from catalyst_sdwan_lab.tasks.deploy import (
+    _TOPOLOGY_ENV,
     _attach_controller_template,
     _check_ip_free,
     _find_lab,
@@ -524,3 +526,57 @@ class TestSignDeviceCert:
         client.generate_csr.side_effect = requests.exceptions.ConnectionError("down")
         with pytest.raises(ManagerAPIError, match="Certificate signing failed"):
             sign_device_cert(client, MagicMock(), "172.16.0.101")
+
+
+class TestBaseTopologyResources:
+    @staticmethod
+    def _render(**kwargs: object) -> dict:
+        topology = _TOPOLOGY_ENV.get_template("cml-base-topology.j2").render(
+            title="lab",
+            manager_num="1",
+            controller_num="01",
+            validator_num="01",
+            **kwargs,
+        )
+        return yaml.safe_load(topology)
+
+    @staticmethod
+    def _node(topology: dict, label: str) -> dict:
+        return next(n for n in topology["nodes"] if n["label"] == label)
+
+    def test_defaults_to_image_values(self) -> None:
+        topology = self._render()
+        for label in ("Manager01", "Controller01", "Validator01"):
+            node = self._node(topology, label)
+            assert node["cpus"] is None
+            assert node["ram"] is None
+
+    def test_overrides_applied_per_role(self) -> None:
+        topology = self._render(
+            manager_cpus=8,
+            manager_ram=32768,
+            controller_cpus=2,
+            controller_ram=4096,
+            validator_cpus=3,
+            validator_ram=5120,
+        )
+        manager = self._node(topology, "Manager01")
+        assert (manager["cpus"], manager["ram"]) == (8, 32768)
+        controller = self._node(topology, "Controller01")
+        assert (controller["cpus"], controller["ram"]) == (2, 4096)
+        validator = self._node(topology, "Validator01")
+        assert (validator["cpus"], validator["ram"]) == (3, 5120)
+
+    def test_partial_override_leaves_others_default(self) -> None:
+        topology = self._render(manager_ram=32768)
+        manager = self._node(topology, "Manager01")
+        assert manager["ram"] == 32768
+        assert manager["cpus"] is None
+        assert self._node(topology, "Controller01")["ram"] is None
+
+    def test_infra_nodes_unaffected(self) -> None:
+        topology = self._render(manager_cpus=8, manager_ram=32768)
+        for label in ("VPN0", "Gateway", "INET", "MPLS"):
+            node = self._node(topology, label)
+            assert node["cpus"] is None
+            assert node["ram"] is None

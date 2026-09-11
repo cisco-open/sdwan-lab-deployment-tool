@@ -73,6 +73,12 @@ def run(
     proxy_ip: str = "",
     proxy_port: str = "80",
     no_proxy: str = "",
+    manager_cpus: int | None = None,
+    manager_ram: int | None = None,
+    controller_cpus: int | None = None,
+    controller_ram: int | None = None,
+    validator_cpus: int | None = None,
+    validator_ram: int | None = None,
 ) -> None:
     if manager_password == "admin":
         log.error("Cannot use default credentials. Update Manager password and try again.")
@@ -84,6 +90,14 @@ def run(
     if pki == "cisco" and (major, minor, patch) < (20, 18, 2):
         log.error("Cisco PKI requires Manager version 20.18.2 or later. Got: %s", version)
         raise typer.Exit(1)
+    if retry and any(
+        v is not None
+        for v in (
+            manager_cpus, manager_ram, controller_cpus,
+            controller_ram, validator_cpus, validator_ram,
+        )
+    ):
+        log.warning("CPU/RAM overrides are ignored with --retry; the lab already exists.")
 
     try:
         org_name = extract_org_name(serial_file)
@@ -122,6 +136,12 @@ def run(
                     dns_server=dns_server,
                     ip_type=ip_type,
                     patty=patty,
+                    manager_cpus=manager_cpus,
+                    manager_ram=manager_ram,
+                    controller_cpus=controller_cpus,
+                    controller_ram=controller_ram,
+                    validator_cpus=validator_cpus,
+                    validator_ram=validator_ram,
                 )
 
             update("Waiting for SD-WAN Manager...")
@@ -315,6 +335,12 @@ def _create_lab(
     dns_server: str,
     ip_type: str,
     patty: bool,
+    manager_cpus: int | None = None,
+    manager_ram: int | None = None,
+    controller_cpus: int | None = None,
+    controller_ram: int | None = None,
+    validator_cpus: int | None = None,
+    validator_ram: int | None = None,
 ) -> Any:
     existing = [lab.title for lab in cml.all_labs(show_all=True)]
     if lab_name in existing:
@@ -354,6 +380,12 @@ def _create_lab(
         patty_used=patty,
         password_change_time=now,
         persona="COMPUTE_AND_DATA",
+        manager_cpus=manager_cpus,
+        manager_ram=manager_ram,
+        controller_cpus=controller_cpus,
+        controller_ram=controller_ram,
+        validator_cpus=validator_cpus,
+        validator_ram=validator_ram,
     )
 
     log.info("Importing lab '%s' to CML...", lab_name)
