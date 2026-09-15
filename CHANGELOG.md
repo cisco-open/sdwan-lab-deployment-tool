@@ -1,4 +1,4 @@
-# Catalyst SD-WAN Lab 3.2.1 [unreleased]
+# Catalyst SD-WAN Lab 3.2.1 [Sep 15, 2026]
 
 - Fix `csdwan-mcp` failing to start on fresh installs with `ModuleNotFoundError: No module named 'mcp.server.fastmcp'` — the MCP server now targets the mcp 2.x SDK, which renamed `FastMCP` to `MCPServer` (the optional extra is now `mcp[cli]>=2.0.0`)
 - Fix MCP tools reporting failures without a reason — an unreachable or unauthenticated CML surfaced only as `Task exited with code 1`, and missing `CML_IP`/`CML_USER`/`CML_PASSWORD` as a bare `Error executing tool <name>`
