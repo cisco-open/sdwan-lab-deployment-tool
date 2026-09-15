@@ -24,7 +24,7 @@ from queue import Empty, SimpleQueue
 from typing import Any
 
 import typer
-from mcp.server.fastmcp import Context
+from mcp.server.mcpserver import Context
 from rich.console import Console
 
 
