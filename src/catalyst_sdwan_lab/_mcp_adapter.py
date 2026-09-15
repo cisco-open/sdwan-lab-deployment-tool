@@ -29,14 +29,17 @@ from rich.console import Console
 
 
 class _StreamingLogHandler(logging.Handler):
-    """Pushes log records into a queue for async consumption."""
+    """Pushes log records into a queue for async consumption, retaining them for the result."""
 
     def __init__(self, queue: SimpleQueue[str | None]) -> None:
         super().__init__()
         self.queue = queue
+        self.records: list[str] = []
 
     def emit(self, record: logging.LogRecord) -> None:
-        self.queue.put(self.format(record))
+        msg = self.format(record)
+        self.records.append(msg)
+        self.queue.put(msg)
 
 
 def _patch_task_consoles(capture_console: Console) -> list[tuple[object, str, Any]]:
@@ -63,7 +66,7 @@ def _run_task_in_thread(
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
     queue: SimpleQueue[str | None],
-) -> tuple[str | None, BaseException | None]:
+) -> tuple[str, str, BaseException | None]:
     """Run the task function synchronously in a thread, capturing output."""
     import catalyst_sdwan_lab.tasks.utils as utils
 
@@ -92,7 +95,7 @@ def _run_task_in_thread(
         queue.put(None)  # sentinel
 
     console_output = buf.getvalue().strip()
-    return console_output, error
+    return console_output, "\n".join(handler.records), error
 
 
 async def capture_task_async(
@@ -139,20 +142,9 @@ async def capture_task_async(
         step += 1
         await ctx.report_progress(step, message=msg)
 
-    console_output, error = await future
-
-    if error is None:
-        return console_output if console_output else "Done."
-    elif isinstance(error, typer.Exit):
-        error_text = console_output or f"Task exited with code {error.exit_code}"
-        if error.exit_code != 0:
-            return f"Error: {error_text}"
-        return error_text
-    else:
-        import traceback
-
-        tb = "".join(traceback.format_exception(type(error), error, error.__traceback__))
-        return f"Error: {type(error).__name__}: {error}\n{tb}"
+    console_output, log_text, error = await future
+    _, result = _finalize_result(console_output, error, log_text)
+    return result
 
 
 def capture_task(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> str:
@@ -219,13 +211,16 @@ def capture_task(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> str:
 
 
 def _finalize_result(
-    console_output: str, error: BaseException | None
+    console_output: str, error: BaseException | None, log_text: str = ""
 ) -> tuple[str, str]:
     """Map a finished task to (status, result_text). status is 'done' or 'error'."""
     if error is None:
         return "done", console_output or "Done."
+    # Task modules report fatal reasons through log.error rather than console, so the
+    # log text is usually the only explanation a bare typer.Exit carries.
+    detail = "\n".join(p for p in (log_text, console_output) if p)
     if isinstance(error, typer.Exit):
-        text = console_output or f"Task exited with code {error.exit_code}"
+        text = detail or f"Task exited with code {error.exit_code}"
         if error.exit_code not in (0, None):
             return "error", f"Error: {text}"
         return "done", text
@@ -274,11 +269,14 @@ class _JobLogHandler(logging.Handler):
     def __init__(self, job: _Job, thread_id: int) -> None:
         super().__init__()
         self.job = job
+        self.records: list[str] = []
         self._thread_id = thread_id
 
     def emit(self, record: logging.LogRecord) -> None:
         if record.thread == self._thread_id:
-            self.job.emit(self.format(record))
+            msg = self.format(record)
+            self.records.append(msg)
+            self.job.emit(msg)
 
 
 _JOBS: dict[str, _Job] = {}
@@ -313,7 +311,9 @@ def _job_worker(
         _restore_patched_values(patched)
         root_logger.removeHandler(handler)
 
-    status, result = _finalize_result(buf.getvalue().strip(), error)
+    status, result = _finalize_result(
+        buf.getvalue().strip(), error, "\n".join(handler.records)
+    )
     job.finish(status, result)
 
 
