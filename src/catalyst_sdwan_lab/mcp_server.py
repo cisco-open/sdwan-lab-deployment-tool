@@ -11,8 +11,10 @@ import logging
 import os
 from pathlib import Path
 
-from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.mcpserver import Context, MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
+from catalyst_sdwan_lab import __version__
 from catalyst_sdwan_lab.tasks import add as _add
 from catalyst_sdwan_lab.tasks import backup as _backup
 from catalyst_sdwan_lab.tasks import delete as _delete
@@ -27,8 +29,9 @@ from ._mcp_adapter import capture_task_async, poll_job, start_job
 
 log = logging.getLogger(__name__)
 
-mcp = FastMCP(
+mcp = MCPServer(
     "catalyst-sdwan-lab",
+    version=__version__,
     instructions=(
         "Automates Cisco Catalyst SD-WAN lab deployment and management inside "
         "Cisco Modeling Labs (CML). Provides tools to deploy full control-plane "
@@ -75,12 +78,16 @@ def _cml_creds(
     host = cml_host or os.environ.get("CML_IP", "")
     user = cml_user or os.environ.get("CML_USER", "")
     password = cml_password or os.environ.get("CML_PASSWORD", "")
+    # ToolError is the only exception type whose message the MCP SDK relays to the
+    # client; anything else is masked, hiding the fix from the agent.
     if not host:
-        raise ValueError("CML host is required (pass cml_host or set CML_IP env var)")
+        raise ToolError("CML host is required (pass cml_host or set CML_IP env var)")
     if not user:
-        raise ValueError("CML user is required (pass cml_user or set CML_USER env var)")
+        raise ToolError("CML user is required (pass cml_user or set CML_USER env var)")
     if not password:
-        raise ValueError("CML password is required (pass cml_password or set CML_PASSWORD env var)")
+        raise ToolError(
+            "CML password is required (pass cml_password or set CML_PASSWORD env var)"
+        )
     return host, user, password
 
 

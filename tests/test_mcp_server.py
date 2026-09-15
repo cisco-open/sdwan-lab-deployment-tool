@@ -5,6 +5,8 @@ import pytest
 
 pytest.importorskip("mcp", reason="requires the optional 'mcp' extra")
 
+from mcp.server.mcpserver.exceptions import ToolError
+
 from catalyst_sdwan_lab import mcp_server
 from catalyst_sdwan_lab.mcp_server import _cml_creds, _started
 
@@ -27,17 +29,17 @@ class TestCmlCreds:
 
     def test_missing_host_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv("CML_IP", raising=False)
-        with pytest.raises(ValueError, match="CML host"):
+        with pytest.raises(ToolError, match="CML host"):
             _cml_creds(None, "u", "p")
 
     def test_missing_user_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv("CML_USER", raising=False)
-        with pytest.raises(ValueError, match="CML user"):
+        with pytest.raises(ToolError, match="CML user"):
             _cml_creds("h", None, "p")
 
     def test_missing_password_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv("CML_PASSWORD", raising=False)
-        with pytest.raises(ValueError, match="CML password"):
+        with pytest.raises(ToolError, match="CML password"):
             _cml_creds("h", "u", None)
 
 
