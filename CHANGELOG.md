@@ -1,3 +1,9 @@
+# Catalyst SD-WAN Lab 3.2.1 [unreleased]
+
+- Fix `csdwan-mcp` failing to start on fresh installs with `ModuleNotFoundError: No module named 'mcp.server.fastmcp'` — the MCP server now targets the mcp 2.x SDK, which renamed `FastMCP` to `MCPServer` (the optional extra is now `mcp[cli]>=2.0.0`)
+- Fix MCP tools reporting failures without a reason — an unreachable or unauthenticated CML surfaced only as `Task exited with code 1`, and missing `CML_IP`/`CML_USER`/`CML_PASSWORD` as a bare `Error executing tool <name>`
+- Fix the MCP server advertising the SDK version instead of the tool version in `serverInfo`
+
 # Catalyst SD-WAN Lab 3.2.0 [Sep 11, 2026]
 
 - Add per-node CPU/RAM overrides to `deploy` via `--manager-cpus`/`--manager-ram`, `--controller-cpus`/`--controller-ram` and `--validator-cpus`/`--validator-ram` (env vars `MANAGER_CPUS`, `MANAGER_RAM`, `CONTROLLER_CPUS`, `CONTROLLER_RAM`, `VALIDATOR_CPUS`, `VALIDATOR_RAM`); each node keeps its image default unless overridden, and overrides are ignored with `--retry`
