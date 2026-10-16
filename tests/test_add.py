@@ -13,6 +13,8 @@ from catalyst_sdwan_lab.tasks.add import (
     _add_to_manager_retrying,
     _add_wan_edge_node,
     _drop_unsupported_variables,
+    _edge_device_model,
+    _free_vedge_uuids,
     _next_device_num,
     _next_system_ip_num,
     _wait_for_controllers_ready,
@@ -504,3 +506,32 @@ class TestDropUnsupportedVariables:
     def test_empty_allowed_drops_everything(self) -> None:
         variables = [{"name": "system_ip", "value": "10.0.0.1"}]
         assert _drop_unsupported_variables(variables, set()) == []
+
+
+class TestEdgeDeviceModel:
+    @pytest.mark.parametrize(
+        ("version", "sdrouting", "expected"),
+        [
+            ("26.1.1", False, "vedge-C8000V"),
+            ("17.18.01a", False, "vedge-C8000V"),
+            ("26.1.1", True, "vedge-C8000V-SD-ROUTING"),
+            ("27.1.1", False, "vedge-C8000V-G2"),
+            ("27.01.01", False, "vedge-C8000V-G2"),
+            ("27.1.1", True, "vedge-C8000V-G2-SD-ROUTING"),
+            ("28.1.1", False, "vedge-C8000V-G2"),
+        ],
+    )
+    def test_model_by_version(self, version: str, sdrouting: bool, expected: str) -> None:
+        assert _edge_device_model(version, sdrouting=sdrouting) == expected
+
+
+class TestFreeVedgeUuids:
+    def test_filters_by_model_and_unused(self) -> None:
+        vedges = [
+            {"uuid": "C8K-1", "deviceModel": "vedge-C8000V"},
+            {"uuid": "VG2-1", "deviceModel": "vedge-C8000V-G2"},
+            {"uuid": "VG2-2", "deviceModel": "vedge-C8000V-G2", "certInstallStatus": "Installed"},
+            {"uuid": "VG2-3", "deviceModel": "vedge-C8000V-G2-SD-ROUTING"},
+        ]
+        assert _free_vedge_uuids(vedges, "vedge-C8000V-G2") == ["VG2-1"]
+        assert _free_vedge_uuids(vedges, "vedge-C8000V") == ["C8K-1"]

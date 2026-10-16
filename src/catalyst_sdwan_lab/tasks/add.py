@@ -217,14 +217,11 @@ def run_edge(
         try:
             update("Checking available edge devices...")
             vedges = client.get_vedges()
-            free_uuids = [
-                v["uuid"]
-                for v in vedges
-                if v.get("deviceModel") == "vedge-C8000V" and v.get("certInstallStatus") is None
-            ]
+            model = _edge_device_model(version)
+            free_uuids = _free_vedge_uuids(vedges, model)
             if count > len(free_uuids):
                 log.error(
-                    "Not enough free C8000V UUIDs: need %d, have %d.", count, len(free_uuids)
+                    "Not enough free %s UUIDs: need %d, have %d.", model, count, len(free_uuids)
                 )
                 raise typer.Exit(1)
 
@@ -336,15 +333,11 @@ def run_sdrouting(
         try:
             update("Checking available SD-Routing devices...")
             vedges = client.get_vedges()
-            free_uuids = [
-                v["uuid"]
-                for v in vedges
-                if v.get("deviceModel") == "vedge-C8000V-SD-ROUTING"
-                and v.get("certInstallStatus") is None
-            ]
+            model = _edge_device_model(version, sdrouting=True)
+            free_uuids = _free_vedge_uuids(vedges, model)
             if count > len(free_uuids):
                 log.error(
-                    "Not enough free SD-Routing UUIDs: need %d, have %d.", count, len(free_uuids)
+                    "Not enough free %s UUIDs: need %d, have %d.", model, count, len(free_uuids)
                 )
                 raise typer.Exit(1)
 
@@ -443,6 +436,21 @@ def run_sdrouting(
 def _next_device_num(lab: Lab, num_re: re.Pattern[str]) -> str:
     nums = [int(m.group(1)) for node in lab.nodes() if (m := num_re.match(node.label))]
     return f"{(max(nums) + 1) if nums else 1:02d}"
+
+
+def _edge_device_model(version: str, sdrouting: bool = False) -> str:
+    # C8000V images from 27.1 onwards report a new chassis serial format (VG2-*) and register
+    # under a separate G2 device model, so they need UUIDs from the matching serial file entries.
+    base = "vedge-C8000V-G2" if parse_version(version) >= (27, 1, 0) else "vedge-C8000V"
+    return f"{base}-SD-ROUTING" if sdrouting else base
+
+
+def _free_vedge_uuids(vedges: list[dict[str, Any]], model: str) -> list[str]:
+    return [
+        v["uuid"]
+        for v in vedges
+        if v.get("deviceModel") == model and v.get("certInstallStatus") is None
+    ]
 
 
 def _next_system_ip_num(lab: Lab, vedges: list[dict[str, Any]]) -> int:
